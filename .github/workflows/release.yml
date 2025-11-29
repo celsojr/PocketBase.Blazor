@@ -1,0 +1,34 @@
+name: Publish NuGet
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore
+        run: dotnet restore ./src/PocketBase.Blazor
+
+      - name: Build
+        run: dotnet build ./src/PocketBase.Blazor -c Release
+
+      - name: Pack
+        run: dotnet pack ./src/PocketBase.Blazor -c Release -o ./artifacts
+
+      - name: Publish to NuGet
+        if: github.ref_type == 'tag'
+        env:
+          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+        run: |
+          dotnet nuget push ./artifacts/*.nupkg -k $NUGET_API_KEY -s https://api.nuget.org/v3/index.json

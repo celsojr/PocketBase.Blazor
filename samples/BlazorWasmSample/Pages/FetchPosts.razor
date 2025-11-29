@@ -1,0 +1,33 @@
+@page "/posts"
+@inject PocketBase.Blazor.IPocketBaseClient Client
+
+<h3>Posts</h3>
+
+@if (posts == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <ul>
+        @foreach (var p in posts)
+        {
+            <li>@p.title</li>
+        }
+    </ul>
+}
+
+@code {
+    private List<Post>? posts;
+
+    protected override async Task OnInitializedAsync()
+    {
+        posts = await Client.GetListAsync<Post>("posts");
+    }
+
+    public class Post
+    {
+        public string id { get; set; } = string.Empty;
+        public string title { get; set; } = string.Empty;
+    }
+}
