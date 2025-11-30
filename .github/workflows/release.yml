@@ -27,6 +27,18 @@ jobs:
       - name: Pack
         run: dotnet pack ./src/PocketBase.Blazor -c Release -o ./artifacts
 
+      - name: Debug Secret
+        if: github.ref_type == 'tag'
+        env:
+          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+        run: |
+          if [ -z "$NUGET_API_KEY" ]; then
+            echo "NUGET_API_KEY is empty!"
+            exit 1
+          else
+            echo "NUGET_API_KEY is available"
+          fi
+
       - name: Publish to NuGet
         if: github.ref_type == 'tag'
         env:
