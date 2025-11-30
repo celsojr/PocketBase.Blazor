@@ -6,3 +6,9 @@
 nupkg/
 nupkg/*
 *.nupkg
+.DS_Store
+.vscode/
+*.log
+*.swp
+*.swo
+*.sln.docstates

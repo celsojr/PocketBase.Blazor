@@ -1,24 +1,20 @@
+using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
-using Microsoft.Extensions.DependencyInjection;
-using System.Threading.Tasks;
+using BlazorWasmSample;
+using PocketBase.Blazor;
 
-namespace BlazorWasmSample;
+var builder = WebAssemblyHostBuilder.CreateDefault(args);
+builder.RootComponents.Add<App>("#app");
+builder.RootComponents.Add<HeadOutlet>("head::after");
 
-public class Program
+builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
+
+// Configure PocketBase with example options
+builder.Services.AddPocketBase(options =>
 {
-    public static async Task Main(string[] args)
-    {
-        var builder = WebAssemblyHostBuilder.CreateDefault(args);
-        builder.RootComponents.Add<App>("#app");
+    options.BaseUrl = "https://pocketbase.io";
+    // options.ApiKey = "pb_pk_xxx";
+    // You can customize JSON options here if needed
+});
 
-        // Configure PocketBase with example options
-        builder.Services.AddPocketBase(options =>
-        {
-            options.BaseUrl = "https://demo.pocketbase.io";
-            // options.ApiKey = "pb_pk_xxx";
-            // You can customize JSON options here if needed
-        });
-
-        await builder.Build().RunAsync();
-    }
-}
+await builder.Build().RunAsync();

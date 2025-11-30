@@ -1,20 +1,21 @@
 # PocketBase.Blazor
 
-PocketBase.Blazor is a small, Blazor-friendly client wrapper for the [PocketBase REST API](https://pocketbase.io/).  
+**PocketBase.Blazor** is a lightweight, Blazor-friendly client wrapper for the [PocketBase REST API](https://pocketbase.io/). It simplifies working with PocketBase in both **Blazor WebAssembly** and **Blazor Server** projects by providing a minimal, strongly-typed API with built-in DI support. 
 
 ## Features
 
-- Minimal `IPocketBaseClient` + `PocketBaseClient` implementation using `HttpClient`.
-- DI convenience extension: `AddPocketBase(options => { ... })`.
-- `PocketBaseOptions` with a `JsonSerializerOptions` pre-configured similar to Blazored.LocalStorage defaults.
-- Sample Blazor WASM app.
-- Unit test project skeleton.
-- GitHub Actions workflow for publishing a NuGet package on tag push.
-- Local build/pack script.
+- Minimalistic `IPocketBaseClient` + `PocketBaseClient` implementation using `HttpClient`.  
+- Dependency Injection (DI) extension: `AddPocketBase(options => { ... })`.  
+- `PocketBaseOptions` with pre-configured `JsonSerializerOptions` tailored for Blazor.  
+- Strongly-typed API with automatic error handling for API responses.  
+- Sample Blazor WebAssembly application to get you started quickly.  
+- Unit test project skeleton using **XUnit** and **Moq** for HTTP client mocking.  
+- GitHub Actions workflow for automated NuGet package publishing.  
+- Local build and pack scripts for easy packaging and distribution.
 
 ## Quickstart
 
-Install from NuGet (when published):
+Install from NuGet:
 
 ```bash
 dotnet add package PocketBase.Blazor
@@ -35,6 +36,44 @@ builder.Services.AddPocketBase(options =>
     options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
 });
 ```
+Inject and use the client in your components:
+
+```
+@inject IPocketBaseClient Client
+
+@code {
+    private List<Post>? posts;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var (items, error) = await Client.GetListAsync<Post>("posts");
+        if (error != null)
+        {
+            // Handle error (e.g., log or show a message)
+        }
+        else
+        {
+            posts = items;
+        }
+    }
+
+    public class Post
+    {
+        public string Id { get; set; } = "";
+        public string? Title { get; set; }
+        public string? Slug { get; set; }
+    }
+}
+
+```
+
+## Running Unit Tests
+
+PocketBase.Blazor includes a test project using **XUnit** and **Moq**. To run the tests:
+```
+dotnet test ./tests/PocketBase.Blazor.Tests/PocketBase.Blazor.Tests.csproj
+
+```
 
 ## Deployment
 Build & pack locally
@@ -43,9 +82,9 @@ Build & pack locally
 
 # macOs/Linux
 
-dotnet clean ./src/PocketBase.Blazor
-dotnet build ./src/PocketBase.Blazor -c Release
-dotnet pack ./src/PocketBase.Blazor -c Release -o ./nupkg
+dotnet clean ./src/PocketBase.Blazor/PocketBase.Blazor.csproj
+dotnet build ./src/PocketBase.Blazor/PocketBase.Blazor.csproj -c Release
+dotnet pack ./src/PocketBase.Blazor/PocketBase.Blazor.csproj -c Release -o ./nupkg
 
 ```
 
@@ -62,3 +101,18 @@ A GitHub Actions workflow is included to pack and publish to NuGet when a tag `v
 ## Contributing
 
 Contributions and issues are welcome. Please follow standard GitHub PR workflow.
+
+## License
+
+This work is licensed under the **Creative Commons Attribution 4.0 International License (CC BY 4.0)**.  
+
+You are free to:
+
+- **Share** — copy and redistribute the material in any medium or format  
+- **Adapt** — remix, transform, and build upon the material for any purpose, including commercial  
+
+**Under the following terms:**
+
+- **Attribution** — You must give appropriate credit, provide a link to the license, and indicate if changes were made. You may do so in any reasonable manner, but not in any way that suggests the licensor endorses you or your use.
+
+**To view a copy of this license:** [https://creativecommons.org/licenses/by/4.0/](https://creativecommons.org/licenses/by/4.0/)
