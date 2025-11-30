@@ -5,7 +5,7 @@
     <Nullable>enable</Nullable>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <PackageId>PocketBase.Blazor</PackageId>
-    <Version>0.0.1</Version>
+    <Version>0.0.2</Version>
     <Authors>Celso Jr</Authors>
     <Description>Blazor SDK wrapper over the PocketBase REST API.</Description>
     <PackageTags>blazor;pocketbase;wasm</PackageTags>
