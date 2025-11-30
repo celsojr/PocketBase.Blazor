@@ -4,16 +4,31 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+
+    <!-- Package identity -->
     <PackageId>PocketBase.Blazor</PackageId>
     <Version>0.0.3</Version>
     <Authors>Celso Jr</Authors>
+    <Company>Celso Jr</Company>
     <Description>Blazor SDK wrapper over the PocketBase REST API.</Description>
     <PackageTags>blazor;pocketbase;wasm</PackageTags>
-    <RepositoryUrl>https://github.com/celosjr/PocketBase.Blazor</RepositoryUrl>
+
+    <!-- Repository / project links -->
+    <PackageProjectUrl>https://github.com/celsojr/PocketBase.Blazor</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/celsojr/PocketBase.Blazor</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+
+    <!-- README file -->
     <PackageReadmeFile>README.md</PackageReadmeFile>
+
+    <!-- Ensure XML docs are included (optional but recommended) -->
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <IncludeSymbols>true</IncludeSymbols>
+    <IncludeSource>true</IncludeSource>
   </PropertyGroup>
 
   <ItemGroup>
+    <!-- Include README from root -->
     <None Include="../../README.md" Pack="true" PackagePath="" />
   </ItemGroup>
 
