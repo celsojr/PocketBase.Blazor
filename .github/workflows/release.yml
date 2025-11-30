@@ -33,3 +33,16 @@ jobs:
           NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
         run: |
           dotnet nuget push ./artifacts/*.nupkg -k $NUGET_API_KEY -s https://api.nuget.org/v3/index.json
+
+      - name: Push to GitHub Packages
+        if: github.ref_type == 'tag'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          dotnet nuget add source \
+            --username celsojr \
+            --password $GITHUB_TOKEN \
+            --store-password-in-clear-text \
+            --name github \
+            "https://nuget.pkg.github.com/celsojr/index.json"
+          dotnet nuget push ./artifacts/*.nupkg -k $GITHUB_TOKEN -s github --skip-duplicate
