@@ -40,14 +40,14 @@ jobs:
       - name: Publish to GitHub Packages
         if: github.ref_type == 'tag'
         env:
-          GH_PACKAGES_PAT: ${{ secrets.GH_PACKAGES_PAT }} # Use a personal access token
+          GH_PACKAGES_PAT: ${{ secrets.GH_PACKAGES_PAT }}
         run: |
           dotnet nuget add source \
             --username celsojr \
             --password $GH_PACKAGES_PAT \
             --store-password-in-clear-text \
             --name github \
-            "https://nuget.pkg.github.com/celsojr/index.json"
+            "https://nuget.pkg.github.com/celsojr/PocketBase.Blazor/index.json"
           dotnet nuget push ./artifacts/*.nupkg \
             -k $GH_PACKAGES_PAT \
             -s github \
