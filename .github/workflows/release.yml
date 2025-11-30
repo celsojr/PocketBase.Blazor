@@ -27,22 +27,28 @@ jobs:
       - name: Pack
         run: dotnet pack ./src/PocketBase.Blazor -c Release -o ./artifacts
 
-      - name: Publish to NuGet
+      - name: Publish to NuGet.org
         if: github.ref_type == 'tag'
         env:
           NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
         run: |
-          dotnet nuget push ./artifacts/*.nupkg -k $NUGET_API_KEY -s https://api.nuget.org/v3/index.json --skip-duplicate
+          dotnet nuget push ./artifacts/*.nupkg \
+            -k $NUGET_API_KEY \
+            -s https://api.nuget.org/v3/index.json \
+            --skip-duplicate
 
-      - name: Push to GitHub Packages
+      - name: Publish to GitHub Packages
         if: github.ref_type == 'tag'
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_PACKAGES_PAT: ${{ secrets.GH_PACKAGES_PAT }} # Use a personal access token
         run: |
           dotnet nuget add source \
             --username celsojr \
-            --password $GITHUB_TOKEN \
+            --password $GH_PACKAGES_PAT \
             --store-password-in-clear-text \
             --name github \
             "https://nuget.pkg.github.com/celsojr/index.json"
-          dotnet nuget push ./artifacts/*.nupkg -k $GITHUB_TOKEN -s github --skip-duplicate
+          dotnet nuget push ./artifacts/*.nupkg \
+            -k $GH_PACKAGES_PAT \
+            -s github \
+            --skip-duplicate
