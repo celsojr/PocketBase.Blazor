@@ -8,7 +8,7 @@
 > 
 > Feel free to use, fork, or modify this project as needed. Pull requests are welcome, and you may contact me with any questions.  
 > 
-> **Important:** This project is not an official Microsoft repository and is not endorsed, sponsored, or affiliated with Microsoft or any of its subsidiaries. Additionally, this is not an official PocketBase SDK; the official PocketBase SDKs are available in JavaScript and Dart and you can find it on their repository.
+> **Important:** This project is not an official Microsoft repository and is not endorsed, sponsored, or affiliated with Microsoft or any of its subsidiaries. Additionally, this is not an official PocketBase SDK; the official PocketBase SDKs are available in JavaScript and Dart and you can find them on their repository.
 
 ## Features
 
@@ -26,7 +26,7 @@
 Install from NuGet:
 
 ```bash
-dotnet add package PocketBase.Blazor
+dotnet add package PocketBase.Blazor --version 0.0.3
 ```
 
 Register services in `Program.cs`:
@@ -86,14 +86,12 @@ dotnet test ./tests/PocketBase.Blazor.Tests/PocketBase.Blazor.Tests.csproj
 ## Deployment
 Build & pack locally
 ```
+# Windows
 ./build-local.ps1
 
 # macOs/Linux
-
-dotnet clean ./src/PocketBase.Blazor/PocketBase.Blazor.csproj
-dotnet build ./src/PocketBase.Blazor/PocketBase.Blazor.csproj -c Release
-dotnet pack ./src/PocketBase.Blazor/PocketBase.Blazor.csproj -c Release -o ./nupkg
-
+chmod +x build.sh
+./build.sh
 ```
 
 ## CI / Release
@@ -101,10 +99,21 @@ A GitHub Actions workflow is included to pack and publish to NuGet when a tag `v
 
 ## Roadmap
 
-- Auth helpers (login/logout, token refresh)
-- Realtime support (if PocketBase offers a WASM-friendly realtime API)
-- Aspire integration hooks
-- More complete, generated models
+- **Authentication helpers**  
+  Streamlined utilities for login/logout, session handling, and automatic token refresh.
+
+- **Realtime support**  
+  Investigate realtime capabilities using the new Server-Sent Events (SSE) features introduced in ASP.NET Core 10.  
+  This includes leveraging `IAsyncEnumerable<T>`, `SseItem<T>`, and `TypedResults.ServerSentEvents` to enable efficient, one-way realtime updates without requiring external dependencies.
+
+- **Aspire integration**  
+  Provide extensions or hooks to integrate PocketBase.Blazor into .NET Aspire applications.
+
+- **Expanded model generation**  
+  Generate more complete, strongly-typed models based on PocketBase schemas.
+
+- **Possible full SDK implementation**  
+  Explore evolving this project into a more complete PocketBase SDK for .NET/Blazor, depending on demand and community interest.
 
 ## Contributing
 
