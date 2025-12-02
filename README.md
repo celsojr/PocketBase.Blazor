@@ -1,6 +1,14 @@
-# PocketBase.Blazor [![NuGet Version](https://img.shields.io/nuget/v/PocketBase.Blazor.svg)](https://www.nuget.org/packages/PocketBase.Blazor)
+# PocketBase.Blazor [![NuGet Version](https://img.shields.io/nuget/v/PocketBase.Blazor.svg)](https://www.nuget.org/packages/PocketBase.Blazor) [![NuGet Downloads](https://img.shields.io/nuget/dt/PocketBase.Blazor.svg)](https://www.nuget.org/packages/PocketBase.Blazor/) ![GitHub Packages](https://img.shields.io/badge/GitHub%20Packages-0.0.3-blue)
+
 
 **PocketBase.Blazor** is a lightweight, Blazor-friendly client wrapper for the [PocketBase REST API](https://pocketbase.io/). It simplifies working with PocketBase in both **Blazor WebAssembly** and **Blazor Server** projects by providing a minimal, strongly-typed API with built-in DI support. 
+
+> **Disclaimer:**  
+> This repository is an experimental work in progress. It is primarily used in another project and is maintained only for personal use or on-demand updates. The goal is to keep it simple while providing tooling that might be helpful to others. _Not all **PocketBase** functionalities are covered yet_.  
+> 
+> Feel free to use, fork, or modify this project as needed. Pull requests are welcome, and you may contact me with any questions.  
+> 
+> **Important:** This project is not an official Microsoft repository and is not endorsed, sponsored, or affiliated with Microsoft or any of its subsidiaries. Additionally, this is not an official PocketBase SDK; the official PocketBase SDKs are available in JavaScript and Dart and you can find it on their repository.
 
 ## Features
 
