@@ -1,6 +1,7 @@
 using System;
 using System.Net.Http;
 using Microsoft.Extensions.DependencyInjection;
+using PocketBase.Blazor.Options;
 
 namespace PocketBase.Blazor;
 
@@ -34,7 +35,7 @@ public static class ServiceCollectionExtensions
             return http;
         });
 
-        services.AddScoped<IPocketBaseClient, PocketBaseClient>();
+        services.AddScoped<IPocketBase, PocketBase>();
 
         return services;
     }

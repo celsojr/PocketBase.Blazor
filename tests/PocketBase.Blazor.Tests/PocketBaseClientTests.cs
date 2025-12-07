@@ -12,7 +12,7 @@ namespace PocketBase.Blazor.Tests;
 
 public class PocketBaseClientTests
 {
-    private PocketBaseClient CreateClient(HttpResponseMessage response)
+    private PocketBase CreateClient(HttpResponseMessage response)
     {
         var handlerMock = new Mock<HttpMessageHandler>();
         handlerMock

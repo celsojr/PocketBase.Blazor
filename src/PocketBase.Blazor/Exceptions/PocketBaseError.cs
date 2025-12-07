@@ -1,6 +1,6 @@
 using System;
 
-namespace PocketBase.Blazor;
+namespace PocketBase.Blazor.Exceptions;
 
 public class PocketBaseError
 {
