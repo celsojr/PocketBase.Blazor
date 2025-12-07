@@ -12,3 +12,5 @@ nupkg/*
 *.swp
 *.swo
 *.sln.docstates
+*.user
+
