@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using PocketBase.Blazor.Http;
 using PocketBase.Blazor.Models;
 
-namespace PocketBase.Blazor.Services.Admins
+namespace PocketBase.Blazor.Clients.Admin
 {
     public class AdminsClient : IAdminsClient
     {

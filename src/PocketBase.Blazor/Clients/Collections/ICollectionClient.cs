@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using PocketBase.Blazor.Events;
 using PocketBase.Blazor.Models;
 
-namespace PocketBase.Blazor.Collections
+namespace PocketBase.Blazor.Clients.Collections
 {
     public interface ICollectionClient
     {

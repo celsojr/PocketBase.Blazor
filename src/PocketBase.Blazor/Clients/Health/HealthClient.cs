@@ -2,7 +2,7 @@ using System;
 using System.Threading.Tasks;
 using PocketBase.Blazor.Http;
 
-namespace PocketBase.Blazor.Services.Health
+namespace PocketBase.Blazor.Clients.Health
 {
     public class HealthClient : IHealthClient
     {

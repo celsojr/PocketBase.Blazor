@@ -1,11 +1,11 @@
 using System.Net.Http;
-using PocketBase.Blazor.Collections;
 using PocketBase.Blazor.Http;
-using PocketBase.Blazor.Services.Admins;
-using PocketBase.Blazor.Services.Files;
-using PocketBase.Blazor.Services.Health;
-using PocketBase.Blazor.Services.Realtime;
-using PocketBase.Blazor.Services.Settings;
+using PocketBase.Blazor.Clients.Admin;
+using PocketBase.Blazor.Clients.Files;
+using PocketBase.Blazor.Clients.Health;
+using PocketBase.Blazor.Clients.Realtime;
+using PocketBase.Blazor.Clients.Settings;
+using PocketBase.Blazor.Clients.Collections;
 
 namespace PocketBase.Blazor;
 

@@ -1,7 +1,7 @@
 using System.Text.Json;
 using System.Threading.Tasks;
 
-namespace PocketBase.Blazor.Services.Settings
+namespace PocketBase.Blazor.Clients.Settings
 {
     public interface ISettingsClient
     {

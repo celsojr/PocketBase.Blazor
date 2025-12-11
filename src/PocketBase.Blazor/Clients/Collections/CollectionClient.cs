@@ -5,7 +5,7 @@ using PocketBase.Blazor.Events;
 using PocketBase.Blazor.Http;
 using PocketBase.Blazor.Models;
 
-namespace PocketBase.Blazor.Collections
+namespace PocketBase.Blazor.Clients.Collections
 {
     public class CollectionClient : ICollectionClient
     {

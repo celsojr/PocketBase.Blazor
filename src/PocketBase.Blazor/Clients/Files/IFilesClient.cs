@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using PocketBase.Blazor.Models;
 using System.Collections.Generic;
 
-namespace PocketBase.Blazor.Services.Files
+namespace PocketBase.Blazor.Clients.Files
 {
     public interface IFilesClient
     {

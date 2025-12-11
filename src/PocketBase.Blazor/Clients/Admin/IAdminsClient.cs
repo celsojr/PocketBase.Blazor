@@ -1,7 +1,7 @@
 using System.Threading.Tasks;
 using PocketBase.Blazor.Models;
 
-namespace PocketBase.Blazor.Services.Admins
+namespace PocketBase.Blazor.Clients.Admin
 {
     public interface IAdminsClient
     {

@@ -3,7 +3,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using PocketBase.Blazor.Http;
 
-namespace PocketBase.Blazor.Services.Settings
+namespace PocketBase.Blazor.Clients.Settings
 {
     public class SettingsClient : ISettingsClient
     {

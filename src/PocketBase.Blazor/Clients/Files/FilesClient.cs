@@ -5,7 +5,7 @@ using PocketBase.Blazor.Http;
 using PocketBase.Blazor.Models;
 using System.Collections.Generic;
 
-namespace PocketBase.Blazor.Services.Files
+namespace PocketBase.Blazor.Clients.Files
 {
     public class FilesClient : IFilesClient
     {

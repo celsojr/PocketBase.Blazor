@@ -1,6 +1,6 @@
 using System.Threading.Tasks;
 
-namespace PocketBase.Blazor.Services.Health
+namespace PocketBase.Blazor.Clients.Health
 {
     public interface IHealthClient
     {

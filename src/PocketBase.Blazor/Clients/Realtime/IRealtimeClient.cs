@@ -2,7 +2,7 @@ using System;
 using System.Threading.Tasks;
 using PocketBase.Blazor.Models;
 
-namespace PocketBase.Blazor.Services.Realtime
+namespace PocketBase.Blazor.Clients.Realtime
 {
     public interface IRealtimeClient
     {
