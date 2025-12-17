@@ -1,0 +1,28 @@
+﻿@page "/"
+@inject IHttpClientFactory Http
+
+<PageTitle>Home</PageTitle>
+
+<h1>Hello, world!</h1>
+
+<p>@_status</p>
+
+@code {
+    private string _status = "Checking PocketBase health...";
+
+    protected override async Task OnInitializedAsync()
+    {
+        var client = Http.CreateClient("pocketbase");
+
+        var response = await client.GetAsync("api/health");
+
+        if (response.IsSuccessStatusCode)
+        {
+            _status = "PocketBase is healthy";
+        }
+        else
+        {
+            _status = $"PocketBase unhealthy ({response.StatusCode})";
+        }
+    }
+}
