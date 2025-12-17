@@ -97,6 +97,27 @@ chmod +x build.sh
 ## CI / Release
 A GitHub Actions workflow is included to pack and publish to NuGet when a tag `v*` is pushed and `NUGET_API_KEY` is present in repository secrets.
 
+## Running the Aspire Sample Application
+
+### 1. Prerequisites
+- [.NET 8 SDK](https://dotnet.microsoft.com/download) (as specified in global.json)
+- [Docker](https://www.docker.com/get-started) (or [Podman](https://podman.io/getting-started/installation)) installed and running
+- Optional: [Aspire CLI](https://aspire.dev/get-started/install-cli/) if you want to use command-line tooling
+> **Note**: The sample uses a containerized PocketBase instance, so Docker (or Podman) must be running.
+
+To run the sample application, follow these steps:
+
+1. Ensure you have the .NET SDK installed.
+
+1. Open a terminal and navigate to the `samples/AspireSample` directory.
+
+1. Run the following command to start the application:
+
+   ```
+   dotnet run --project AspireSample.AppHost
+   ```
+
+
 ## Roadmap
 
 - **Authentication helpers**  
