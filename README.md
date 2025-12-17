@@ -105,6 +105,7 @@ A GitHub Actions workflow is included to pack and publish to NuGet when a tag `v
 - Optional: [Aspire CLI](https://aspire.dev/get-started/install-cli/) if you want to use command-line tooling
 > **Note**: The sample uses a containerized PocketBase instance, so Docker (or Podman) must be running.
 
+### 2. Setting Up the Aspire Environment
 To run the sample application, follow these steps:
 
 1. Ensure you have the .NET SDK installed.
@@ -117,6 +118,19 @@ To run the sample application, follow these steps:
    dotnet run --project AspireSample.AppHost
    ```
 
+1. Check the terminal output for the super user creation URL. Replace the internal container address and port with the one exposed on your host machine by the Aspire dashboard.
+
+### 3. Access PocketBase in the container
+To run PocketBase commands inside the container, use the following command with Docker:
+```
+docker (or podman) exec aspire_sample_pocketbase /usr/local/bin/pocketbase --version
+```
+
+or, you can execute an interactive shell session. Best for interactive commands when you have to answer questions:
+```
+docker (or podman) exec -it aspire_sample_pocketbase /bin/sh
+pocketbase --version
+```
 
 ## Roadmap
 
