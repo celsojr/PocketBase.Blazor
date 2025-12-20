@@ -1,5 +1,6 @@
 using AspireSample.Web;
 using AspireSample.Web.Components;
+using PocketBase.Blazor;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,6 +24,13 @@ builder.Services.AddHttpClient("pocketbase", client =>
 {
     client.BaseAddress = new Uri(
         builder.Configuration["services:pocketbase:http:0"]!);
+});
+
+builder.Services.AddPocketBase(options =>
+{
+    options.BaseUrl = "https://pocketbase.io";
+    // options.ApiKey = "pb_pk_xxx";
+    // You can customize JSON options here if needed
 });
 
 var app = builder.Build();
