@@ -1,28 +1,72 @@
 ﻿@page "/"
-@inject IHttpClientFactory Http
+@using PocketBase.Blazor
+@inject IPocketBaseClient Client
 
-<PageTitle>Home</PageTitle>
+<h3 class="page-title">Posts</h3>
 
-<h1>Hello, world!</h1>
-
-<p>@_status</p>
+@if (posts == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table table-striped table-hover table-bordered w-100 align-middle">
+        <thead class="table-light">
+            <tr>
+                <th scope="col">Slug</th>
+                <th scope="col">Title</th>
+                <th scope="col">Author</th>
+                <th scope="col" class="text-center">Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var p in posts)
+            {
+                <tr>
+                    <td class="text-muted">@p.Slug</td>
+                    <td>@p.Title</td>
+                    <td>@p.Author</td>
+                    <td class="text-center">
+                        <span class="badge @(p.IsPublished ? "bg-success" : "bg-secondary")">
+                            @(p.IsPublished ? "Published" : "Draft")
+                        </span>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
 
 @code {
-    private string _status = "Checking PocketBase health...";
+    private List<Post>? posts;
 
     protected override async Task OnInitializedAsync()
     {
-        var client = Http.CreateClient("pocketbase");
+        var (items, error) = await Client.GetListAsync<Post>("posts");
 
-        var response = await client.GetAsync("api/health");
-
-        if (response.IsSuccessStatusCode)
+        if (error != null)
         {
-            _status = "PocketBase is healthy";
+            if (error.RequiresApiKey)
+            {
+                Console.WriteLine("⚠ This endpoint requires an API key or admin privileges.");
+            }
+            else
+            {
+                Console.WriteLine($"Error {error.Status}: {error.Message}");
+            }
         }
         else
         {
-            _status = $"PocketBase unhealthy ({response.StatusCode})";
+            posts = items;
         }
+    }
+
+    public class Post
+    {
+        public string Id { get; set; } = null!;
+        public string? Slug { get; set; }
+        public string? Title { get; set; }
+        public string? Author { get; set; }
+        public bool IsPublished { get; set; }
     }
 }

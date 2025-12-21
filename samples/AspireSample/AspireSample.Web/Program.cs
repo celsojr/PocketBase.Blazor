@@ -1,3 +1,4 @@
+using System.Text.Json;
 using AspireSample.Web;
 using AspireSample.Web.Components;
 using PocketBase.Blazor;
@@ -20,15 +21,13 @@ builder.Services.AddHttpClient<WeatherApiClient>(client =>
     client.BaseAddress = new("https+http://apiservice");
 });
 
-builder.Services.AddHttpClient("pocketbase", client =>
-{
-    client.BaseAddress = new Uri(
-        builder.Configuration["services:pocketbase:http:0"]!);
-});
+string baseUrl = builder.Configuration["services:pocketbase:http:0"]!;
 
 builder.Services.AddPocketBase(options =>
 {
-    options.BaseUrl = "https://pocketbase.io";
+    options.BaseUrl = baseUrl;
+    options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower;
+    options.JsonSerializerOptions.DictionaryKeyPolicy = JsonNamingPolicy.SnakeCaseLower;
     // options.ApiKey = "pb_pk_xxx";
     // You can customize JSON options here if needed
 });
