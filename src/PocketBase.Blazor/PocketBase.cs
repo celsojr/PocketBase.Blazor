@@ -1,16 +1,17 @@
 using System.Net.Http;
-using PocketBase.Blazor.Http;
 using PocketBase.Blazor.Clients.Admin;
-using PocketBase.Blazor.Clients.Files;
-using PocketBase.Blazor.Clients.Health;
-using PocketBase.Blazor.Clients.Realtime;
-using PocketBase.Blazor.Clients.Settings;
-using PocketBase.Blazor.Clients.Collections;
 using PocketBase.Blazor.Clients.Backup;
 using PocketBase.Blazor.Clients.Batch;
+using PocketBase.Blazor.Clients.Collections;
 using PocketBase.Blazor.Clients.CronJob;
+using PocketBase.Blazor.Clients.Files;
+using PocketBase.Blazor.Clients.Health;
 using PocketBase.Blazor.Clients.Logging;
+using PocketBase.Blazor.Clients.Realtime;
 using PocketBase.Blazor.Clients.Record;
+using PocketBase.Blazor.Clients.Settings;
+using PocketBase.Blazor.Http;
+using PocketBase.Blazor.Store;
 
 namespace PocketBase.Blazor;
 
@@ -29,6 +30,7 @@ public class PocketBase : IPocketBase
     public IRealtimeClient Realtime { get; }
     public IRecordClient Record { get; }
     public ISettingsClient Settings { get; }
+    public PocketBaseStore Store { get; }
 
     readonly IHttpTransport _http;
 
@@ -48,11 +50,14 @@ public class PocketBase : IPocketBase
         Record = new RecordClient(_http);
         Health = new HealthClient(_http);
         Settings = new SettingsClient(_http);
+
+        var authStore = new AuthStore(Admins);
+        Store = new PocketBaseStore(authStore, Realtime);
     }
 
     /// <inheritdoc />
     public ICollectionClient Collection(string name)
-        => new CollectionClient(name, _http);
+        => new CollectionClient(name, _http, Store);
 
     /// <inheritdoc />
     public void EnableAutoCancellation(bool enabled)

@@ -11,6 +11,9 @@ namespace PocketBase.Blazor.Clients.Collections
 {
     public interface ICollectionClient
     {
+        /// <summary>
+        /// The name of the collection.
+        /// </summary>
         string Name { get; }
 
         // Auth (for auth-enabled collections)
