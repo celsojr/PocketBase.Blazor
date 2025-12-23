@@ -1,8 +1,8 @@
 using System.Net.Http;
 using System.Threading.Tasks;
 using PocketBase.Blazor.Http;
-using PocketBase.Blazor.Models;
 using PocketBase.Blazor.Options;
+using PocketBase.Blazor.Responses;
 
 namespace PocketBase.Blazor.Clients.Health
 {

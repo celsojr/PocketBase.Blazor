@@ -1,6 +1,6 @@
-namespace PocketBase.Blazor.Models
+namespace PocketBase.Blazor.Requests
 {
-    public class QueryOptions
+    public class QueryOptionsRequest
     {
         public string? Filter { get; set; }
         public string? Sort { get; set; }

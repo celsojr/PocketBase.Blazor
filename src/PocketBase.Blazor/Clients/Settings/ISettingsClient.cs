@@ -1,8 +1,8 @@
 using System.Text.Json;
 using System.Threading.Tasks;
 using PocketBase.Blazor.Exceptions;
-using PocketBase.Blazor.Models;
 using PocketBase.Blazor.Options;
+using PocketBase.Blazor.Responses;
 
 namespace PocketBase.Blazor.Clients.Settings
 {
@@ -95,6 +95,6 @@ namespace PocketBase.Blazor.Clients.Settings
         /// <exception cref="ClientResponseError">
         /// Thrown when the client receives an invalid response.
         /// </exception>
-        Task<AppleClientSecret> GenerateAppleClientSecretAsync(string clientId, string teamId, string keyId, string privateKey, int duration, CommonOptions? options);
+        Task<AppleClientSecretResponse> GenerateAppleClientSecretAsync(string clientId, string teamId, string keyId, string privateKey, int duration, CommonOptions? options);
     }
 }

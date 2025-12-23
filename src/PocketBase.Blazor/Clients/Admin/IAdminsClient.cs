@@ -1,12 +1,12 @@
 using System.Threading.Tasks;
-using PocketBase.Blazor.Models;
+using PocketBase.Blazor.Responses;
 
 namespace PocketBase.Blazor.Clients.Admin
 {
     public interface IAdminsClient
     {
-        Task<AuthResult> AuthWithPasswordAsync(string email, string password);
-        Task<AuthResult> RefreshAsync();
+        Task<AuthResponse> AuthWithPasswordAsync(string email, string password);
+        Task<AuthResponse> RefreshAsync();
         Task LogoutAsync();
     }
 }

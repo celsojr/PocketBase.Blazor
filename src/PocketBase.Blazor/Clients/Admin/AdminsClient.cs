@@ -1,7 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using PocketBase.Blazor.Http;
-using PocketBase.Blazor.Models;
+using PocketBase.Blazor.Responses;
 
 namespace PocketBase.Blazor.Clients.Admin
 {
@@ -14,7 +14,7 @@ namespace PocketBase.Blazor.Clients.Admin
             _http = http;
         }
 
-        public Task<AuthResult> AuthWithPasswordAsync(string email, string password)
+        public Task<AuthResponse> AuthWithPasswordAsync(string email, string password)
         {
             throw new NotImplementedException();
         }
@@ -24,7 +24,7 @@ namespace PocketBase.Blazor.Clients.Admin
             throw new NotImplementedException();
         }
 
-        public Task<AuthResult> RefreshAsync()
+        public Task<AuthResponse> RefreshAsync()
         {
             throw new NotImplementedException();
         }

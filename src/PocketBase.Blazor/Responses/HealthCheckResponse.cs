@@ -1,6 +1,6 @@
 using System.Text.Json;
 
-namespace PocketBase.Blazor.Models
+namespace PocketBase.Blazor.Responses
 {
     public class HealthCheckResponse
     {

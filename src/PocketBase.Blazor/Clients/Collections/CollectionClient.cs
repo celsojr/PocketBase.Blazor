@@ -4,6 +4,8 @@ using System.Threading.Tasks;
 using PocketBase.Blazor.Events;
 using PocketBase.Blazor.Http;
 using PocketBase.Blazor.Models;
+using PocketBase.Blazor.Requests;
+using PocketBase.Blazor.Responses;
 
 namespace PocketBase.Blazor.Clients.Collections
 {
@@ -19,7 +21,7 @@ namespace PocketBase.Blazor.Clients.Collections
             _http = http;
         }
 
-        public Task<AuthResult> AuthWithPasswordAsync(string identity, string password)
+        public Task<AuthResponse> AuthWithPasswordAsync(string identity, string password)
         {
             throw new NotImplementedException();
         }
@@ -34,22 +36,22 @@ namespace PocketBase.Blazor.Clients.Collections
             throw new NotImplementedException();
         }
 
-        public Task<RecordModel> GetFirstAsync(string filter, QueryOptions? options = null)
+        public Task<RecordModel> GetFirstAsync(string filter, QueryOptionsRequest? options = null)
         {
             throw new NotImplementedException();
         }
 
-        public Task<ListResult<RecordModel>> GetListAsync(int page = 1, int perPage = 30, QueryOptions? options = null)
+        public Task<ListResult<RecordModel>> GetListAsync(int page = 1, int perPage = 30, QueryOptionsRequest? options = null)
         {
             throw new NotImplementedException();
         }
 
-        public Task<RecordModel> GetOneAsync(string id, QueryOptions? options = null)
+        public Task<RecordModel> GetOneAsync(string id, QueryOptionsRequest? options = null)
         {
             throw new NotImplementedException();
         }
 
-        public Task<AuthResult> RefreshAsync()
+        public Task<AuthResponse> RefreshAsync()
         {
             throw new NotImplementedException();
         }

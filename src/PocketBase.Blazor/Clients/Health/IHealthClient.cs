@@ -1,7 +1,7 @@
 using System.Threading.Tasks;
 using PocketBase.Blazor.Exceptions;
-using PocketBase.Blazor.Models;
 using PocketBase.Blazor.Options;
+using PocketBase.Blazor.Responses;
 
 namespace PocketBase.Blazor.Clients.Health
 {
