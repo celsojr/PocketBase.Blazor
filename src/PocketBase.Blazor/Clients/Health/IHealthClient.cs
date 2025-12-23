@@ -1,3 +1,4 @@
+using System.Threading;
 using System.Threading.Tasks;
 using PocketBase.Blazor.Exceptions;
 using PocketBase.Blazor.Options;
@@ -14,10 +15,11 @@ namespace PocketBase.Blazor.Clients.Health
         /// Checks the health status of the api.
         /// </summary>
         /// <param name="options"></param>
+        /// <param name="cancellationToken">Optional cancellation token.</param>
         /// <exception cref="ClientResponseError">
         /// Thrown when the client receives an invalid response.
         /// </exception>
-        Task<HealthCheckResponse> CheckAsync(CommonOptions? options = null);
+        Task<HealthCheckResponse> CheckAsync(CommonOptions? options = null, CancellationToken cancellationToken = default);
     }
 }
 

@@ -6,6 +6,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using PocketBase.Blazor.Exceptions;
+using System.Threading;
 
 namespace PocketBase.Blazor.Http
 {
@@ -20,18 +21,18 @@ namespace PocketBase.Blazor.Http
             _client = httpClient ?? new HttpClient();
         }
 
-        public async Task<T> SendAsync<T>(HttpMethod method, string path, object? body = null, IDictionary<string, string>? query = null)
+        public async Task<T> SendAsync<T>(HttpMethod method, string path, object? body = null, IDictionary<string, string>? query = null, CancellationToken cancellationToken = default)
         {
             var request = BuildRequest(method, path, body, query);
-            var response = await _client.SendAsync(request);
-            return await HandleResponse<T>(response);
+            var response = await _client.SendAsync(request, cancellationToken);
+            return await HandleResponse<T>(response, cancellationToken);
         }
 
-        public async Task SendAsync(HttpMethod method, string path, object? body = null, IDictionary<string, string>? query = null)
+        public async Task SendAsync(HttpMethod method, string path, object? body = null, IDictionary<string, string>? query = null, CancellationToken cancellationToken = default)
         {
             var request = BuildRequest(method, path, body, query);
-            var response = await _client.SendAsync(request);
-            await HandleResponse<object>(response);
+            var response = await _client.SendAsync(request, cancellationToken);
+            await HandleResponse<object>(response, cancellationToken);
         }
 
         HttpRequestMessage BuildRequest(HttpMethod method, string path, object? body, IDictionary<string, string>? query)
@@ -49,9 +50,9 @@ namespace PocketBase.Blazor.Http
             return req;
         }
 
-        async Task<T> HandleResponse<T>(HttpResponseMessage response)
+        async Task<T> HandleResponse<T>(HttpResponseMessage response, CancellationToken cancellationToken)
         {
-            var text = await response.Content.ReadAsStringAsync();
+            var text = await response.Content.ReadAsStringAsync(cancellationToken);
             if (!response.IsSuccessStatusCode)
                 throw new PocketBaseException(response.StatusCode, text);
 

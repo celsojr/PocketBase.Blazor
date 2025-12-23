@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using PocketBase.Blazor.Http;
 using PocketBase.Blazor.Options;
@@ -20,7 +21,7 @@ namespace PocketBase.Blazor.Clients.Files
         }
 
         /// <inheritdoc />
-        public async Task<string> GetUrl(IDictionary<string, object?> record, string fileName, IDictionary<string, string>? query)
+        public async Task<string> GetUrl(IDictionary<string, object?> record, string fileName, IDictionary<string, string>? query, CancellationToken cancellationToken = default)
         {
             object? collectionId = null, collectionName = null;
 
@@ -51,14 +52,15 @@ namespace PocketBase.Blazor.Clients.Files
             var request = await _http.SendAsync<string>(
                 HttpMethod.Get,
                 path,
-                query: query
+                query: query,
+                cancellationToken: cancellationToken
             );
 
             return request ?? string.Empty;
         }
 
         /// <inheritdoc />
-        public async Task<string> GetTokenAsync(CommonOptions? options = null)
+        public async Task<string> GetTokenAsync(CommonOptions? options = null, CancellationToken cancellationToken = default)
         {
             options ??= new CommonOptions();
 
@@ -68,7 +70,8 @@ namespace PocketBase.Blazor.Clients.Files
                 method,
                 "/api/files/token",
                 body: options.Body,
-                query: options.Query
+                query: options.Query,
+                cancellationToken: cancellationToken
             );
 
             return data?.Token ?? string.Empty;

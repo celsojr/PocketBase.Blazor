@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using PocketBase.Blazor.Exceptions;
 using PocketBase.Blazor.Options;
@@ -15,20 +16,22 @@ namespace PocketBase.Blazor.Clients.CronJob
         /// Returns list with all registered cron jobs.
         /// </summary>
         /// <param name="options">Optional common options for the request.</param>
+        /// <param name="cancellationToken">Optional cancellation token.</param>
         /// <exception cref="ClientResponseError">
         /// Thrown when the client receives an invalid response.
         /// </exception>
-        Task<IEnumerable<CronJobResponse>> GetFullList(CommonOptions? options = null);
+        Task<IEnumerable<CronJobResponse>> GetFullList(CommonOptions? options = null, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Runs a specific cron job.
         /// </summary>
         /// <param name="id">The ID of the cron job to run.</param>
         /// <param name="options">Optional common options for the request.</param>
+        /// <param name="cancellationToken">Optional cancellation token.</param>
         /// <exception cref="ClientResponseError">
         /// Thrown when the client receives an invalid response.
         /// </exception>
-        Task Run(string id, CommonOptions? options = null);
+        Task Run(string id, CommonOptions? options = null, CancellationToken cancellationToken = default);
     }
 }
 

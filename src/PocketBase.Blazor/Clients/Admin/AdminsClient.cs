@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using PocketBase.Blazor.Http;
 using PocketBase.Blazor.Responses;
@@ -14,17 +15,17 @@ namespace PocketBase.Blazor.Clients.Admin
             _http = http;
         }
 
-        public Task<AuthResponse> AuthWithPasswordAsync(string email, string password)
+        public Task<AuthResponse> AuthWithPasswordAsync(string email, string password, CancellationToken cancellationToken = default)
         {
             throw new NotImplementedException();
         }
 
-        public Task LogoutAsync()
+        public Task LogoutAsync(CancellationToken cancellationToken = default)
         {
             throw new NotImplementedException();
         }
 
-        public Task<AuthResponse> RefreshAsync()
+        public Task<AuthResponse> RefreshAsync(CancellationToken cancellationToken = default)
         {
             throw new NotImplementedException();
         }

@@ -1,4 +1,5 @@
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using PocketBase.Blazor.Http;
 using PocketBase.Blazor.Options;
@@ -18,12 +19,13 @@ namespace PocketBase.Blazor.Clients.Health
         }
 
         /// <inheritdoc />
-        public async Task<HealthCheckResponse> CheckAsync(CommonOptions? options = null)
+        public async Task<HealthCheckResponse> CheckAsync(CommonOptions? options = null, CancellationToken cancellationToken = default)
         {
             var response = await _http.SendAsync<HealthCheckResponse>(
                 HttpMethod.Get,
                 "/api/health",
-                query: options?.Query
+                query: options?.Query,
+                cancellationToken: cancellationToken
             );
 
             return response;

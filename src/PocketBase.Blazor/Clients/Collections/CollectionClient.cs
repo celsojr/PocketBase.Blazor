@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using PocketBase.Blazor.Events;
 using PocketBase.Blazor.Http;
@@ -21,57 +22,57 @@ namespace PocketBase.Blazor.Clients.Collections
             _http = http;
         }
 
-        public Task<AuthResponse> AuthWithPasswordAsync(string identity, string password)
+        public Task<AuthResponse> AuthWithPasswordAsync(string identity, string password, CancellationToken cancellationToken = default)
         {
             throw new NotImplementedException();
         }
 
-        public Task<RecordModel> CreateAsync(object data)
+        public Task<RecordModel> CreateAsync(object data, CancellationToken cancellationToken = default)
         {
             throw new NotImplementedException();
         }
 
-        public Task DeleteAsync(string id)
+        public Task DeleteAsync(string id, CancellationToken cancellationToken = default)
         {
             throw new NotImplementedException();
         }
 
-        public Task<RecordModel> GetFirstAsync(string filter, QueryOptionsRequest? options = null)
+        public Task<RecordModel> GetFirstAsync(string filter, QueryOptionsRequest? options = null, CancellationToken cancellationToken = default)
         {
             throw new NotImplementedException();
         }
 
-        public Task<ListResult<RecordModel>> GetListAsync(int page = 1, int perPage = 30, QueryOptionsRequest? options = null)
+        public Task<ListResult<RecordModel>> GetListAsync(int page = 1, int perPage = 30, QueryOptionsRequest? options = null, CancellationToken cancellationToken = default)
         {
             throw new NotImplementedException();
         }
 
-        public Task<RecordModel> GetOneAsync(string id, QueryOptionsRequest? options = null)
+        public Task<RecordModel> GetOneAsync(string id, QueryOptionsRequest? options = null, CancellationToken cancellationToken = default)
         {
             throw new NotImplementedException();
         }
 
-        public Task<AuthResponse> RefreshAsync()
+        public Task<AuthResponse> RefreshAsync(CancellationToken cancellationToken = default)
         {
             throw new NotImplementedException();
         }
 
-        public Task RequestPasswordResetAsync(string email)
+        public Task RequestPasswordResetAsync(string email, CancellationToken cancellationToken = default)
         {
             throw new NotImplementedException();
         }
 
-        public Task<IDisposable> SubscribeAsync(string topic, Action<RecordSubscriptionEvent> handler)
+        public Task<IDisposable> SubscribeAsync(string topic, Action<RecordSubscriptionEvent> handler, CancellationToken cancellationToken = default)
         {
             throw new NotImplementedException();
         }
 
-        public Task<RecordModel> UpdateAsync(string id, object data)
+        public Task<RecordModel> UpdateAsync(string id, object data, CancellationToken cancellationToken = default)
         {
             throw new NotImplementedException();
         }
 
-        public Task<RecordModel> UploadFileAsync(string id, string field, Stream file, string fileName)
+        public Task<RecordModel> UploadFileAsync(string id, string field, Stream file, string fileName, CancellationToken cancellationToken = default)
         {
             throw new NotImplementedException();
         }

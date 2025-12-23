@@ -1,10 +1,9 @@
 using System.Collections.Generic;
 using System.Net.Http;
-using System.Text;
-using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using PocketBase.Blazor.Enums;
+using PocketBase.Blazor.Http;
 using PocketBase.Blazor.Requests;
 using PocketBase.Blazor.Responses;
 
@@ -13,14 +12,19 @@ namespace PocketBase.Blazor.Clients.Batch
     /// <inheritdoc />
     public class BatchClient : IBatchClient
     {
+        private readonly IHttpTransport _transport;
         private readonly string? _collectionName;
-        private readonly List<BatchRequest> _requests = new();
+        private readonly List<BatchRequest> _requests = [];
 
         /// <inheritdoc />
-        public BatchClient() { }
-
-        private BatchClient(string? collectionName, List<BatchRequest> requests)
+        public BatchClient(IHttpTransport transport)
         {
+            _transport = transport;
+        }
+
+        private BatchClient(IHttpTransport transport, string? collectionName, List<BatchRequest> requests)
+        {
+            _transport = transport;
             _collectionName = collectionName;
             _requests = requests;
         }
@@ -28,7 +32,7 @@ namespace PocketBase.Blazor.Clients.Batch
         /// <inheritdoc />
         public IBatchClient Collection(string collectionName)
         {
-            return new BatchClient(collectionName, _requests);
+            return new BatchClient(_transport, collectionName, _requests);
         }
 
         /// <inheritdoc />
@@ -46,27 +50,15 @@ namespace PocketBase.Blazor.Clients.Batch
         }
 
         /// <inheritdoc />
-        public async Task<IReadOnlyList<BatchResponse>> SendAsync(
+        public  Task<IReadOnlyList<BatchResponse>> SendAsync(
             CancellationToken cancellationToken = default)
         {
-            var json = JsonSerializer.Serialize(_requests);
-
-            using var httpClient = new HttpClient();
-            using var response = await httpClient.PostAsync(
+            return _transport.SendAsync<IReadOnlyList<BatchResponse>>(
+                HttpMethod.Post,
                 "/api/batch",
-                new StringContent(json, Encoding.UTF8, "application/json"),
-                cancellationToken
-            );
-
-            response.EnsureSuccessStatusCode();
-
-            await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
-            var result = await JsonSerializer.DeserializeAsync<List<BatchResponse>>(
-                stream,
+                _requests,
                 cancellationToken: cancellationToken
             );
-
-            return result ?? [];
         }
 
         /// <inheritdoc />
