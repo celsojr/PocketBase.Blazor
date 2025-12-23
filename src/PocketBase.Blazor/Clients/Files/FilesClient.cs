@@ -1,31 +1,30 @@
 using System;
-using System.IO;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
 using PocketBase.Blazor.Http;
 using PocketBase.Blazor.Models;
-using System.Collections.Generic;
 using PocketBase.Blazor.Options;
 
 namespace PocketBase.Blazor.Clients.Files
 {
+    /// <inheritdoc />
     public class FilesClient : IFilesClient
     {
         readonly IHttpTransport _http;
 
+        /// <inheritdoc />
         public FilesClient(IHttpTransport http)
         {
             _http = http;
         }
 
-        public async Task<string> GetUrl(
-            IDictionary<string, object?> record,
-            string filename,
-            IDictionary<string, string>? queryParams = null)
+        /// <inheritdoc />
+        public async Task<string> GetUrl(IDictionary<string, object?> record, string fileName, IDictionary<string, string>? query)
         {
             object? collectionId = null, collectionName = null;
 
-            if (string.IsNullOrWhiteSpace(filename) ||
+            if (string.IsNullOrWhiteSpace(fileName) ||
                 !record.TryGetValue("id", out var id) ||
                 !(record.TryGetValue("collectionId", out collectionId) ||
                 record.TryGetValue("collectionName", out collectionName)))
@@ -38,27 +37,27 @@ namespace PocketBase.Blazor.Clients.Files
                 "files",
                 Uri.EscapeDataString((collectionId ?? collectionName)!.ToString()!),
                 Uri.EscapeDataString(id!.ToString()!),
-                Uri.EscapeDataString(filename)
+                Uri.EscapeDataString(fileName)
             );
 
             // normalize the download query param (same as TS)
-            if (queryParams != null &&
-                queryParams.TryGetValue("download", out var download) &&
+            if (query != null &&
+                query.TryGetValue("download", out var download) &&
                 download == "false")
             {
-                queryParams.Remove("download");
+                query.Remove("download");
             }
 
             var request = await _http.SendAsync<string>(
                 HttpMethod.Get,
                 path,
-                query: queryParams
+                query: query
             );
 
             return request ?? string.Empty;
         }
 
-
+        /// <inheritdoc />
         public async Task<string> GetTokenAsync(CommonOptions? options = null)
         {
             options ??= new CommonOptions();

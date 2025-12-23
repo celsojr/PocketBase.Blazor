@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace PocketBase.Blazor.Options
 {
-    public sealed class CommonOptions
+    public class CommonOptions
     {
         public HttpMethod? Method { get; set; }
         public object? Body { get; set; }
