@@ -98,3 +98,4 @@ namespace PocketBase.Blazor.Clients.Settings
         Task<AppleClientSecretResponse> GenerateAppleClientSecretAsync(string clientId, string teamId, string keyId, string privateKey, int duration, CommonOptions? options);
     }
 }
+

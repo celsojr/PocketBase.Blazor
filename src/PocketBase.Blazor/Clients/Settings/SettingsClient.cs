@@ -49,3 +49,4 @@ namespace PocketBase.Blazor.Clients.Settings
         }
     }
 }
+

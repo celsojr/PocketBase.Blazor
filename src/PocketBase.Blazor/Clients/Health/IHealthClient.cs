@@ -20,3 +20,4 @@ namespace PocketBase.Blazor.Clients.Health
         Task<HealthCheckResponse> CheckAsync(CommonOptions? options = null);
     }
 }
+
