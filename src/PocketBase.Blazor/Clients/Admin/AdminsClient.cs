@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using PocketBase.Blazor.Http;
@@ -6,28 +8,61 @@ using PocketBase.Blazor.Responses;
 
 namespace PocketBase.Blazor.Clients.Admin
 {
+    /// <inheritdoc />
     public class AdminsClient : IAdminsClient
     {
-        readonly IHttpTransport _http;
+        private readonly IHttpTransport _http;
 
+        /// <inheritdoc />
         public AdminsClient(IHttpTransport http)
         {
-            _http = http;
+            _http = http ?? throw new ArgumentNullException(nameof(http));
         }
 
-        public Task<AuthResponse> AuthWithPasswordAsync(string email, string password, CancellationToken cancellationToken = default)
+        /// <inheritdoc />
+        public async Task<AuthResponse> AuthWithPasswordAsync(string email, string password, CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            if (string.IsNullOrWhiteSpace(email))
+                throw new ArgumentException("Email must be provided.", nameof(email));
+
+            if (string.IsNullOrWhiteSpace(password))
+                throw new ArgumentException("Password must be provided.", nameof(password));
+
+            var body = new Dictionary<string, object>
+            {
+                { "identity", email },
+                { "password", password }
+            };
+
+            return await _http.SendAsync<AuthResponse>(
+                HttpMethod.Post,
+                "/api/admins/auth-with-password",
+                body,
+                cancellationToken: cancellationToken
+            );
         }
 
-        public Task LogoutAsync(CancellationToken cancellationToken = default)
+        /// <inheritdoc />
+        public async Task<AuthResponse> RefreshAsync(CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            return await _http.SendAsync<AuthResponse>(
+                HttpMethod.Post,
+                "/api/admins/auth-refresh",
+                body: null,
+                cancellationToken: cancellationToken
+            );
         }
 
-        public Task<AuthResponse> RefreshAsync(CancellationToken cancellationToken = default)
+        /// <inheritdoc />
+        public async Task LogoutAsync(CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            await _http.SendAsync(
+                HttpMethod.Post,
+                "/api/admins/logout",
+                body: null,
+                cancellationToken: cancellationToken
+            );
         }
     }
 }
+
