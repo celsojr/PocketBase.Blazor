@@ -121,3 +121,35 @@
 - Unified base client class could be introduced in future.  
 - Exception messages could be aligned with JS SDK for parity.
 
+## 11. RecordClient vs JS SDK RecordService
+
+### JS SDK Features
+
+The original JS SDK `RecordService` includes a broader set of convenience methods beyond core CRUD, such as:
+
+- `getList(page, perPage, options)` ? paginated list of records.
+- `getFullList(options)` ? retrieves all records across pages automatically.
+- `getFirstListItem(filter, options)` ? returns the first record matching a filter.
+- `getOne(recordId, options)` ? fetches a single record by ID.
+- `create(bodyParams, options)` ? create new records.
+- `update(recordId, bodyParams, options)` ? update existing records.
+- `delete(recordId, options)` ? delete a record.
+- `subscribe` ? integrates with the Realtime service for record events.
+- Helpers for `expand` and batch operations (create/update/delete multiple records at once).
+
+### C# `RecordClient` Implementation
+
+- Focuses on **core REST CRUD operations** and pagination.
+- Provides `GetListAsync`, `GetFullListAsync`, `GetFirstListItemAsync`, `GetOneAsync`, `CreateAsync`, `UpdateAsync`, `DeleteAsync`.
+- Uses `IHttpTransport` for all HTTP communication.
+- Includes parameter validation and query mapping via `ToDictionary()`.
+- Does not include realtime subscription helpers, batch helpers, or certain convenience methods that exist in the JS SDK.
+- Optional helper methods (batch operations, expanded relations, subscription integration) can be added later as extensions or additional clients.
+
+### Rationale
+
+- Keeps the API clean and focused on core responsibilities.
+- Avoids over-complicating the initial C# port.
+- Aligns with the “client-first” design philosophy.
+- Makes future extension easier while preserving JS SDK semantics where it matters most.
+
