@@ -1,33 +1,41 @@
-using System.Threading.Tasks;
-using PocketBase.Blazor.Options;
+using System;
 using System.Collections.Generic;
-using PocketBase.Blazor.Responses;
-using PocketBase.Blazor.Http;
+using System.Net.Http;
 using System.Threading;
+using System.Threading.Tasks;
+using PocketBase.Blazor.Extensions;
+using PocketBase.Blazor.Http;
+using PocketBase.Blazor.Options;
+using PocketBase.Blazor.Responses;
 
 namespace PocketBase.Blazor.Clients.CronJob
 {
     /// <inheritdoc />
     public class CronJobClient : ICronJobClient
     {
-        private IHttpTransport _http;
+        private readonly IHttpTransport _http;
 
         /// <inheritdoc />
         public CronJobClient(IHttpTransport http)
         {
-            _http = http;
+            _http = http ?? throw new ArgumentNullException(nameof(http));
         }
 
         /// <inheritdoc />
         public Task<IEnumerable<CronJobResponse>> GetFullList(CommonOptions? options = null, CancellationToken cancellationToken = default)
         {
-            throw new System.NotImplementedException();
+            var query = options?.ToDictionary();
+            return _http.SendAsync<IEnumerable<CronJobResponse>>(HttpMethod.Get, "/api/cron-jobs", query: query, cancellationToken: cancellationToken);
         }
 
         /// <inheritdoc />
         public Task Run(string id, CommonOptions? options = null, CancellationToken cancellationToken = default)
         {
-            throw new System.NotImplementedException();
+            if (string.IsNullOrWhiteSpace(id))
+                throw new ArgumentException("Cron job id is required.", nameof(id));
+
+            var query = options?.ToDictionary();
+            return _http.SendAsync(HttpMethod.Post, $"/api/cron-jobs/{id}/run", body: null, query: query, cancellationToken: cancellationToken);
         }
     }
 }

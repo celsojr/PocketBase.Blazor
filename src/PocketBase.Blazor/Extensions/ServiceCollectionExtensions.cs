@@ -3,7 +3,7 @@ using System.Net.Http;
 using Microsoft.Extensions.DependencyInjection;
 using PocketBase.Blazor.Options;
 
-namespace PocketBase.Blazor;
+namespace PocketBase.Blazor.Extensions;
 
 public static class ServiceCollectionExtensions
 {
