@@ -1,8 +1,8 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using PocketBase.Blazor.Events;
 using PocketBase.Blazor.Http;
-using PocketBase.Blazor.Models;
 
 namespace PocketBase.Blazor.Clients.Realtime
 {
@@ -25,7 +25,7 @@ namespace PocketBase.Blazor.Clients.Realtime
             throw new NotImplementedException();
         }
 
-        public Task<IDisposable> SubscribeAsync(string topic, Action<RealtimeMessage> handler, CancellationToken cancellationToken = default)
+        public Task<IDisposable> SubscribeAsync(string topic, Action<RecordSubscriptionEvent> handler, CancellationToken cancellationToken = default)
         {
             throw new NotImplementedException();
         }

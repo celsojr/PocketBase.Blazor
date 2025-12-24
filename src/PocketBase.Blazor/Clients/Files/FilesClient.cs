@@ -64,10 +64,8 @@ namespace PocketBase.Blazor.Clients.Files
         {
             options ??= new CommonOptions();
 
-            var method = options.Method ?? HttpMethod.Post;
-
             var data = await _http.SendAsync<TokenResponse>(
-                method,
+                HttpMethod.Post,
                 "/api/files/token",
                 body: options.Body,
                 query: options.Query,
