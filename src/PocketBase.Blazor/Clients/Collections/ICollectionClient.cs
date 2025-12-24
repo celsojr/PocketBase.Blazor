@@ -34,7 +34,7 @@ namespace PocketBase.Blazor.Clients.Collections
         Task<RecordModel> UploadFileAsync(string id, string field, Stream file, string fileName, CancellationToken cancellationToken = default);
 
         // Realtime
-        Task<IDisposable> SubscribeAsync(string topic, Action<RecordSubscriptionEvent> handler, CancellationToken cancellationToken = default);
+        Task<bool> SubscribeAsync(string topic, Action<RealtimeEvent> handler, CancellationToken cancellationToken = default);
     }
 
 }

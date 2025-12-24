@@ -155,9 +155,9 @@ namespace PocketBase.Blazor.Clients.Collections
         }
 
         /// <inheritdoc />
-        public Task<IDisposable> SubscribeAsync(string topic, Action<RecordSubscriptionEvent> handler, CancellationToken cancellationToken = default)
+        public async Task<bool> SubscribeAsync(string topic, Action<RealtimeEvent> handler, CancellationToken cancellationToken = default)
         {
-            return _store.Realtime.SubscribeAsync(topic, handler, cancellationToken);
+            return await _store.Realtime.SubscribeAsync(topic, handler, cancellationToken: cancellationToken);
         }
     }
 }
