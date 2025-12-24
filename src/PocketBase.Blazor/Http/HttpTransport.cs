@@ -1,12 +1,12 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
-using System.Collections.Generic;
-using PocketBase.Blazor.Exceptions;
 using System.Threading;
+using System.Threading.Tasks;
+using PocketBase.Blazor.Exceptions;
 
 namespace PocketBase.Blazor.Http
 {
@@ -57,13 +57,21 @@ namespace PocketBase.Blazor.Http
         static async Task<T> HandleResponse<T>(HttpResponseMessage response, CancellationToken cancellationToken)
         {
             var text = await response.Content.ReadAsStringAsync(cancellationToken);
+
             if (!response.IsSuccessStatusCode)
                 throw new PocketBaseException(response.StatusCode, text);
 
             if (typeof(T) == typeof(object))
                 return default!;
 
-            return JsonSerializer.Deserialize<T>(text)!;
+            // Use JsonSerializerOptions for case-insensitive matching
+            var options = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            };
+            options.Converters.Add(new PocketBaseDateTimeConverter());
+
+            return JsonSerializer.Deserialize<T>(text, options)!;
         }
     }
 }

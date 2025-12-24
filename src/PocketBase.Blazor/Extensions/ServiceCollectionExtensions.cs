@@ -7,9 +7,7 @@ namespace PocketBase.Blazor.Extensions;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddPocketBase(
-        this IServiceCollection services,
-        Action<PocketBaseOptions> configure)
+    public static IServiceCollection AddPocketBase(this IServiceCollection services, Action<PocketBaseOptions> configure)
     {
         if (configure == null) throw new ArgumentNullException(nameof(configure));
         var options = new PocketBaseOptions();

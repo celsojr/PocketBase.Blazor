@@ -1,6 +1,8 @@
 @page "/posts"
 @using PocketBase.Blazor
-@inject IPocketBase Client
+@using PocketBase.Blazor.Models
+@using System.Text.Json
+@using System.Globalization
 
 <h3 class="page-title">Posts</h3>
 
@@ -38,30 +40,94 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        var (items, error) = await Client.GetListAsync<Post>("posts");
+        try
+        {
+            // Registering the client with the PocketBase URL
+            // var pb = new PocketBase("https:dummy-pocketbase-url.com");
+            var pb = new PocketBase("http://localhost:8090");
 
-        if (error != null)
-        {
-            if (error.RequiresApiKey)
-            {
-                Console.WriteLine("⚠ This endpoint requires an API key or admin privileges.");
-            }
-            else
-            {
-                Console.WriteLine($"Error {error.Status}: {error.Message}");
-            }
+            // Fetch all posts like JS SDK style
+            var result = await pb.Collection("posts").GetListAsync();
+
+            // var safeRecords = result.Items
+            // .Select(r => new
+            // {
+            //     r.Id,
+            //     RawJson = r.Data.GetRawText() capture immediately while buffer is valid
+            // })
+            // .ToList();
+
+            // foreach (var r in safeRecords)
+            // {
+            //     Console.WriteLine($"Id: {r.Id}, Data: {r.RawJson}");
+            // }
+
+            Console.WriteLine($"Fetched {result.Items.Count} posts.");
+
+            // foreach (var r in result.Items)
+            // {
+            //     Console.WriteLine($"Id: {r.Id}, Data: {r.Data.GetRawText()}");
+            //     Console.WriteLine($"Id: {r.Id}, Data: {r.Data}");
+            // }
+
+            // Console.WriteLine(JsonSerializer.Serialize(result.Items, new JsonSerializerOptions { WriteIndented = true }));
+
+            // posts = result.Items
+            //     .Where(r => r?.Data.ValueKind == JsonValueKind.Object)
+            //     .Where(r => r != null)
+            //     .Select(r => r.ToModel<Post>())
+            //     .ToList();
+
+            var mappedPosts = result.Items.Select(MapPost).ToList();
+            // await Task.Delay(2000); Simulate loading delay
+            await InvokeAsync(() => posts = mappedPosts);
         }
-        else
+        catch (Exception ex)
         {
-            posts = items;
+            Console.WriteLine($"Error fetching posts: {ex.Message}");
+            posts = new List<Post>();
         }
+    }
+
+    private static Post MapPost(RecordModel record)
+    {
+        // Start with defaults
+        var post = new Post { Id = record.Id };
+
+        try
+        {
+            var data = record.Data;
+
+            // Map fields safely
+            // if (data.ValueKind == JsonValueKind.Object)
+            // {
+                post.Title = data.TryGetProperty("title", out var t) ? t.GetString() : null;
+                post.Slug = data.TryGetProperty("slug", out var s) ? s.GetString() : null;
+                post.IsPublished = data.TryGetProperty("is_published", out var p) && p.GetBoolean();
+
+                // Parse created timestamp safely
+                if (data.TryGetProperty("created", out var c) && c.ValueKind == JsonValueKind.String)
+                {
+                    if (DateTime.TryParse(c.GetString(), null, DateTimeStyles.RoundtripKind, out var dt))
+                        post.Created = dt;
+                }
+            // }
+        }
+        catch
+        {
+            // Swallow mapping errors to avoid breaking Blazor rendering
+        }
+
+        return post;
     }
 
     public class Post
     {
-        public string Id { get; set; }
+        public string Id { get; set; } = null!;
         public string? Title { get; set; }
         public string? Slug { get; set; }
         public bool IsPublished { get; set; }
+        public DateTime? Created { get; set; }
     }
-}
+ }
+

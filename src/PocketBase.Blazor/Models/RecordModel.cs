@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Text.Json;
 
 namespace PocketBase.Blazor.Models;
@@ -10,7 +11,7 @@ public class RecordModel
     public DateTime Updated { get; set; }
 
     // dynamic fields
-    public JsonElement Data { get; set; }
+    public Dictionary<string, object> Data { get; set; } = new();
 
     public JsonElement? Expand { get; set; }
 }

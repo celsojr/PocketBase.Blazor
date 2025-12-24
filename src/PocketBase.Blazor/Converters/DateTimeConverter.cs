@@ -14,7 +14,7 @@ namespace PocketBase.Blazor.Converters
                 return null;
             }
 
-            return DateTime.SpecifyKind(dt, DateTimeKind.Utc); ;
+            return DateTime.SpecifyKind(dt, DateTimeKind.Utc);
         }
 
         public override void Write(Utf8JsonWriter writer, DateTime? value, JsonSerializerOptions options)
