@@ -10,17 +10,20 @@ using System.Threading;
 
 namespace PocketBase.Blazor.Http
 {
+    /// <inheritdoc />
     public class HttpTransport : IHttpTransport
     {
         readonly HttpClient _client;
         readonly string _baseUrl;
 
+        /// <inheritdoc />
         public HttpTransport(string baseUrl, HttpClient? httpClient = null)
         {
             _baseUrl = baseUrl;
             _client = httpClient ?? new HttpClient();
         }
 
+        /// <inheritdoc />
         public async Task<T> SendAsync<T>(HttpMethod method, string path, object? body = null, IDictionary<string, string>? query = null, CancellationToken cancellationToken = default)
         {
             var request = BuildRequest(method, path, body, query);
@@ -28,6 +31,7 @@ namespace PocketBase.Blazor.Http
             return await HandleResponse<T>(response, cancellationToken);
         }
 
+        /// <inheritdoc />
         public async Task SendAsync(HttpMethod method, string path, object? body = null, IDictionary<string, string>? query = null, CancellationToken cancellationToken = default)
         {
             var request = BuildRequest(method, path, body, query);
@@ -50,7 +54,7 @@ namespace PocketBase.Blazor.Http
             return req;
         }
 
-        async Task<T> HandleResponse<T>(HttpResponseMessage response, CancellationToken cancellationToken)
+        static async Task<T> HandleResponse<T>(HttpResponseMessage response, CancellationToken cancellationToken)
         {
             var text = await response.Content.ReadAsStringAsync(cancellationToken);
             if (!response.IsSuccessStatusCode)
