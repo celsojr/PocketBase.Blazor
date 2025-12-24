@@ -33,13 +33,13 @@ namespace PocketBase.Blazor.Clients.Files
                 return string.Empty;
             }
 
-            var path = string.Join("/",
+            var path = string.Join('/', [
                 "api",
                 "files",
                 Uri.EscapeDataString((collectionId ?? collectionName)!.ToString()!),
                 Uri.EscapeDataString(id!.ToString()!),
                 Uri.EscapeDataString(fileName)
-            );
+            ]);
 
             // normalize the download query param (same as TS)
             if (query != null &&
