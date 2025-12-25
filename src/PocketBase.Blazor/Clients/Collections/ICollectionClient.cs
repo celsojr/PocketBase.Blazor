@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using FluentResults;
 using PocketBase.Blazor.Events;
 using PocketBase.Blazor.Models;
 using PocketBase.Blazor.Requests;
@@ -29,14 +30,14 @@ namespace PocketBase.Blazor.Clients.Collections
         /// <param name="password">The user's password.</param>
         /// <param name="cancellationToken">Optional cancellation token.</param>
         /// <returns>An <see cref="AuthResponse"/> containing authentication information and tokens.</returns>
-        Task<AuthResponse> AuthWithPasswordAsync(string identity, string password, CancellationToken cancellationToken = default);
+        Task<Result<AuthResponse>> AuthWithPasswordAsync(string identity, string password, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Refreshes the authentication token for the currently authenticated record.
         /// </summary>
         /// <param name="cancellationToken">Optional cancellation token.</param>
         /// <returns>An <see cref="AuthResponse"/> with the refreshed token.</returns>
-        Task<AuthResponse> RefreshAsync(CancellationToken cancellationToken = default);
+        Task<Result<AuthResponse>> RefreshAsync(CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Requests a password reset email for the specified user email.
@@ -56,7 +57,7 @@ namespace PocketBase.Blazor.Clients.Collections
         /// <param name="options">Optional query parameters (e.g., expanded relations).</param>
         /// <param name="cancellationToken">Optional cancellation token.</param>
         /// <returns>The requested <see cref="RecordModel"/>.</returns>
-        Task<RecordModel> GetOneAsync(string id, QueryOptionsRequest? options = null, CancellationToken cancellationToken = default);
+        Task<Result<RecordModel>> GetOneAsync(string id, QueryOptionsRequest? options = null, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Retrieves a paginated list of records.
@@ -66,7 +67,7 @@ namespace PocketBase.Blazor.Clients.Collections
         /// <param name="options">Optional query parameters.</param>
         /// <param name="cancellationToken">Optional cancellation token.</param>
         /// <returns>A <see cref="ListResult{RecordModel}"/> containing the page of records.</returns>
-        Task<ListResult<RecordModel>> GetListAsync(int page = 1, int perPage = 30, QueryOptionsRequest? options = null, CancellationToken cancellationToken = default);
+        Task<Result<ListResult<T>>> GetListAsync<T>(int page = 1, int perPage = 30, QueryOptionsRequest? options = null, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Retrieves the first record matching the specified filter.
@@ -75,7 +76,7 @@ namespace PocketBase.Blazor.Clients.Collections
         /// <param name="options">Optional query parameters.</param>
         /// <param name="cancellationToken">Optional cancellation token.</param>
         /// <returns>The first matching <see cref="RecordModel"/>.</returns>
-        Task<RecordModel> GetFirstAsync(string filter, QueryOptionsRequest? options = null, CancellationToken cancellationToken = default);
+        Task<Result<RecordModel>> GetFirstAsync(string filter, QueryOptionsRequest? options = null, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Creates a new record in the collection.
@@ -83,7 +84,7 @@ namespace PocketBase.Blazor.Clients.Collections
         /// <param name="data">An object containing the record fields and values.</param>
         /// <param name="cancellationToken">Optional cancellation token.</param>
         /// <returns>The created <see cref="RecordModel"/>.</returns>
-        Task<RecordModel> CreateAsync(object data, CancellationToken cancellationToken = default);
+        Task<Result<RecordModel>> CreateAsync(object data, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Updates an existing record by its ID.
@@ -92,7 +93,7 @@ namespace PocketBase.Blazor.Clients.Collections
         /// <param name="data">An object containing the updated fields.</param>
         /// <param name="cancellationToken">Optional cancellation token.</param>
         /// <returns>The updated <see cref="RecordModel"/>.</returns>
-        Task<RecordModel> UpdateAsync(string id, object data, CancellationToken cancellationToken = default);
+        Task<Result<RecordModel>> UpdateAsync(string id, object data, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Deletes a record by its ID.
@@ -114,7 +115,7 @@ namespace PocketBase.Blazor.Clients.Collections
         /// <param name="fileName">The name of the file.</param>
         /// <param name="cancellationToken">Optional cancellation token.</param>
         /// <returns>The updated <see cref="RecordModel"/> containing the uploaded file.</returns>
-        Task<RecordModel> UploadFileAsync(string id, string field, Stream file, string fileName, CancellationToken cancellationToken = default);
+        Task<Result<RecordModel>> UploadFileAsync(string id, string field, Stream file, string fileName, CancellationToken cancellationToken = default);
 
         #endregion
 
@@ -127,7 +128,7 @@ namespace PocketBase.Blazor.Clients.Collections
         /// <param name="handler">A callback invoked for each event received.</param>
         /// <param name="cancellationToken">Optional cancellation token.</param>
         /// <returns>True if subscription was successful; otherwise false.</returns>
-        Task<bool> SubscribeAsync(string topic, Action<RealtimeEvent> handler, CancellationToken cancellationToken = default);
+        Task<Result<bool>> SubscribeAsync(string topic, Action<RealtimeEvent> handler, CancellationToken cancellationToken = default);
 
         #endregion
     }

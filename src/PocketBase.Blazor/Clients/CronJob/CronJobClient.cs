@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using FluentResults;
 using PocketBase.Blazor.Extensions;
 using PocketBase.Blazor.Http;
 using PocketBase.Blazor.Options;
@@ -22,14 +23,14 @@ namespace PocketBase.Blazor.Clients.CronJob
         }
 
         /// <inheritdoc />
-        public Task<IEnumerable<CronJobResponse>> GetFullList(CommonOptions? options = null, CancellationToken cancellationToken = default)
+        public Task<Result<IEnumerable<CronJobResponse>>> GetFullList(CommonOptions? options = null, CancellationToken cancellationToken = default)
         {
             var query = options?.ToDictionary();
             return _http.SendAsync<IEnumerable<CronJobResponse>>(HttpMethod.Get, "/api/cron-jobs", query: query, cancellationToken: cancellationToken);
         }
 
         /// <inheritdoc />
-        public Task Run(string id, CommonOptions? options = null, CancellationToken cancellationToken = default)
+        public Task<Result<object>> Run(string id, CommonOptions? options = null, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(id))
                 throw new ArgumentException("Cron job id is required.", nameof(id));

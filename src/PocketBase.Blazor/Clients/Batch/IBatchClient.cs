@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using FluentResults;
 using PocketBase.Blazor.Exceptions;
 using PocketBase.Blazor.Responses;
 
@@ -60,7 +61,7 @@ namespace PocketBase.Blazor.Clients.Batch
         /// <exception cref="ClientResponseError">
         /// Thrown when the client receives an invalid response.
         /// </exception>
-        Task<IReadOnlyList<BatchResponse>> SendAsync(CancellationToken cancellationToken = default);
+        Task<Result<List<BatchResponse>>> SendAsync(CancellationToken cancellationToken = default);
     }
 }
 

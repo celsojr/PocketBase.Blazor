@@ -6,7 +6,9 @@ using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using FluentResults;
 using PocketBase.Blazor.Exceptions;
+using PocketBase.Blazor.Options;
 
 namespace PocketBase.Blazor.Http
 {
@@ -14,17 +16,24 @@ namespace PocketBase.Blazor.Http
     public class HttpTransport : IHttpTransport
     {
         readonly HttpClient _client;
-        readonly string _baseUrl;
+        readonly PocketBaseOptions _pocketBaseOptions;
 
         /// <inheritdoc />
-        public HttpTransport(string baseUrl, HttpClient? httpClient = null)
+        public HttpTransport(string baseUrl, HttpClient? httpClient = null, PocketBaseOptions? options = null)
         {
-            _baseUrl = baseUrl;
-            _client = httpClient ?? new HttpClient();
+            _client = httpClient ?? new HttpClient() { BaseAddress = new Uri(baseUrl) };
+
+            _client.DefaultRequestHeaders.Add("Accept", "application/json");
+            _client.DefaultRequestHeaders.Add("User-Agent", "PocketBase.Blazor");
+
+            if (options?.ApiKey != null)
+                _client.DefaultRequestHeaders.Add("Authorization", options.ApiKey);
+
+            _pocketBaseOptions = options ?? new PocketBaseOptions();
         }
 
         /// <inheritdoc />
-        public async Task<T> SendAsync<T>(HttpMethod method, string path, object? body = null, IDictionary<string, string>? query = null, CancellationToken cancellationToken = default)
+        public async Task<Result<T>> SendAsync<T>(HttpMethod method, string path, object? body = null, IDictionary<string, object?>? query = null, CancellationToken cancellationToken = default)
         {
             var request = BuildRequest(method, path, body, query);
             var response = await _client.SendAsync(request, cancellationToken);
@@ -32,46 +41,69 @@ namespace PocketBase.Blazor.Http
         }
 
         /// <inheritdoc />
-        public async Task SendAsync(HttpMethod method, string path, object? body = null, IDictionary<string, string>? query = null, CancellationToken cancellationToken = default)
+        public async Task<Result<object>> SendAsync(HttpMethod method, string path, object? body = null, IDictionary<string, object?>? query = null, CancellationToken cancellationToken = default)
         {
             var request = BuildRequest(method, path, body, query);
             var response = await _client.SendAsync(request, cancellationToken);
-            await HandleResponse<object>(response, cancellationToken);
+            return await HandleResponse<object>(response, cancellationToken);
         }
 
-        HttpRequestMessage BuildRequest(HttpMethod method, string path, object? body, IDictionary<string, string>? query)
+        HttpRequestMessage BuildRequest(HttpMethod method, string path, object? body, IDictionary<string, object?>? query)
         {
-            var url = _baseUrl + path;
+            var url = _client.BaseAddress + path;
             if (query != null)
-                url += "?" + string.Join("&", query.Select(kv => $"{kv.Key}={Uri.EscapeDataString(kv.Value)}"));
+                url += "?" + string.Join("&", query.Select(kv => $"{kv.Key}={Uri.EscapeDataString(kv.Value?.ToString() ?? "")}"));
 
             var req = new HttpRequestMessage(method, url);
             if (body != null)
             {
-                var json = JsonSerializer.Serialize(body);
+                var json = JsonSerializer.Serialize(body, _pocketBaseOptions.JsonSerializerOptions);
                 req.Content = new StringContent(json, Encoding.UTF8, "application/json");
             }
             return req;
         }
 
-        static async Task<T> HandleResponse<T>(HttpResponseMessage response, CancellationToken cancellationToken)
+        async Task<Result<T>> HandleResponse<T>(HttpResponseMessage response, CancellationToken cancellationToken)
         {
-            var text = await response.Content.ReadAsStringAsync(cancellationToken);
+            string content = string.Empty;
 
-            if (!response.IsSuccessStatusCode)
-                throw new PocketBaseException(response.StatusCode, text);
-
-            if (typeof(T) == typeof(object))
-                return default!;
-
-            // Use JsonSerializerOptions for case-insensitive matching
-            var options = new JsonSerializerOptions
+            try
             {
-                PropertyNameCaseInsensitive = true
-            };
-            options.Converters.Add(new PocketBaseDateTimeConverter());
+                content = await response.Content.ReadAsStringAsync(cancellationToken);
 
-            return JsonSerializer.Deserialize<T>(text, options)!;
+                if (!response.IsSuccessStatusCode)
+                {
+                    var ex = new PocketBaseException(response.StatusCode, content);
+                    return Result.Fail<T>(ex.Message).WithError(ex.Message);
+                }
+
+                if (typeof(T) == typeof(object))
+                    return Result.Ok<T>(default!);
+
+                T? data;
+                try
+                {
+                    data = JsonSerializer.Deserialize<T>(content, _pocketBaseOptions.JsonSerializerOptions);
+                }
+                catch (JsonException ex)
+                {
+                    return Result.Fail<T>($"Failed to deserialize response: {ex.Message}").WithError(content);
+                }
+
+                return data != null ? Result.Ok(data) : Result.Fail<T>("Deserialized value is null");
+            }
+            catch (HttpRequestException ex)
+            {
+                return Result.Fail<T>($"Request failed: {ex.Message}").WithError(content);
+            }
+            catch (TaskCanceledException) when (!cancellationToken.IsCancellationRequested)
+            {
+                return Result.Fail<T>("Request timed out").WithError(content);
+            }
+            catch (Exception ex)
+            {
+                return Result.Fail<T>($"Unexpected error: {ex.Message}").WithError(content);
+            }
         }
     }
 }

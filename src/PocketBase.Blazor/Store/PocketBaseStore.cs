@@ -1,6 +1,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using FluentResults;
 using PocketBase.Blazor.Clients.Realtime;
 using PocketBase.Blazor.Responses;
 
@@ -21,16 +22,24 @@ namespace PocketBase.Blazor.Store
             Realtime = realtime ?? throw new ArgumentNullException(nameof(realtime));
         }
 
-        public async Task<AuthResponse> AuthWithPasswordAsync(string identity, string password, CancellationToken cancellationToken = default)
+        public async Task<Result<AuthResponse>> AuthWithPasswordAsync(string identity, string password, CancellationToken cancellationToken = default)
         {
-            _currentSession = await Auth.AuthWithPasswordAsync(identity, password, cancellationToken);
-            return _currentSession;
+            var result = await Auth.AuthWithPasswordAsync(identity, password, cancellationToken);
+            if (result.IsSuccess)
+            {
+                _currentSession = result.Value;
+            }
+            return result;
         }
 
-        public async Task<AuthResponse> RefreshAsync(CancellationToken cancellationToken = default)
+        public async Task<Result<AuthResponse>> RefreshAsync(CancellationToken cancellationToken = default)
         {
-            _currentSession = await Auth.RefreshAsync(cancellationToken);
-            return _currentSession;
+            var result = await Auth.RefreshAsync(cancellationToken);
+            if (result.IsSuccess)
+            {
+                _currentSession = result.Value;
+            }
+            return result;
         }
 
         public async Task LogoutAsync(CancellationToken cancellationToken = default)

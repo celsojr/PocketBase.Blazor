@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using FluentResults;
 using PocketBase.Blazor.Http;
 using PocketBase.Blazor.Responses;
 
@@ -20,7 +21,7 @@ namespace PocketBase.Blazor.Clients.Admin
         }
 
         /// <inheritdoc />
-        public async Task<AuthResponse> AuthWithPasswordAsync(string email, string password, CancellationToken cancellationToken = default)
+        public async Task<Result<AuthResponse>> AuthWithPasswordAsync(string email, string password, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(email))
                 throw new ArgumentException("Email must be provided.", nameof(email));
@@ -43,7 +44,7 @@ namespace PocketBase.Blazor.Clients.Admin
         }
 
         /// <inheritdoc />
-        public async Task<AuthResponse> RefreshAsync(CancellationToken cancellationToken = default)
+        public async Task<Result<AuthResponse>> RefreshAsync(CancellationToken cancellationToken = default)
         {
             return await _http.SendAsync<AuthResponse>(
                 HttpMethod.Post,

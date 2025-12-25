@@ -1,5 +1,6 @@
 using System.Threading;
 using System.Threading.Tasks;
+using FluentResults;
 using PocketBase.Blazor.Exceptions;
 using PocketBase.Blazor.Models;
 using PocketBase.Blazor.Options;
@@ -22,7 +23,7 @@ namespace PocketBase.Blazor.Clients.Logging
         /// <exception cref="ClientResponseError">
         /// Thrown when the client receives an invalid response.
         /// </exception>
-        Task<ListResult<LogResponse>> GetListAsync(int page = 1, int perPage = 30, ListOptions? options = null, CancellationToken cancellationToken = default);
+        Task<Result<ListResult<LogResponse>>> GetListAsync(int page = 1, int perPage = 30, ListOptions? options = null, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Returns a single log by its id.
@@ -34,7 +35,7 @@ namespace PocketBase.Blazor.Clients.Logging
         /// <exception cref="ClientResponseError">
         /// Thrown when the client receives an invalid response.
         /// </exception>
-        Task<LogResponse> GetOneAsync(string id, CommonOptions? options = null, CancellationToken cancellationToken = default);
+        Task<Result<LogResponse>> GetOneAsync(string id, CommonOptions? options = null, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Returns hourly statistics for logs.
@@ -44,7 +45,7 @@ namespace PocketBase.Blazor.Clients.Logging
         /// <exception cref="ClientResponseError">
         /// Thrown when the client receives an invalid response.
         /// </exception>
-        Task<HourlyStatsResponse> GetStatsAsync(LogStatsOptions? options = null, CancellationToken cancellationToken = default);
+        Task<Result<HourlyStatsResponse>> GetStatsAsync(LogStatsOptions? options = null, CancellationToken cancellationToken = default);
     }
 }
 

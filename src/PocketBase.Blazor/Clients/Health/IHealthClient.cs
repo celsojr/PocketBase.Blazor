@@ -1,5 +1,6 @@
 using System.Threading;
 using System.Threading.Tasks;
+using FluentResults;
 using PocketBase.Blazor.Exceptions;
 using PocketBase.Blazor.Options;
 using PocketBase.Blazor.Responses;
@@ -19,7 +20,7 @@ namespace PocketBase.Blazor.Clients.Health
         /// <exception cref="ClientResponseError">
         /// Thrown when the client receives an invalid response.
         /// </exception>
-        Task<HealthCheckResponse> CheckAsync(CommonOptions? options = null, CancellationToken cancellationToken = default);
+        Task<Result<HealthCheckResponse>> CheckAsync(CommonOptions? options = null, CancellationToken cancellationToken = default);
     }
 }
 

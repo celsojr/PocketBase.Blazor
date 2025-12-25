@@ -1,4 +1,5 @@
 using System.Net.Http;
+using System.Text.Json;
 using PocketBase.Blazor.Clients.Admin;
 using PocketBase.Blazor.Clients.Backup;
 using PocketBase.Blazor.Clients.Batch;
@@ -11,6 +12,7 @@ using PocketBase.Blazor.Clients.Realtime;
 using PocketBase.Blazor.Clients.Record;
 using PocketBase.Blazor.Clients.Settings;
 using PocketBase.Blazor.Http;
+using PocketBase.Blazor.Options;
 using PocketBase.Blazor.Store;
 
 namespace PocketBase.Blazor;
@@ -35,10 +37,10 @@ public class PocketBase : IPocketBase
     readonly IHttpTransport _http;
 
     /// <inheritdoc />
-    public PocketBase(string baseUrl, HttpClient? client = null)
+    public PocketBase(string baseUrl, HttpClient? client = null, PocketBaseOptions? options = null)
     {
         BaseUrl = baseUrl.TrimEnd('/');
-        _http = new HttpTransport(BaseUrl, client);
+        _http = new HttpTransport(BaseUrl, client, options);
 
         Admins = new AdminsClient(_http);
         Backup = new BackupClient(_http);

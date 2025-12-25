@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using FluentResults;
 using PocketBase.Blazor.Enums;
 using PocketBase.Blazor.Http;
 using PocketBase.Blazor.Requests;
@@ -50,10 +51,9 @@ namespace PocketBase.Blazor.Clients.Batch
         }
 
         /// <inheritdoc />
-        public  Task<IReadOnlyList<BatchResponse>> SendAsync(
-            CancellationToken cancellationToken = default)
+        public Task<Result<List<BatchResponse>>> SendAsync(CancellationToken cancellationToken = default)
         {
-            return _transport.SendAsync<IReadOnlyList<BatchResponse>>(
+            return _transport.SendAsync<List<BatchResponse>>(
                 HttpMethod.Post,
                 "/api/batch",
                 _requests,

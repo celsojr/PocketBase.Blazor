@@ -5,9 +5,9 @@ namespace PocketBase.Blazor.Extensions
 {
     public static class QueryOptionsExtensions
     {
-        public static Dictionary<string, string> ToQueryDictionary(this QueryOptionsRequest? options)
+        public static Dictionary<string, object?> ToQueryDictionary(this QueryOptionsRequest? options)
         {
-            var dict = new Dictionary<string, string>();
+            var dict = new Dictionary<string, object?>();
 
             if (options == null)
                 return dict;
@@ -22,10 +22,10 @@ namespace PocketBase.Blazor.Extensions
                 dict["expand"] = options.Expand;
 
             if (options.Page.HasValue)
-                dict["page"] = options.Page.Value.ToString();
+                dict["page"] = options.Page.Value;
 
             if (options.PerPage.HasValue)
-                dict["perPage"] = options.PerPage.Value.ToString();
+                dict["perPage"] = options.PerPage.Value;
 
             return dict;
         }

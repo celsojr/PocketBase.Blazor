@@ -11,11 +11,11 @@ namespace PocketBase.Blazor.Extensions
         /// <summary>
         /// Converts a <see cref="CommonOptions"/> instance into a dictionary suitable for query parameters.
         /// </summary>
-        public static IDictionary<string, string> ToDictionary(this CommonOptions options)
+        public static IDictionary<string, object?> ToDictionary(this CommonOptions options)
         {
             var dict = options?.Query != null
-                ? new Dictionary<string, string>(options.Query)
-                : new Dictionary<string, string>();
+                ? new Dictionary<string, object?>(options.Query)
+                : [];
 
             if (options != null && !string.IsNullOrWhiteSpace(options.Fields))
             {

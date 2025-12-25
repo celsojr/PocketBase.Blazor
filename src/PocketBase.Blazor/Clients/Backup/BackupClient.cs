@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using FluentResults;
 using PocketBase.Blazor.Http;
 using PocketBase.Blazor.Responses;
 
@@ -20,16 +21,16 @@ namespace PocketBase.Blazor.Clients.Backup
         }
 
         /// <inheritdoc />
-        public Task<IReadOnlyList<BackupInfoResponse>> GetFullListAsync(CancellationToken cancellationToken = default)
+        public Task<Result<List<BackupInfoResponse>>> GetFullListAsync(CancellationToken cancellationToken = default)
         {
-            return _transport.SendAsync<IReadOnlyList<BackupInfoResponse>>(
+            return _transport.SendAsync<List<BackupInfoResponse>>(
                 HttpMethod.Get,
                 "/api/backups",
                 cancellationToken: cancellationToken);
         }
 
         /// <inheritdoc />
-        public async Task<bool> CreateAsync(string? basename = null, CancellationToken cancellationToken = default)
+        public async Task<Result<bool>> CreateAsync(string? basename = null, CancellationToken cancellationToken = default)
         {
             object? body = basename != null
                 ? new { name = basename }
@@ -41,11 +42,11 @@ namespace PocketBase.Blazor.Clients.Backup
                 body,
                 cancellationToken: cancellationToken);
 
-            return true;
+            return Result.Ok(true);
         }
 
         /// <inheritdoc />
-        public async Task<bool> UploadAsync(MultipartFile file, CancellationToken cancellationToken = default)
+        public async Task<Result<bool>> UploadAsync(MultipartFile file, CancellationToken cancellationToken = default)
         {
             if (file == null)
             {
@@ -58,11 +59,11 @@ namespace PocketBase.Blazor.Clients.Backup
                 file,
                 cancellationToken: cancellationToken);
 
-            return true;
+            return Result.Ok(true);
         }
 
         /// <inheritdoc />
-        public async Task<bool> DeleteAsync(string key, CancellationToken cancellationToken = default)
+        public async Task<Result<bool>> DeleteAsync(string key, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(key))
             {
@@ -74,11 +75,11 @@ namespace PocketBase.Blazor.Clients.Backup
                 $"/api/backups/{Uri.EscapeDataString(key)}",
                 cancellationToken: cancellationToken);
 
-            return true;
+            return Result.Ok(true);
         }
 
         /// <inheritdoc />
-        public async Task<bool> RestoreAsync(string key, CancellationToken cancellationToken = default)
+        public async Task<Result<bool>> RestoreAsync(string key, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(key))
             {
@@ -90,7 +91,7 @@ namespace PocketBase.Blazor.Clients.Backup
                 $"/api/backups/{Uri.EscapeDataString(key)}/restore",
                 cancellationToken: cancellationToken);
 
-            return true;
+            return Result.Ok(true);
         }
 
         /// <inheritdoc />

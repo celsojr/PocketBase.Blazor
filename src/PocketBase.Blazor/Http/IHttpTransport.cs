@@ -2,6 +2,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Threading;
+using FluentResults;
 
 namespace PocketBase.Blazor.Http
 {
@@ -20,7 +21,7 @@ namespace PocketBase.Blazor.Http
         /// <param name="query">The query parameters.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>A task that represents the asynchronous operation.</returns>
-        Task<T> SendAsync<T>(HttpMethod method, string path, object? body = null, IDictionary<string, string>? query = null, CancellationToken cancellationToken = default);
+        Task<Result<T>> SendAsync<T>(HttpMethod method, string path, object? body = null, IDictionary<string, object?>? query = null, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Sends an HTTP request.
@@ -31,7 +32,7 @@ namespace PocketBase.Blazor.Http
         /// <param name="query">The query parameters.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>A task that represents the asynchronous operation.</returns>
-        Task SendAsync(HttpMethod method, string path, object? body = null, IDictionary<string, string>? query = null, CancellationToken cancellationToken = default);
+        Task<Result<object>> SendAsync(HttpMethod method, string path, object? body = null, IDictionary<string, object?>? query = null, CancellationToken cancellationToken = default);
     }
 }
 

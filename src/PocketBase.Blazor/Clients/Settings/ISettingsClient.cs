@@ -1,6 +1,7 @@
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using FluentResults;
 using PocketBase.Blazor.Exceptions;
 using PocketBase.Blazor.Options;
 using PocketBase.Blazor.Responses;
@@ -19,7 +20,7 @@ namespace PocketBase.Blazor.Clients.Settings
         /// <exception cref="ClientResponseError">
         /// Thrown when the client receives an invalid response.
         /// </exception>
-        Task<JsonElement> GetAllAsync(CancellationToken cancellationToken = default);
+        Task<Result<JsonElement>> GetAllAsync(CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Bulk updates app settings.
@@ -29,7 +30,7 @@ namespace PocketBase.Blazor.Clients.Settings
         /// <exception cref="ClientResponseError">
         /// Thrown when the client receives an invalid response.
         /// </exception>
-        Task UpdateAsync(object settings, CancellationToken cancellationToken = default);
+        Task<Result<object>> UpdateAsync(object settings, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Performs an S3 filesystem connection test.
@@ -51,7 +52,7 @@ namespace PocketBase.Blazor.Clients.Settings
         /// <exception cref="ClientResponseError">
         /// Thrown when the client receives an invalid response.
         /// </exception>
-        Task<bool> TestS3(CommonOptions? options, string fileSystem = "storage", CancellationToken cancellationToken = default);
+        Task<Result<bool>> TestS3(CommonOptions? options, string fileSystem = "storage", CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Sends a test email.
@@ -79,7 +80,7 @@ namespace PocketBase.Blazor.Clients.Settings
         /// <exception cref="ClientResponseError">
         /// Thrown when the client receives an invalid response.
         /// </exception>
-        Task<bool> TestEmailAsync(string collectionIdOrName, string toEmail, string emailTemplate, CommonOptions? options, CancellationToken cancellationToken = default);
+        Task<Result<bool>> TestEmailAsync(string collectionIdOrName, string toEmail, string emailTemplate, CommonOptions? options, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Generates a new Apple OAuth2 client secret.
@@ -108,7 +109,7 @@ namespace PocketBase.Blazor.Clients.Settings
         /// <exception cref="ClientResponseError">
         /// Thrown when the client receives an invalid response.
         /// </exception>
-        Task<AppleClientSecretResponse> GenerateAppleClientSecretAsync(string clientId, string teamId, string keyId, string privateKey, int duration, CommonOptions? options, CancellationToken cancellationToken = default);
+        Task<Result<AppleClientSecretResponse>> GenerateAppleClientSecretAsync(string clientId, string teamId, string keyId, string privateKey, int duration, CommonOptions? options, CancellationToken cancellationToken = default);
     }
 }
 

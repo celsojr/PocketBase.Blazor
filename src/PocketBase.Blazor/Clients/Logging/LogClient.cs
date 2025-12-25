@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using FluentResults;
 using PocketBase.Blazor.Extensions;
 using PocketBase.Blazor.Http;
 using PocketBase.Blazor.Models;
@@ -23,9 +24,9 @@ namespace PocketBase.Blazor.Clients.Logging
         }
 
         /// <inheritdoc />
-        public Task<ListResult<LogResponse>> GetListAsync(int page = 1, int perPage = 30, ListOptions? options = null, CancellationToken cancellationToken = default)
+        public Task<Result<ListResult<LogResponse>>> GetListAsync(int page = 1, int perPage = 30, ListOptions? options = null, CancellationToken cancellationToken = default)
         {
-            var query = options?.ToDictionary() ?? new Dictionary<string, string>();
+            var query = options?.ToDictionary() ?? new Dictionary<string, object?>();
             query["page"] = page.ToString();
             query["perPage"] = perPage.ToString();
 
@@ -33,7 +34,7 @@ namespace PocketBase.Blazor.Clients.Logging
         }
 
         /// <inheritdoc />
-        public Task<LogResponse> GetOneAsync(string id, CommonOptions? options = null, CancellationToken cancellationToken = default)
+        public Task<Result<LogResponse>> GetOneAsync(string id, CommonOptions? options = null, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(id))
                 throw new ArgumentException("Log id is required.", nameof(id));
@@ -43,7 +44,7 @@ namespace PocketBase.Blazor.Clients.Logging
         }
 
         /// <inheritdoc />
-        public Task<HourlyStatsResponse> GetStatsAsync(LogStatsOptions? options = null, CancellationToken cancellationToken = default)
+        public Task<Result<HourlyStatsResponse>> GetStatsAsync(LogStatsOptions? options = null, CancellationToken cancellationToken = default)
         {
             var query = options?.ToDictionary();
             return _http.SendAsync<HourlyStatsResponse>(HttpMethod.Get, "/api/logs/stats", query: query, cancellationToken: cancellationToken);

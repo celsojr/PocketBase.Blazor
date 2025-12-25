@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using FluentResults;
 using PocketBase.Blazor.Extensions;
 using PocketBase.Blazor.Http;
 using PocketBase.Blazor.Models;
@@ -23,17 +24,17 @@ namespace PocketBase.Blazor.Clients.Record
         }
 
         /// <inheritdoc />
-        public Task<ListResult<RecordResponse>> GetListAsync(string collection, int page = 1, int perPage = 30, CommonOptions? options = null, CancellationToken cancellationToken = default)
+        public Task<Result<ListResult<RecordResponse>>> GetListAsync(string collection, int page = 1, int perPage = 30, CommonOptions? options = null, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(collection)) throw new ArgumentException("Collection is required.", nameof(collection));
-            var query = options?.ToDictionary() ?? new Dictionary<string, string>();
+            var query = options?.ToDictionary() ?? new Dictionary<string, object?>();
             query["page"] = page.ToString();
             query["perPage"] = perPage.ToString();
             return _http.SendAsync<ListResult<RecordResponse>>(HttpMethod.Get, $"/api/collections/{collection}/records", query: query, cancellationToken: cancellationToken);
         }
 
         /// <inheritdoc />
-        public async Task<IReadOnlyList<RecordResponse>> GetFullListAsync(string collection, CommonOptions? options = null, CancellationToken cancellationToken = default)
+        public async Task<Result<List<RecordResponse>>> GetFullListAsync(string collection, CommonOptions? options = null, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(collection)) throw new ArgumentException("Collection is required.", nameof(collection));
             var all = new List<RecordResponse>();
@@ -42,26 +43,26 @@ namespace PocketBase.Blazor.Clients.Record
             while (true)
             {
                 var result = await GetListAsync(collection, page, perPage, options, cancellationToken).ConfigureAwait(false);
-                if (result.Items == null || result.Items.Count == 0) break;
-                all.AddRange(result.Items);
-                if (result.Items.Count < perPage) break;
+                if (result.Value.Items == null || result.Value.Items.Count == 0) break;
+                all.AddRange(result.Value.Items);
+                if (result.Value.Items.Count < perPage) break;
                 page++;
             }
             return all;
         }
 
         /// <inheritdoc />
-        public Task<RecordResponse> GetFirstListItemAsync(string collection, string filter, CommonOptions? options = null, CancellationToken cancellationToken = default)
+        public Task<Result<RecordResponse>> GetFirstListItemAsync(string collection, string filter, CommonOptions? options = null, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(collection)) throw new ArgumentException("Collection is required.", nameof(collection));
             if (string.IsNullOrWhiteSpace(filter)) throw new ArgumentException("Filter is required.", nameof(filter));
-            var query = options?.ToDictionary() ?? new Dictionary<string, string>();
+            var query = options?.ToDictionary() ?? new Dictionary<string, object?>();
             query["filter"] = filter;
             return _http.SendAsync<RecordResponse>(HttpMethod.Get, $"/api/collections/{collection}/records", query: query, cancellationToken: cancellationToken);
         }
 
         /// <inheritdoc />
-        public Task<RecordResponse> GetOneAsync(string collection, string recordId, CommonOptions? options = null, CancellationToken cancellationToken = default)
+        public Task<Result<RecordResponse>> GetOneAsync(string collection, string recordId, CommonOptions? options = null, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(collection)) throw new ArgumentException("Collection is required.", nameof(collection));
             if (string.IsNullOrWhiteSpace(recordId)) throw new ArgumentException("Record ID is required.", nameof(recordId));
@@ -70,7 +71,7 @@ namespace PocketBase.Blazor.Clients.Record
         }
 
         /// <inheritdoc />
-        public Task<RecordResponse> CreateAsync(string collection, object bodyParams, CommonOptions? options = null, CancellationToken cancellationToken = default)
+        public Task<Result<RecordResponse>> CreateAsync(string collection, object bodyParams, CommonOptions? options = null, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(collection)) throw new ArgumentException("Collection is required.", nameof(collection));
             ArgumentNullException.ThrowIfNull(bodyParams);
@@ -79,7 +80,7 @@ namespace PocketBase.Blazor.Clients.Record
         }
 
         /// <inheritdoc />
-        public Task<RecordResponse> UpdateAsync(string collection, string recordId, object bodyParams, CommonOptions? options = null, CancellationToken cancellationToken = default)
+        public Task<Result<RecordResponse>> UpdateAsync(string collection, string recordId, object bodyParams, CommonOptions? options = null, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(collection)) throw new ArgumentException("Collection is required.", nameof(collection));
             if (string.IsNullOrWhiteSpace(recordId)) throw new ArgumentException("Record ID is required.", nameof(recordId));
@@ -89,7 +90,7 @@ namespace PocketBase.Blazor.Clients.Record
         }
 
         /// <inheritdoc />
-        public async Task<bool> DeleteAsync(string collection, string recordId, CommonOptions? options = null, CancellationToken cancellationToken = default)
+        public async Task<Result<bool>> DeleteAsync(string collection, string recordId, CommonOptions? options = null, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(collection)) throw new ArgumentException("Collection is required.", nameof(collection));
             if (string.IsNullOrWhiteSpace(recordId)) throw new ArgumentException("Record ID is required.", nameof(recordId));

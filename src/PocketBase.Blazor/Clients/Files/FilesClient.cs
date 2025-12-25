@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using FluentResults;
 using PocketBase.Blazor.Http;
 using PocketBase.Blazor.Options;
 using PocketBase.Blazor.Responses;
@@ -21,7 +22,7 @@ namespace PocketBase.Blazor.Clients.Files
         }
 
         /// <inheritdoc />
-        public async Task<string> GetUrl(IDictionary<string, object?> record, string fileName, IDictionary<string, string>? query, CancellationToken cancellationToken = default)
+        public async Task<Result<string>> GetUrl(IDictionary<string, object?> record, string fileName, IDictionary<string, object?>? query, CancellationToken cancellationToken = default)
         {
             object? collectionId = null, collectionName = null;
 
@@ -44,7 +45,7 @@ namespace PocketBase.Blazor.Clients.Files
             // normalize the download query param (same as TS)
             if (query != null &&
                 query.TryGetValue("download", out var download) &&
-                download == "false")
+                download?.Equals("false") == true)
             {
                 query.Remove("download");
             }
@@ -60,7 +61,7 @@ namespace PocketBase.Blazor.Clients.Files
         }
 
         /// <inheritdoc />
-        public async Task<string> GetTokenAsync(CommonOptions? options = null, CancellationToken cancellationToken = default)
+        public async Task<Result<string>> GetTokenAsync(CommonOptions? options = null, CancellationToken cancellationToken = default)
         {
             options ??= new CommonOptions();
 
@@ -72,7 +73,7 @@ namespace PocketBase.Blazor.Clients.Files
                 cancellationToken: cancellationToken
             );
 
-            return data?.Token ?? string.Empty;
+            return data?.Value.Token ?? string.Empty;
         }
     }
 }

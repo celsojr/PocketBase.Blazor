@@ -1,6 +1,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using FluentResults;
 using PocketBase.Blazor.Clients.Admin;
 using PocketBase.Blazor.Responses;
 
@@ -19,16 +20,24 @@ namespace PocketBase.Blazor.Store
             _admins = adminsClient ?? throw new ArgumentNullException(nameof(adminsClient));
         }
 
-        public async Task<AuthResponse> AuthWithPasswordAsync(string identity, string password, CancellationToken cancellationToken = default)
+        public async Task<Result<AuthResponse>> AuthWithPasswordAsync(string identity, string password, CancellationToken cancellationToken = default)
         {
-            _currentSession = await _admins.AuthWithPasswordAsync(identity, password, cancellationToken);
-            return _currentSession;
+            var result = await _admins.AuthWithPasswordAsync(identity, password, cancellationToken);
+            if (result.IsSuccess)
+            {
+                _currentSession = result.Value;
+            }
+            return result;
         }
 
-        public async Task<AuthResponse> RefreshAsync(CancellationToken cancellationToken = default)
+        public async Task<Result<AuthResponse>> RefreshAsync(CancellationToken cancellationToken = default)
         {
-            _currentSession = await _admins.RefreshAsync(cancellationToken);
-            return _currentSession;
+            var result = await _admins.RefreshAsync(cancellationToken);
+            if (result.IsSuccess)
+            {
+                _currentSession = result.Value;
+            }
+            return result;
         }
 
         public async Task LogoutAsync(CancellationToken cancellationToken = default)
