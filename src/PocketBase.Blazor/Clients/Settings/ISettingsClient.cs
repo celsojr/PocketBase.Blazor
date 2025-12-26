@@ -30,7 +30,7 @@ namespace PocketBase.Blazor.Clients.Settings
         /// <exception cref="ClientResponseError">
         /// Thrown when the client receives an invalid response.
         /// </exception>
-        Task<Result<object>> UpdateAsync(object settings, CancellationToken cancellationToken = default);
+        Task<Result> UpdateAsync(object settings, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Performs an S3 filesystem connection test.

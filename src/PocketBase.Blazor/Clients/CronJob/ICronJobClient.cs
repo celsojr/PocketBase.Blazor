@@ -32,7 +32,7 @@ namespace PocketBase.Blazor.Clients.CronJob
         /// <exception cref="ClientResponseError">
         /// Thrown when the client receives an invalid response.
         /// </exception>
-        Task<Result<object>> Run(string id, CommonOptions? options = null, CancellationToken cancellationToken = default);
+        Task<Result> Run(string id, CommonOptions? options = null, CancellationToken cancellationToken = default);
     }
 }
 

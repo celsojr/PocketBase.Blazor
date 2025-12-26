@@ -29,7 +29,7 @@ namespace PocketBase.Blazor.Clients.Settings
         }
 
         /// <inheritdoc />
-        public Task<Result<object>> UpdateAsync(object settings, CancellationToken cancellationToken = default)
+        public Task<Result> UpdateAsync(object settings, CancellationToken cancellationToken = default)
         {
             ArgumentNullException.ThrowIfNull(settings);
             return _http.SendAsync(HttpMethod.Patch, "api/settings", body: settings, cancellationToken: cancellationToken);

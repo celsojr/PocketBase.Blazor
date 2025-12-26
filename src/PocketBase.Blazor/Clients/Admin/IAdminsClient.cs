@@ -30,7 +30,7 @@ namespace PocketBase.Blazor.Clients.Admin
         /// Logs out the currently authenticated admin.
         /// </summary>
         /// <param name="cancellationToken">Optional cancellation token.</param>
-        Task LogoutAsync(CancellationToken cancellationToken = default);
+        Task<Result> LogoutAsync(CancellationToken cancellationToken = default);
     }
 }
 

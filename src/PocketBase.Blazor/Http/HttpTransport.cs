@@ -41,11 +41,11 @@ namespace PocketBase.Blazor.Http
         }
 
         /// <inheritdoc />
-        public async Task<Result<object>> SendAsync(HttpMethod method, string path, object? body = null, IDictionary<string, object?>? query = null, CancellationToken cancellationToken = default)
+        public async Task<Result> SendAsync(HttpMethod method, string path, object? body = null, IDictionary<string, object?>? query = null, CancellationToken cancellationToken = default)
         {
             var request = BuildRequest(method, path, body, query);
             var response = await _client.SendAsync(request, cancellationToken);
-            return await HandleResponse<object>(response, cancellationToken);
+            return await HandleResponse(response, cancellationToken);
         }
 
         HttpRequestMessage BuildRequest(HttpMethod method, string path, object? body, IDictionary<string, object?>? query)
@@ -61,6 +61,33 @@ namespace PocketBase.Blazor.Http
                 req.Content = new StringContent(json, Encoding.UTF8, "application/json");
             }
             return req;
+        }
+
+        static async Task<Result> HandleResponse(HttpResponseMessage response, CancellationToken cancellationToken)
+        {
+            string content = string.Empty;
+            try
+            {
+                content = await response.Content.ReadAsStringAsync(cancellationToken);
+                if (!response.IsSuccessStatusCode)
+                {
+                    var ex = new PocketBaseException(response.StatusCode, content);
+                    return Result.Fail(ex.Message).WithError(ex.Message);
+                }
+                return Result.Ok();
+            }
+            catch (HttpRequestException ex)
+            {
+                return Result.Fail($"Request failed: {ex.Message}").WithError(content);
+            }
+            catch (TaskCanceledException) when (!cancellationToken.IsCancellationRequested)
+            {
+                return Result.Fail("Request timed out").WithError(content);
+            }
+            catch (Exception ex)
+            {
+                return Result.Fail($"Unexpected error: {ex.Message}").WithError(content);
+            }
         }
 
         async Task<Result<T>> HandleResponse<T>(HttpResponseMessage response, CancellationToken cancellationToken)

@@ -40,10 +40,11 @@ namespace PocketBase.Blazor.Store
             return result;
         }
 
-        public async Task LogoutAsync(CancellationToken cancellationToken = default)
+        public async Task<Result> LogoutAsync(CancellationToken cancellationToken = default)
         {
             await _admins.LogoutAsync(cancellationToken);
             _currentSession = null;
+            return Result.Ok();
         }
     }
 }

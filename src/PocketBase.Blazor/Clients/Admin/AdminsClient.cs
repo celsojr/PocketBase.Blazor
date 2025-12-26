@@ -55,7 +55,7 @@ namespace PocketBase.Blazor.Clients.Admin
         }
 
         /// <inheritdoc />
-        public async Task LogoutAsync(CancellationToken cancellationToken = default)
+        public async Task<Result> LogoutAsync(CancellationToken cancellationToken = default)
         {
             await _http.SendAsync(
                 HttpMethod.Post,
@@ -63,6 +63,7 @@ namespace PocketBase.Blazor.Clients.Admin
                 body: null,
                 cancellationToken: cancellationToken
             );
+            return Result.Ok();
         }
     }
 }

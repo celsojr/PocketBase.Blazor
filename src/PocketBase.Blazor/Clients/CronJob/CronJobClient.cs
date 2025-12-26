@@ -30,7 +30,7 @@ namespace PocketBase.Blazor.Clients.CronJob
         }
 
         /// <inheritdoc />
-        public Task<Result<object>> Run(string id, CommonOptions? options = null, CancellationToken cancellationToken = default)
+        public Task<Result> Run(string id, CommonOptions? options = null, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(id))
                 throw new ArgumentException("Cron job id is required.", nameof(id));

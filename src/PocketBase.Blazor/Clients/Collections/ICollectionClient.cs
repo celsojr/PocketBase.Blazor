@@ -44,7 +44,7 @@ namespace PocketBase.Blazor.Clients.Collections
         /// </summary>
         /// <param name="email">The user's email address.</param>
         /// <param name="cancellationToken">Optional cancellation token.</param>
-        Task RequestPasswordResetAsync(string email, CancellationToken cancellationToken = default);
+        Task<Result> RequestPasswordResetAsync(string email, CancellationToken cancellationToken = default);
 
         #endregion
 
@@ -100,7 +100,7 @@ namespace PocketBase.Blazor.Clients.Collections
         /// </summary>
         /// <param name="id">The ID of the record to delete.</param>
         /// <param name="cancellationToken">Optional cancellation token.</param>
-        Task DeleteAsync(string id, CancellationToken cancellationToken = default);
+        Task<Result> DeleteAsync(string id, CancellationToken cancellationToken = default);
 
         #endregion
 

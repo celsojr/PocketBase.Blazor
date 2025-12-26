@@ -45,7 +45,7 @@ namespace PocketBase.Blazor.Clients.Collections
         }
 
         /// <inheritdoc />
-        public Task LogoutAsync(CancellationToken cancellationToken = default)
+        public Task<Result> LogoutAsync(CancellationToken cancellationToken = default)
         {
             return _store.LogoutAsync(cancellationToken);
         }
@@ -121,13 +121,14 @@ namespace PocketBase.Blazor.Clients.Collections
         }
 
         /// <inheritdoc />
-        public async Task DeleteAsync(string id, CancellationToken cancellationToken = default)
+        public async Task<Result> DeleteAsync(string id, CancellationToken cancellationToken = default)
         {
             await _http.SendAsync(
                 HttpMethod.Delete,
                 $"api/collections/{Name}/records/{id}",
                 cancellationToken: cancellationToken
             );
+            return Result.Ok();
         }
 
         /// <inheritdoc />
@@ -145,7 +146,7 @@ namespace PocketBase.Blazor.Clients.Collections
         }
 
         /// <inheritdoc />
-        public async Task RequestPasswordResetAsync(string email, CancellationToken cancellationToken = default)
+        public async Task<Result> RequestPasswordResetAsync(string email, CancellationToken cancellationToken = default)
         {
             var body = new Dictionary<string, object> { { "email", email } };
             await _http.SendAsync(
@@ -154,6 +155,7 @@ namespace PocketBase.Blazor.Clients.Collections
                 body,
                 cancellationToken: cancellationToken
             );
+            return Result.Ok();
         }
 
         /// <inheritdoc />

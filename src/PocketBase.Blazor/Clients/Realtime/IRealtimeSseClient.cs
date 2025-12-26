@@ -1,6 +1,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using FluentResults;
 using PocketBase.Blazor.Events;
 
 namespace PocketBase.Blazor.Clients.Realtime
@@ -37,7 +38,7 @@ namespace PocketBase.Blazor.Clients.Realtime
         /// Starts listening for SSE events.
         /// </summary>
         /// <param name="cancellationToken">A cancellation token to cancel the operation.</param>
-        Task StartListeningAsync(CancellationToken cancellationToken = default);
+        Task<Result> StartListeningAsync(CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Stops listening for SSE events.

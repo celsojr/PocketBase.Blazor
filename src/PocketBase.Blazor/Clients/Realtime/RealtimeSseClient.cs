@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using FluentResults;
 using PocketBase.Blazor.Events;
 
 namespace PocketBase.Blazor.Clients.Realtime
@@ -53,9 +54,9 @@ namespace PocketBase.Blazor.Clients.Realtime
         }
 
         /// <inheritdoc />
-        public async Task StartListeningAsync(CancellationToken cancellationToken = default)
+        public async Task<Result> StartListeningAsync(CancellationToken cancellationToken = default)
         {
-            if (IsConnected) return;
+            if (IsConnected) return Result.Fail("Already connected");
 
             _cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             _listeningTask = Task.Run(async () =>
@@ -98,6 +99,8 @@ namespace PocketBase.Blazor.Clients.Realtime
             }, _cts.Token);
 
             await Task.CompletedTask;
+
+            return Result.Ok();
         }
 
         /// <inheritdoc />
