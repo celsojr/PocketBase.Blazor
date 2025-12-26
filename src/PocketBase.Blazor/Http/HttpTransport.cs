@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using FluentResults;
 using PocketBase.Blazor.Exceptions;
 using PocketBase.Blazor.Options;
+using PocketBase.Blazor.Store;
 
 namespace PocketBase.Blazor.Http
 {
@@ -17,6 +18,7 @@ namespace PocketBase.Blazor.Http
     {
         readonly HttpClient _client;
         readonly PocketBaseOptions _pocketBaseOptions;
+        private PocketBaseStore? _store;
 
         /// <inheritdoc />
         public HttpTransport(string baseUrl, HttpClient? httpClient = null, PocketBaseOptions? options = null)
@@ -26,15 +28,28 @@ namespace PocketBase.Blazor.Http
             _client.DefaultRequestHeaders.Add("Accept", "application/json");
             _client.DefaultRequestHeaders.Add("User-Agent", "PocketBase.Blazor");
 
-            if (options?.ApiKey != null)
-                _client.DefaultRequestHeaders.Add("Authorization", options.ApiKey);
-
             _pocketBaseOptions = options ?? new PocketBaseOptions();
+        }
+
+        public void SetStore(PocketBaseStore store)
+        {
+            _store = store;
+        }
+
+        private void UpdateAuthorizationHeader()
+        {
+            if (!string.IsNullOrEmpty(_store?.Token))
+            {
+                // Remove any previous token, but leave other headers intact
+                _client.DefaultRequestHeaders.Remove("Authorization");
+                _client.DefaultRequestHeaders.Add("Authorization", _store.Token);
+            }
         }
 
         /// <inheritdoc />
         public async Task<Result<T>> SendAsync<T>(HttpMethod method, string path, object? body = null, IDictionary<string, object?>? query = null, CancellationToken cancellationToken = default)
         {
+            UpdateAuthorizationHeader();
             var request = BuildRequest(method, path, body, query);
             var response = await _client.SendAsync(request, cancellationToken);
             return await HandleResponse<T>(response, cancellationToken);
@@ -43,6 +58,7 @@ namespace PocketBase.Blazor.Http
         /// <inheritdoc />
         public async Task<Result> SendAsync(HttpMethod method, string path, object? body = null, IDictionary<string, object?>? query = null, CancellationToken cancellationToken = default)
         {
+            UpdateAuthorizationHeader();
             var request = BuildRequest(method, path, body, query);
             var response = await _client.SendAsync(request, cancellationToken);
             return await HandleResponse(response, cancellationToken);
@@ -101,7 +117,11 @@ namespace PocketBase.Blazor.Http
                 if (!response.IsSuccessStatusCode)
                 {
                     var ex = new PocketBaseException(response.StatusCode, content);
-                    return Result.Fail<T>(ex.Message).WithError(ex.Message);
+                    return Result.Fail<T>(
+                        new ExceptionalError(ex)
+                            .WithMetadata("status", (int)response.StatusCode)
+                            .WithMetadata("raw", content)
+                    );
                 }
 
                 if (typeof(T) == typeof(object))

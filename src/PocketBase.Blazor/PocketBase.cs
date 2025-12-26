@@ -32,7 +32,7 @@ public class PocketBase : IPocketBase
     public IRealtimeClient Realtime { get; }
     public IRecordClient Record { get; }
     public ISettingsClient Settings { get; }
-    public PocketBaseStore Store { get; }
+    public PocketBaseStore AuthStore { get; }
 
     readonly IHttpTransport _http;
 
@@ -54,12 +54,18 @@ public class PocketBase : IPocketBase
         Settings = new SettingsClient(_http);
 
         var authStore = new AuthStore(Admins);
-        Store = new PocketBaseStore(authStore, Realtime);
+        AuthStore = new PocketBaseStore(authStore, Realtime);
+
+        if (_http is HttpTransport transport)
+        {
+            transport.SetStore(AuthStore);
+            Admins.SetStore(AuthStore);
+        }
     }
 
     /// <inheritdoc />
     public ICollectionClient Collection(string name)
-        => new CollectionClient(name, _http, Store);
+        => new CollectionClient(name, _http, AuthStore);
 
     /// <inheritdoc />
     public void EnableAutoCancellation(bool enabled)

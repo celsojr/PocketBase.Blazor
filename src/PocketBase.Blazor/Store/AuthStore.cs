@@ -9,11 +9,13 @@ namespace PocketBase.Blazor.Store
 {
     public class AuthStore
     {
+        public string? Token { get; private set; }
+        public UserResponse? User { get; private set; }
+
         private readonly IAdminsClient _admins;
         private AuthResponse? _currentSession;
 
         public AuthResponse? CurrentSession => _currentSession;
-        public string? Token => _currentSession?.Token;
 
         public AuthStore(IAdminsClient adminsClient)
         {
@@ -45,6 +47,18 @@ namespace PocketBase.Blazor.Store
             await _admins.LogoutAsync(cancellationToken);
             _currentSession = null;
             return Result.Ok();
+        }
+
+        public void Save(AuthResponse auth)
+        {
+            Token = auth.Token;
+            User = auth.Record;
+        }
+
+        public void Clear()
+        {
+            Token = null;
+            User = null;
         }
     }
 }

@@ -14,11 +14,12 @@ namespace PocketBase.Blazor.Store
 
         private AuthResponse? _currentSession;
 
+        public string? Token => _currentSession?.Token;
         public AuthResponse? CurrentSession => _currentSession;
 
         public PocketBaseStore(AuthStore auth, IRealtimeClient realtime)
         {
-             Auth = auth ?? throw new ArgumentNullException(nameof(auth));
+            Auth = auth ?? throw new ArgumentNullException(nameof(auth));
             Realtime = realtime ?? throw new ArgumentNullException(nameof(realtime));
         }
 
@@ -49,6 +50,16 @@ namespace PocketBase.Blazor.Store
             return Result.Ok();
         }
 
-        public string? Token => _currentSession?.Token;
+        internal void Save(AuthResponse auth)
+        {
+            _currentSession = auth;
+            Auth.Save(auth);
+        }
+
+        public void Clear()
+        {
+            _currentSession = null;
+            Auth.Clear();
+        }
     }
 }

@@ -6,12 +6,14 @@ using System.Threading.Tasks;
 using FluentResults;
 using PocketBase.Blazor.Http;
 using PocketBase.Blazor.Responses;
+using PocketBase.Blazor.Store;
 
 namespace PocketBase.Blazor.Clients.Admin
 {
     /// <inheritdoc />
     public class AdminsClient : IAdminsClient
     {
+        private PocketBaseStore? _authStore;
         private readonly IHttpTransport _http;
 
         /// <inheritdoc />
@@ -35,12 +37,23 @@ namespace PocketBase.Blazor.Clients.Admin
                 { "password", password }
             };
 
-            return await _http.SendAsync<AuthResponse>(
+            var result = await _http.SendAsync<AuthResponse>(
                 HttpMethod.Post,
-                "api/admins/auth-with-password",
+                //"api/collections/_superusers/auth-with-password",
+                "api/collections/users/auth-with-password",
                 body,
                 cancellationToken: cancellationToken
             );
+
+            if (result.IsSuccess)
+            {
+                _authStore?.Save(result.Value);
+                return Result.Ok(result.Value);
+            }
+            else
+            {
+                return Result.Fail(result.Errors);
+            }
         }
 
         /// <inheritdoc />
@@ -64,6 +77,11 @@ namespace PocketBase.Blazor.Clients.Admin
                 cancellationToken: cancellationToken
             );
             return Result.Ok();
+        }
+
+        public void SetStore(PocketBaseStore store)
+        {
+            _authStore = store ?? throw new ArgumentNullException(nameof(store));
         }
     }
 }

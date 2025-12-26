@@ -1,5 +1,7 @@
 @page "/posts"
+@using FluentResults
 @using PocketBase.Blazor
+@using PocketBase.Blazor.Exceptions
 @using PocketBase.Blazor.Models
 @using System.Text.Json
 @using System.Globalization
@@ -8,6 +10,10 @@
 
 <h3 class="page-title">Posts</h3>
 
+@if (error != null)
+{
+    <div class="alert alert-danger">@error</div>
+}
 @if (posts == null)
 {
     <p><em>Loading...</em></p>
@@ -38,20 +44,54 @@ else
 }
 
 @code {
+    private string? error;
     private List<Post>? posts;
 
     protected override async Task OnInitializedAsync()
     {
+        // is_published in PB is snake_case, so we need to set the naming policy
         var options = new PocketBaseOptions();
         options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower;
 
         // Registering the client with the PocketBase URL
-        var pb = new PocketBase("https:dummy-pocketbase-url.com", options: options);
+        var pb = new PocketBase("http://localhost:8090", options: options);
+
+        // Or pb.Collection("users").AuthWithPasswordAsync(...) for user auth
+        var authResult = await pb.Admins
+            .AuthWithPasswordAsync("joe.doe@email.com", "1qgk4YjLLI_MBs8");
+
+        Console.WriteLine($"Auth result: {authResult.IsSuccess}");
+        Console.WriteLine($"Auth result Token: {authResult.Value.Token}");
+        Console.WriteLine($"Auth result Record ID: {authResult.Value.Record?.Id}");
 
         // Fetch all posts like JS SDK style
         var result = await pb.Collection("posts").GetListAsync<Post>();
 
-        posts = result.Value.Items;
+        if (result.IsSuccess)
+        {
+            posts = result.Value.Items;
+        }
+        else
+        {
+            // Handle errors
+            foreach (var item in result.Errors.OfType<ExceptionalError>())
+            {
+                if (item.Exception is PocketBaseException pbEx)
+                {
+                    var errorContent = JsonSerializer.Deserialize<PbError>(pbEx.Message,
+                        new JsonSerializerOptions
+                        {
+                            PropertyNameCaseInsensitive = true
+                        });
+                    error = $"PokectBase error {(int)pbEx.Status}: {errorContent?.Message}";
+                }
+            }
+
+            posts = new List<Post>(); // Keep UI stable
+        }
+
+        // Logout
+        pb.AuthStore.Clear();
     }
 
     public class Post
@@ -61,6 +101,18 @@ else
         public string? Slug { get; set; }
         public bool IsPublished { get; set; }
         public DateTime? Created { get; set; }
+    }
+
+    public class PbError
+    {
+        [JsonPropertyName("message")]
+        public string Message { get; set; } = null!;
+
+        [JsonPropertyName("status")]
+        public int Status { get; set; }
+
+        [JsonPropertyName("data")]
+        public JsonElement? Data { get; set; }
     }
  }
 

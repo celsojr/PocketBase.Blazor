@@ -2,6 +2,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using FluentResults;
 using PocketBase.Blazor.Responses;
+using PocketBase.Blazor.Store;
 
 namespace PocketBase.Blazor.Clients.Admin
 {
@@ -31,6 +32,12 @@ namespace PocketBase.Blazor.Clients.Admin
         /// </summary>
         /// <param name="cancellationToken">Optional cancellation token.</param>
         Task<Result> LogoutAsync(CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Sets the PocketBase store for managing authentication state.
+        /// </summary>
+        /// <param name="store">The PocketBase store instance.</param>
+        void SetStore(PocketBaseStore store);
     }
 }
 
