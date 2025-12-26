@@ -49,7 +49,7 @@ namespace PocketBase.Blazor.Clients.Realtime
 
             var body = new { clientId = topic, subscriptions = new[] { topic } };
 
-            await _http.SendAsync(HttpMethod.Post, "/api/realtime", body, options?.ToDictionary(), cancellationToken);
+            await _http.SendAsync(HttpMethod.Post, "api/realtime", body, options?.ToDictionary(), cancellationToken);
             _connected = true;
             return true;
         }
@@ -67,7 +67,7 @@ namespace PocketBase.Blazor.Clients.Realtime
             }
 
             var body = new { clientId = topic ?? string.Empty, subscriptions = Array.Empty<string>() };
-            await _http.SendAsync(HttpMethod.Post, "/api/realtime", body, null, cancellationToken);
+            await _http.SendAsync(HttpMethod.Post, "api/realtime", body, null, cancellationToken);
             _connected = false;
             OnDisconnect(Array.Empty<string>());
             return true;
@@ -85,7 +85,7 @@ namespace PocketBase.Blazor.Clients.Realtime
             }
 
             var body = new { clientId = prefix, subscriptions = Array.Empty<string>() };
-            await _http.SendAsync(HttpMethod.Post, "/api/realtime", body, null, cancellationToken);
+            await _http.SendAsync(HttpMethod.Post, "api/realtime", body, null, cancellationToken);
             return true;
         }
 
@@ -99,7 +99,7 @@ namespace PocketBase.Blazor.Clients.Realtime
             }
 
             var body = new { clientId = topic, subscriptions = _subscriptions.Keys };
-            await _http.SendAsync(HttpMethod.Post, "/api/realtime", body, null, cancellationToken);
+            await _http.SendAsync(HttpMethod.Post, "api/realtime", body, null, cancellationToken);
             return true;
         }
     }

@@ -25,7 +25,7 @@ namespace PocketBase.Blazor.Clients.Backup
         {
             return _transport.SendAsync<List<BackupInfoResponse>>(
                 HttpMethod.Get,
-                "/api/backups",
+                "api/backups",
                 cancellationToken: cancellationToken);
         }
 
@@ -38,7 +38,7 @@ namespace PocketBase.Blazor.Clients.Backup
 
             await _transport.SendAsync(
                 HttpMethod.Post,
-                "/api/backups",
+                "api/backups",
                 body,
                 cancellationToken: cancellationToken);
 
@@ -55,7 +55,7 @@ namespace PocketBase.Blazor.Clients.Backup
 
             await _transport.SendAsync(
                 HttpMethod.Post,
-                "/api/backups/upload",
+                "api/backups/upload",
                 file,
                 cancellationToken: cancellationToken);
 
@@ -72,7 +72,7 @@ namespace PocketBase.Blazor.Clients.Backup
 
             await _transport.SendAsync(
                 HttpMethod.Delete,
-                $"/api/backups/{Uri.EscapeDataString(key)}",
+                $"api/backups/{Uri.EscapeDataString(key)}",
                 cancellationToken: cancellationToken);
 
             return Result.Ok(true);
@@ -88,7 +88,7 @@ namespace PocketBase.Blazor.Clients.Backup
 
             await _transport.SendAsync(
                 HttpMethod.Post,
-                $"/api/backups/{Uri.EscapeDataString(key)}/restore",
+                $"api/backups/{Uri.EscapeDataString(key)}/restore",
                 cancellationToken: cancellationToken);
 
             return Result.Ok(true);
@@ -107,7 +107,7 @@ namespace PocketBase.Blazor.Clients.Backup
                 throw new ArgumentException("Token is required.", nameof(token));
             }
 
-            return $"/api/backups/{Uri.EscapeDataString(key)}?token={Uri.EscapeDataString(token)}";
+            return $"api/backups/{Uri.EscapeDataString(key)}?token={Uri.EscapeDataString(token)}";
         }
     }
 }

@@ -37,7 +37,7 @@ namespace PocketBase.Blazor.Clients.Admin
 
             return await _http.SendAsync<AuthResponse>(
                 HttpMethod.Post,
-                "/api/admins/auth-with-password",
+                "api/admins/auth-with-password",
                 body,
                 cancellationToken: cancellationToken
             );
@@ -48,7 +48,7 @@ namespace PocketBase.Blazor.Clients.Admin
         {
             return await _http.SendAsync<AuthResponse>(
                 HttpMethod.Post,
-                "/api/admins/auth-refresh",
+                "api/admins/auth-refresh",
                 body: null,
                 cancellationToken: cancellationToken
             );
@@ -59,7 +59,7 @@ namespace PocketBase.Blazor.Clients.Admin
         {
             await _http.SendAsync(
                 HttpMethod.Post,
-                "/api/admins/logout",
+                "api/admins/logout",
                 body: null,
                 cancellationToken: cancellationToken
             );

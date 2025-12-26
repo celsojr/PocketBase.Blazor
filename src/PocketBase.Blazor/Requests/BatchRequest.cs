@@ -28,11 +28,11 @@ namespace PocketBase.Blazor.Requests
             Url = method switch
             {
                 Create or Upsert
-                    => $"/api/collections/{collectionName}/records",
+                    => $"api/collections/{collectionName}/records",
 
                 Update or Delete
                     => id is not null
-                        ? $"/api/collections/{collectionName}/records/{id}"
+                        ? $"api/collections/{collectionName}/records/{id}"
                         : throw new ArgumentNullException(nameof(id)),
 
                 _ => throw new ArgumentException("Invalid batch method", nameof(method)),

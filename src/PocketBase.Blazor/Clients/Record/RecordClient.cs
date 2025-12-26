@@ -30,7 +30,7 @@ namespace PocketBase.Blazor.Clients.Record
             var query = options?.ToDictionary() ?? new Dictionary<string, object?>();
             query["page"] = page.ToString();
             query["perPage"] = perPage.ToString();
-            return _http.SendAsync<ListResult<RecordResponse>>(HttpMethod.Get, $"/api/collections/{collection}/records", query: query, cancellationToken: cancellationToken);
+            return _http.SendAsync<ListResult<RecordResponse>>(HttpMethod.Get, $"api/collections/{collection}/records", query: query, cancellationToken: cancellationToken);
         }
 
         /// <inheritdoc />
@@ -58,7 +58,7 @@ namespace PocketBase.Blazor.Clients.Record
             if (string.IsNullOrWhiteSpace(filter)) throw new ArgumentException("Filter is required.", nameof(filter));
             var query = options?.ToDictionary() ?? new Dictionary<string, object?>();
             query["filter"] = filter;
-            return _http.SendAsync<RecordResponse>(HttpMethod.Get, $"/api/collections/{collection}/records", query: query, cancellationToken: cancellationToken);
+            return _http.SendAsync<RecordResponse>(HttpMethod.Get, $"api/collections/{collection}/records", query: query, cancellationToken: cancellationToken);
         }
 
         /// <inheritdoc />
@@ -67,7 +67,7 @@ namespace PocketBase.Blazor.Clients.Record
             if (string.IsNullOrWhiteSpace(collection)) throw new ArgumentException("Collection is required.", nameof(collection));
             if (string.IsNullOrWhiteSpace(recordId)) throw new ArgumentException("Record ID is required.", nameof(recordId));
             var query = options?.ToDictionary();
-            return _http.SendAsync<RecordResponse>(HttpMethod.Get, $"/api/collections/{collection}/records/{recordId}", query: query, cancellationToken: cancellationToken);
+            return _http.SendAsync<RecordResponse>(HttpMethod.Get, $"api/collections/{collection}/records/{recordId}", query: query, cancellationToken: cancellationToken);
         }
 
         /// <inheritdoc />
@@ -76,7 +76,7 @@ namespace PocketBase.Blazor.Clients.Record
             if (string.IsNullOrWhiteSpace(collection)) throw new ArgumentException("Collection is required.", nameof(collection));
             ArgumentNullException.ThrowIfNull(bodyParams);
             var query = options?.ToDictionary();
-            return _http.SendAsync<RecordResponse>(HttpMethod.Post, $"/api/collections/{collection}/records", bodyParams, query, cancellationToken);
+            return _http.SendAsync<RecordResponse>(HttpMethod.Post, $"api/collections/{collection}/records", bodyParams, query, cancellationToken);
         }
 
         /// <inheritdoc />
@@ -86,7 +86,7 @@ namespace PocketBase.Blazor.Clients.Record
             if (string.IsNullOrWhiteSpace(recordId)) throw new ArgumentException("Record ID is required.", nameof(recordId));
             ArgumentNullException.ThrowIfNull(bodyParams);
             var query = options?.ToDictionary();
-            return _http.SendAsync<RecordResponse>(HttpMethod.Patch, $"/api/collections/{collection}/records/{recordId}", bodyParams, query, cancellationToken);
+            return _http.SendAsync<RecordResponse>(HttpMethod.Patch, $"api/collections/{collection}/records/{recordId}", bodyParams, query, cancellationToken);
         }
 
         /// <inheritdoc />
@@ -95,7 +95,7 @@ namespace PocketBase.Blazor.Clients.Record
             if (string.IsNullOrWhiteSpace(collection)) throw new ArgumentException("Collection is required.", nameof(collection));
             if (string.IsNullOrWhiteSpace(recordId)) throw new ArgumentException("Record ID is required.", nameof(recordId));
             var query = options?.ToDictionary();
-            await _http.SendAsync(HttpMethod.Delete, $"/api/collections/{collection}/records/{recordId}", query: query, cancellationToken: cancellationToken);
+            await _http.SendAsync(HttpMethod.Delete, $"api/collections/{collection}/records/{recordId}", query: query, cancellationToken: cancellationToken);
             return true;
         }
     }

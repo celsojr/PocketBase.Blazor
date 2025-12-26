@@ -55,7 +55,7 @@ namespace PocketBase.Blazor.Clients.Batch
         {
             return _transport.SendAsync<List<BatchResponse>>(
                 HttpMethod.Post,
-                "/api/batch",
+                "api/batch",
                 _requests,
                 cancellationToken: cancellationToken
             );

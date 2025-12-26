@@ -67,7 +67,7 @@ namespace PocketBase.Blazor.Clients.Files
 
             var data = await _http.SendAsync<TokenResponse>(
                 HttpMethod.Post,
-                "/api/files/token",
+                "api/files/token",
                 body: options.Body,
                 query: options.Query,
                 cancellationToken: cancellationToken

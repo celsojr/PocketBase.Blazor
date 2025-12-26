@@ -26,7 +26,7 @@ namespace PocketBase.Blazor.Clients.CronJob
         public Task<Result<IEnumerable<CronJobResponse>>> GetFullList(CommonOptions? options = null, CancellationToken cancellationToken = default)
         {
             var query = options?.ToDictionary();
-            return _http.SendAsync<IEnumerable<CronJobResponse>>(HttpMethod.Get, "/api/cron-jobs", query: query, cancellationToken: cancellationToken);
+            return _http.SendAsync<IEnumerable<CronJobResponse>>(HttpMethod.Get, "api/cron-jobs", query: query, cancellationToken: cancellationToken);
         }
 
         /// <inheritdoc />
@@ -36,7 +36,7 @@ namespace PocketBase.Blazor.Clients.CronJob
                 throw new ArgumentException("Cron job id is required.", nameof(id));
 
             var query = options?.ToDictionary();
-            return _http.SendAsync(HttpMethod.Post, $"/api/cron-jobs/{id}/run", body: null, query: query, cancellationToken: cancellationToken);
+            return _http.SendAsync(HttpMethod.Post, $"api/cron-jobs/{id}/run", body: null, query: query, cancellationToken: cancellationToken);
         }
     }
 }

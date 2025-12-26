@@ -25,21 +25,21 @@ namespace PocketBase.Blazor.Clients.Settings
         /// <inheritdoc />
         public Task<Result<JsonElement>> GetAllAsync(CancellationToken cancellationToken = default)
         {
-            return _http.SendAsync<JsonElement>(HttpMethod.Get, "/api/settings", cancellationToken: cancellationToken);
+            return _http.SendAsync<JsonElement>(HttpMethod.Get, "api/settings", cancellationToken: cancellationToken);
         }
 
         /// <inheritdoc />
         public Task<Result<object>> UpdateAsync(object settings, CancellationToken cancellationToken = default)
         {
             ArgumentNullException.ThrowIfNull(settings);
-            return _http.SendAsync(HttpMethod.Patch, "/api/settings", body: settings, cancellationToken: cancellationToken);
+            return _http.SendAsync(HttpMethod.Patch, "api/settings", body: settings, cancellationToken: cancellationToken);
         }
 
         /// <inheritdoc />
         public async Task<Result<bool>> TestS3(CommonOptions? options, string fileSystem = "storage", CancellationToken cancellationToken = default)
         {
             var query = options?.ToDictionary();
-            var response = await _http.SendAsync(HttpMethod.Post, $"/api/settings/test-s3/{fileSystem}", query: query, cancellationToken: cancellationToken);
+            var response = await _http.SendAsync(HttpMethod.Post, $"api/settings/test-s3/{fileSystem}", query: query, cancellationToken: cancellationToken);
             return response.IsSuccess ? Result.Ok(true) : Result.Fail(response.Errors);
         }
 
@@ -58,7 +58,7 @@ namespace PocketBase.Blazor.Clients.Settings
             };
 
             var query = options?.ToDictionary();
-            await _http.SendAsync(HttpMethod.Post, "/api/settings/test-email", body: body, query: query, cancellationToken: cancellationToken);
+            await _http.SendAsync(HttpMethod.Post, "api/settings/test-email", body: body, query: query, cancellationToken: cancellationToken);
             return true;
         }
 
@@ -81,7 +81,7 @@ namespace PocketBase.Blazor.Clients.Settings
             };
 
             var query = options?.ToDictionary();
-            return _http.SendAsync<AppleClientSecretResponse>(HttpMethod.Post, "/api/settings/apple/client-secret", body: body, query: query, cancellationToken: cancellationToken);
+            return _http.SendAsync<AppleClientSecretResponse>(HttpMethod.Post, "api/settings/apple/client-secret", body: body, query: query, cancellationToken: cancellationToken);
         }
     }
 }

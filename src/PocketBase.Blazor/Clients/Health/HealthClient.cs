@@ -24,7 +24,7 @@ namespace PocketBase.Blazor.Clients.Health
         {
             var response = await _http.SendAsync<HealthCheckResponse>(
                 HttpMethod.Get,
-                "/api/health",
+                "api/health",
                 query: options?.Query,
                 cancellationToken: cancellationToken
             );
