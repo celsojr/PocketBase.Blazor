@@ -4,6 +4,9 @@ migrate((app) => {
 
   // update collection data
   unmarshal({
+    "createRule": "@request.auth.id != \"\"",
+    "deleteRule": "@request.auth.id != \"\"",
+    "updateRule": "@request.auth.id != \"\"",
     "listRule": "@request.auth.id != \"\"",
     "viewRule": "@request.auth.id != \"\""
   }, collection)
@@ -14,8 +17,11 @@ migrate((app) => {
 
   // update collection data
   unmarshal({
-    "listRule": "",
-    "viewRule": ""
+    "createRule": null,
+    "deleteRule": null,
+    "updateRule": null,
+    "listRule": null,
+    "viewRule": null
   }, collection)
 
   return app.save(collection)

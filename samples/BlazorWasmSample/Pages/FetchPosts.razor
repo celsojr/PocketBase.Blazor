@@ -57,8 +57,7 @@ else
         var pb = new PocketBase("http://localhost:8090", options: options);
 
         // Or pb.Collection("users").AuthWithPasswordAsync(...) for user auth
-        var authResult = await pb.Admins
-            .AuthWithPasswordAsync("joe.doe@email.com", "1qgk4YjLLI_MBs8");
+        var authResult = await pb.Admins.AuthWithPasswordAsync("joe.doe@email.com", "1qgk4YjLLI_MBs8");
 
         Console.WriteLine($"Auth result: {authResult.IsSuccess}");
         Console.WriteLine($"Auth result Token: {authResult.Value.Token}");
@@ -99,6 +98,8 @@ else
         public string Id { get; set; } = null!;
         public string? Title { get; set; }
         public string? Slug { get; set; }
+        public string? Content { get; set; }
+        public string? Author { get; set; }
         public bool IsPublished { get; set; }
         public DateTime? Created { get; set; }
     }
