@@ -3,6 +3,7 @@
 
 **PocketBase.Blazor** is a lightweight, Blazor-friendly client wrapper for the [PocketBase REST API](https://pocketbase.io/). It simplifies working with PocketBase in both **Blazor WebAssembly** and **Blazor Server** projects by providing a minimal, strongly-typed API with built-in DI support. 
 
+> [!WARNING]  
 > **Disclaimer:**  
 > This repository is an experimental work in progress. It is primarily used in another project and is maintained only for personal use or on-demand updates. The goal is to keep it simple while providing tooling that might be helpful to others. _Not all **PocketBase** functionalities are covered yet_.  
 > 
