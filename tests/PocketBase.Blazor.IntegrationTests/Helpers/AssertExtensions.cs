@@ -9,5 +9,14 @@ public static class AssertExtensions
                 string.Join(Environment.NewLine, result.Errors.Select(e => e.Message))
             );
     }
+
+    public static void ShouldHaveProperties(this JsonElement element, params string[] props)
+    {
+        foreach (var p in props)
+        {
+            if (!element.TryGetProperty(p, out _))
+                throw new XunitException($"Property '{p}' was not found in JSON element.");
+        }
+    }
 }
 

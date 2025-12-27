@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
@@ -8,6 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using FluentResults;
 using PocketBase.Blazor.Exceptions;
+using PocketBase.Blazor.Models;
 using PocketBase.Blazor.Options;
 using PocketBase.Blazor.Store;
 
@@ -127,17 +129,63 @@ namespace PocketBase.Blazor.Http
                 if (typeof(T) == typeof(object))
                     return Result.Ok<T>(default!);
 
-                T? data;
+                T? wrapperData;
                 try
                 {
-                    data = JsonSerializer.Deserialize<T>(content, _pocketBaseOptions.JsonSerializerOptions);
+                    var wrapperOptions = new JsonSerializerOptions
+                    {
+                        PropertyNameCaseInsensitive = true,
+                        Converters = { new PocketBaseDateTimeConverter() }
+                    };
+
+                    wrapperData = JsonSerializer.Deserialize<T>(content, wrapperOptions);
                 }
                 catch (JsonException ex)
                 {
-                    return Result.Fail<T>($"Failed to deserialize response: {ex.Message}").WithError(content);
+                    return Result.Fail<T>($"Failed to deserialize wrapper: {ex.Message}").WithError(content);
                 }
 
-                return data != null ? Result.Ok(data) : Result.Fail<T>("Deserialized value is null");
+                if (wrapperData != null)
+                {
+                    var wrapperType = wrapperData.GetType();
+                    if (wrapperType.IsGenericType && wrapperType.GetGenericTypeDefinition() == typeof(ListResult<>))
+                    {
+                        var itemsProp = wrapperType.GetProperty("Items");
+                        if (itemsProp != null)
+                        {
+                            var itemsValue = itemsProp.GetValue(wrapperData) as IEnumerable<object>;
+                            if (itemsValue != null)
+                            {
+                                var itemType = wrapperType.GetGenericArguments()[0];
+                                var newItemsList = (IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(itemType))!;
+
+                                foreach (var item in itemsValue)
+                                {
+                                    object typedItem;
+
+                                    if (item is JsonElement je)
+                                    {
+                                        typedItem = JsonSerializer.Deserialize(
+                                            je.GetRawText(),
+                                            itemType,
+                                            _pocketBaseOptions.JsonSerializerOptions
+                                        )!;
+                                    }
+                                    else
+                                    {
+                                        typedItem = item;
+                                    }
+
+                                    newItemsList.Add(typedItem);
+                                }
+
+                                itemsProp.SetValue(wrapperData, newItemsList);
+                            }
+                        }
+                    }
+                }
+
+                return wrapperData != null ? Result.Ok(wrapperData) : Result.Fail<T>("Deserialized value is null");
             }
             catch (HttpRequestException ex)
             {

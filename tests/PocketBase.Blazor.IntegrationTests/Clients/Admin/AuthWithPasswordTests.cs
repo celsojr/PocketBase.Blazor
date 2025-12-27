@@ -1,7 +1,7 @@
-namespace PocketBase.Blazor.IntegrationTests.Auth;
+namespace PocketBase.Blazor.IntegrationTests.Clients.Admin;
 
-[Collection("PocketBase collection")]
-public class AuthWithPasswordTests //: IClassFixture<PocketBaseTestFixture>
+[Collection("PocketBase.Blazor Clients")]
+public class AuthWithPasswordTests
 {
     private readonly PocketBaseTestFixture _fixture;
 
@@ -15,8 +15,7 @@ public class AuthWithPasswordTests //: IClassFixture<PocketBaseTestFixture>
     {
         var pb = new PocketBase(_fixture.Settings.BaseUrl);
 
-        var result = await pb
-            .Collection("users")
+        var result = await pb.Admins
             .AuthWithPasswordAsync(
                 _fixture.Settings.TestUserEmail,
                 _fixture.Settings.TestUserPassword
@@ -26,3 +25,4 @@ public class AuthWithPasswordTests //: IClassFixture<PocketBaseTestFixture>
         result.Value.Token.Should().NotBeNullOrEmpty();
     }
 }
+
