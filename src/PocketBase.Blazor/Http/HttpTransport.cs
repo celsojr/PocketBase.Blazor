@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
@@ -126,66 +125,39 @@ namespace PocketBase.Blazor.Http
                     );
                 }
 
-                if (typeof(T) == typeof(object))
-                    return Result.Ok<T>(default!);
-
-                T? wrapperData;
-                try
+                if (IsListResult(typeof(T), out var itemType))
                 {
-                    var wrapperOptions = new JsonSerializerOptions
-                    {
-                        PropertyNameCaseInsensitive = true,
-                        Converters = { new PocketBaseDateTimeConverter() }
-                    };
+                    using var doc = JsonDocument.Parse(content);
+                    var root = doc.RootElement;
 
-                    wrapperData = JsonSerializer.Deserialize<T>(content, wrapperOptions);
-                }
-                catch (JsonException ex)
-                {
-                    return Result.Fail<T>($"Failed to deserialize wrapper: {ex.Message}").WithError(content);
-                }
+                    var itemsElement = root.GetProperty("items");
 
-                if (wrapperData != null)
-                {
-                    var wrapperType = wrapperData.GetType();
-                    if (wrapperType.IsGenericType && wrapperType.GetGenericTypeDefinition() == typeof(ListResult<>))
-                    {
-                        var itemsProp = wrapperType.GetProperty("Items");
-                        if (itemsProp != null)
-                        {
-                            var itemsValue = itemsProp.GetValue(wrapperData) as IEnumerable<object>;
-                            if (itemsValue != null)
-                            {
-                                var itemType = wrapperType.GetGenericArguments()[0];
-                                var newItemsList = (IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(itemType))!;
+                    var items = JsonSerializer.Deserialize(
+                        itemsElement.GetRawText(),
+                        typeof(List<>).MakeGenericType(itemType),
+                        _pocketBaseOptions.JsonSerializerOptions
+                    );
 
-                                foreach (var item in itemsValue)
-                                {
-                                    object typedItem;
+                    var result = Activator.CreateInstance(typeof(ListResult<>).MakeGenericType(itemType))!;
 
-                                    if (item is JsonElement je)
-                                    {
-                                        typedItem = JsonSerializer.Deserialize(
-                                            je.GetRawText(),
-                                            itemType,
-                                            _pocketBaseOptions.JsonSerializerOptions
-                                        )!;
-                                    }
-                                    else
-                                    {
-                                        typedItem = item;
-                                    }
+                    typeof(T).GetProperty("Page")!.SetValue(result, root.GetProperty("page").GetInt32());
+                    typeof(T).GetProperty("PerPage")!.SetValue(result, root.GetProperty("perPage").GetInt32());
+                    typeof(T).GetProperty("TotalItems")!.SetValue(result, root.GetProperty("totalItems").GetInt32());
+                    typeof(T).GetProperty("TotalPages")!.SetValue(result, root.GetProperty("totalPages").GetInt32());
+                    typeof(T).GetProperty("Items")!.SetValue(result, items);
 
-                                    newItemsList.Add(typedItem);
-                                }
-
-                                itemsProp.SetValue(wrapperData, newItemsList);
-                            }
-                        }
-                    }
+                    return Result.Ok((T)result);
                 }
 
-                return wrapperData != null ? Result.Ok(wrapperData) : Result.Fail<T>("Deserialized value is null");
+                var wrapperOptions = new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true,
+                    Converters = { new PocketBaseDateTimeConverter() }
+                };
+
+                var data = JsonSerializer.Deserialize<T>(content, wrapperOptions);
+
+                return data != null ? Result.Ok(data) : Result.Fail<T>("Deserialized value is null");
             }
             catch (HttpRequestException ex)
             {
@@ -200,5 +172,19 @@ namespace PocketBase.Blazor.Http
                 return Result.Fail<T>($"Unexpected error: {ex.Message}").WithError(content);
             }
         }
+
+        static bool IsListResult(Type type, out Type itemType)
+        {
+            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(ListResult<>))
+            {
+                itemType = type.GetGenericArguments()[0];
+                return true;
+            }
+
+            itemType = null!;
+            return false;
+        }
+
     }
 }
+
