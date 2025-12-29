@@ -7,6 +7,7 @@ using System.Net;
 public class HealthCheckTests
 {
     private readonly IPocketBase _pb;
+
     public HealthCheckTests(PocketBaseTestFixture fixture)
     {
         _pb = fixture.Client;
