@@ -118,6 +118,7 @@ namespace PocketBase.Blazor.Http
                 if (!response.IsSuccessStatusCode)
                 {
                     var ex = new PocketBaseException(response.StatusCode, content);
+
                     return Result.Fail<T>(
                         new ExceptionalError(ex)
                             .WithMetadata("status", (int)response.StatusCode)
