@@ -6,7 +6,6 @@ using FluentResults;
 using PocketBase.Blazor.Http;
 using PocketBase.Blazor.Models;
 using PocketBase.Blazor.Options;
-using PocketBase.Blazor.Store;
 
 namespace PocketBase.Blazor.Clients.Collections
 {
@@ -17,11 +16,11 @@ namespace PocketBase.Blazor.Clients.Collections
         protected override string BasePath => "api/collections";
 
         /// <inheritdoc />
-        public CollectionClient(IHttpTransport http, PocketBaseStore store)
+        public CollectionClient(IHttpTransport http)
             :base(http)
         {
         }
-        
+
         /// <inheritdoc />
         public async Task<Result> ImportAsync(IEnumerable<CollectionModel> collections, bool deleteMissing = false, CommonOptions? options = null, CancellationToken cancellationToken = default)
         {

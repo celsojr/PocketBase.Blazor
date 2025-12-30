@@ -13,90 +13,116 @@ using PocketBase.Blazor.Responses;
 namespace PocketBase.Blazor.Clients.Record
 {
     /// <inheritdoc />
-    public class RecordClient : IRecordClient
+    public class RecordClient : BaseClient, IRecordClient
     {
-        private readonly IHttpTransport _http;
+        /// <inheritdoc />
+        public string CollectionName { get; }
 
         /// <inheritdoc />
-        public RecordClient(IHttpTransport http)
-        {
-            _http = http ?? throw new ArgumentNullException(nameof(http));
-        }
+        protected override string BasePath => $"api/collections/{CollectionName}/records";
 
         /// <inheritdoc />
-        public Task<Result<ListResult<RecordResponse>>> GetListAsync(string collection, int page = 1, int perPage = 30, CommonOptions? options = null, CancellationToken cancellationToken = default)
+        public RecordClient(string collectionName, IHttpTransport http)
+            : base(http)
         {
-            if (string.IsNullOrWhiteSpace(collection)) throw new ArgumentException("Collection is required.", nameof(collection));
-            var query = options?.ToDictionary() ?? new Dictionary<string, object?>();
-            query["page"] = page.ToString();
-            query["perPage"] = perPage.ToString();
-            return _http.SendAsync<ListResult<RecordResponse>>(HttpMethod.Get, $"api/collections/{collection}/records", query: query, cancellationToken: cancellationToken);
+            CollectionName = collectionName ?? throw new ArgumentNullException(nameof(collectionName));
         }
 
-        /// <inheritdoc />
-        public async Task<Result<List<RecordResponse>>> GetFullListAsync(string collection, CommonOptions? options = null, CancellationToken cancellationToken = default)
-        {
-            if (string.IsNullOrWhiteSpace(collection)) throw new ArgumentException("Collection is required.", nameof(collection));
-            var all = new List<RecordResponse>();
-            int page = 1;
-            const int perPage = 200;
-            while (true)
-            {
-                var result = await GetListAsync(collection, page, perPage, options, cancellationToken).ConfigureAwait(false);
-                if (result.Value.Items == null || result.Value.Items.Count == 0) break;
-                all.AddRange(result.Value.Items);
-                if (result.Value.Items.Count < perPage) break;
-                page++;
-            }
-            return all;
-        }
 
-        /// <inheritdoc />
-        public Task<Result<RecordResponse>> GetFirstListItemAsync(string collection, string filter, CommonOptions? options = null, CancellationToken cancellationToken = default)
-        {
-            if (string.IsNullOrWhiteSpace(collection)) throw new ArgumentException("Collection is required.", nameof(collection));
-            if (string.IsNullOrWhiteSpace(filter)) throw new ArgumentException("Filter is required.", nameof(filter));
-            var query = options?.ToDictionary() ?? new Dictionary<string, object?>();
-            query["filter"] = filter;
-            return _http.SendAsync<RecordResponse>(HttpMethod.Get, $"api/collections/{collection}/records", query: query, cancellationToken: cancellationToken);
-        }
 
-        /// <inheritdoc />
-        public Task<Result<RecordResponse>> GetOneAsync(string collection, string recordId, CommonOptions? options = null, CancellationToken cancellationToken = default)
-        {
-            if (string.IsNullOrWhiteSpace(collection)) throw new ArgumentException("Collection is required.", nameof(collection));
-            if (string.IsNullOrWhiteSpace(recordId)) throw new ArgumentException("Record ID is required.", nameof(recordId));
-            var query = options?.ToDictionary();
-            return _http.SendAsync<RecordResponse>(HttpMethod.Get, $"api/collections/{collection}/records/{recordId}", query: query, cancellationToken: cancellationToken);
-        }
 
-        /// <inheritdoc />
-        public Task<Result<RecordResponse>> CreateAsync(string collection, object bodyParams, CommonOptions? options = null, CancellationToken cancellationToken = default)
-        {
-            if (string.IsNullOrWhiteSpace(collection)) throw new ArgumentException("Collection is required.", nameof(collection));
-            ArgumentNullException.ThrowIfNull(bodyParams);
-            var query = options?.ToDictionary();
-            return _http.SendAsync<RecordResponse>(HttpMethod.Post, $"api/collections/{collection}/records", bodyParams, query, cancellationToken);
-        }
 
-        /// <inheritdoc />
-        public Task<Result<RecordResponse>> UpdateAsync(string collection, string recordId, object bodyParams, CommonOptions? options = null, CancellationToken cancellationToken = default)
-        {
-            if (string.IsNullOrWhiteSpace(collection)) throw new ArgumentException("Collection is required.", nameof(collection));
-            if (string.IsNullOrWhiteSpace(recordId)) throw new ArgumentException("Record ID is required.", nameof(recordId));
-            ArgumentNullException.ThrowIfNull(bodyParams);
-            var query = options?.ToDictionary();
-            return _http.SendAsync<RecordResponse>(HttpMethod.Patch, $"api/collections/{collection}/records/{recordId}", bodyParams, query, cancellationToken);
-        }
 
-        /// <inheritdoc />
-        public async Task<Result<bool>> DeleteAsync(string collection, string recordId, CommonOptions? options = null, CancellationToken cancellationToken = default)
-        {
-            if (string.IsNullOrWhiteSpace(collection)) throw new ArgumentException("Collection is required.", nameof(collection));
-            if (string.IsNullOrWhiteSpace(recordId)) throw new ArgumentException("Record ID is required.", nameof(recordId));
-            var query = options?.ToDictionary();
-            await _http.SendAsync(HttpMethod.Delete, $"api/collections/{collection}/records/{recordId}", query: query, cancellationToken: cancellationToken);
-            return true;
-        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        ///// <inheritdoc />
+        //public Task<Result<ListResult<RecordResponse>>> GetListAsync(string collection, int page = 1, int perPage = 30, CommonOptions? options = null, CancellationToken cancellationToken = default)
+        //{
+        //    if (string.IsNullOrWhiteSpace(collection)) throw new ArgumentException("Collection is required.", nameof(collection));
+        //    var query = options?.ToDictionary() ?? new Dictionary<string, object?>();
+        //    query["page"] = page.ToString();
+        //    query["perPage"] = perPage.ToString();
+        //    return Http.SendAsync<ListResult<RecordResponse>>(HttpMethod.Get, $"api/collections/{collection}/records", query: query, cancellationToken: cancellationToken);
+        //}
+
+        ///// <inheritdoc />
+        //public async Task<Result<List<RecordResponse>>> GetFullListAsync(string collection, CommonOptions? options = null, CancellationToken cancellationToken = default)
+        //{
+        //    if (string.IsNullOrWhiteSpace(collection)) throw new ArgumentException("Collection is required.", nameof(collection));
+        //    var all = new List<RecordResponse>();
+        //    int page = 1;
+        //    const int perPage = 200;
+        //    while (true)
+        //    {
+        //        var result = await GetListAsync(collection, page, perPage, options, cancellationToken).ConfigureAwait(false);
+        //        if (result.Value.Items == null || result.Value.Items.Count == 0) break;
+        //        all.AddRange(result.Value.Items);
+        //        if (result.Value.Items.Count < perPage) break;
+        //        page++;
+        //    }
+        //    return all;
+        //}
+
+        ///// <inheritdoc />
+        //public Task<Result<RecordResponse>> GetFirstListItemAsync(string collection, string filter, CommonOptions? options = null, CancellationToken cancellationToken = default)
+        //{
+        //    if (string.IsNullOrWhiteSpace(collection)) throw new ArgumentException("Collection is required.", nameof(collection));
+        //    if (string.IsNullOrWhiteSpace(filter)) throw new ArgumentException("Filter is required.", nameof(filter));
+        //    var query = options?.ToDictionary() ?? new Dictionary<string, object?>();
+        //    query["filter"] = filter;
+        //    return Http.SendAsync<RecordResponse>(HttpMethod.Get, $"api/collections/{collection}/records", query: query, cancellationToken: cancellationToken);
+        //}
+
+        ///// <inheritdoc />
+        //public Task<Result<RecordResponse>> GetOneAsync(string collection, string recordId, CommonOptions? options = null, CancellationToken cancellationToken = default)
+        //{
+        //    if (string.IsNullOrWhiteSpace(collection)) throw new ArgumentException("Collection is required.", nameof(collection));
+        //    if (string.IsNullOrWhiteSpace(recordId)) throw new ArgumentException("Record ID is required.", nameof(recordId));
+        //    var query = options?.ToDictionary();
+        //    return Http.SendAsync<RecordResponse>(HttpMethod.Get, $"api/collections/{collection}/records/{recordId}", query: query, cancellationToken: cancellationToken);
+        //}
+
+        ///// <inheritdoc />
+        //public Task<Result<RecordResponse>> CreateAsync(string collection, object bodyParams, CommonOptions? options = null, CancellationToken cancellationToken = default)
+        //{
+        //    if (string.IsNullOrWhiteSpace(collection)) throw new ArgumentException("Collection is required.", nameof(collection));
+        //    ArgumentNullException.ThrowIfNull(bodyParams);
+        //    var query = options?.ToDictionary();
+        //    return Http.SendAsync<RecordResponse>(HttpMethod.Post, $"api/collections/{collection}/records", bodyParams, query, cancellationToken);
+        //}
+
+        ///// <inheritdoc />
+        //public Task<Result<RecordResponse>> UpdateAsync(string collection, string recordId, object bodyParams, CommonOptions? options = null, CancellationToken cancellationToken = default)
+        //{
+        //    if (string.IsNullOrWhiteSpace(collection)) throw new ArgumentException("Collection is required.", nameof(collection));
+        //    if (string.IsNullOrWhiteSpace(recordId)) throw new ArgumentException("Record ID is required.", nameof(recordId));
+        //    ArgumentNullException.ThrowIfNull(bodyParams);
+        //    var query = options?.ToDictionary();
+        //    return Http.SendAsync<RecordResponse>(HttpMethod.Patch, $"api/collections/{collection}/records/{recordId}", bodyParams, query, cancellationToken);
+        //}
+
+        ///// <inheritdoc />
+        //public async Task<Result<bool>> DeleteAsync(string collection, string recordId, CommonOptions? options = null, CancellationToken cancellationToken = default)
+        //{
+        //    if (string.IsNullOrWhiteSpace(collection)) throw new ArgumentException("Collection is required.", nameof(collection));
+        //    if (string.IsNullOrWhiteSpace(recordId)) throw new ArgumentException("Record ID is required.", nameof(recordId));
+        //    var query = options?.ToDictionary();
+        //    await Http.SendAsync(HttpMethod.Delete, $"api/collections/{collection}/records/{recordId}", query: query, cancellationToken: cancellationToken);
+        //    return true;
+        //}
     }
 }
+

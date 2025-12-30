@@ -16,8 +16,8 @@ public interface IPocketBase
 {
     string BaseUrl { get; }
 
-    // Collections
-    ICollectionClient Collection(string name);
+    // Record client for a specific collection
+    IRecordClient Collection(string collectionName);
 
     // Services
     public IAdminsClient Admins { get; }
@@ -28,7 +28,6 @@ public interface IPocketBase
     public IHealthClient Health { get; }
     public ILogClient Log { get; }
     public IRealtimeClient Realtime { get; }
-    public IRecordClient Record { get; }
     public ISettingsClient Settings { get; }
 
     // behavior

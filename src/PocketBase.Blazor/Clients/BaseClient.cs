@@ -1,6 +1,13 @@
 using System;
+using System.Collections.Generic;
+using System.Net.Http;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Web;
+using FluentResults;
 using PocketBase.Blazor.Http;
+using PocketBase.Blazor.Models;
+using PocketBase.Blazor.Options;
 
 namespace PocketBase.Blazor.Clients
 {
@@ -25,6 +32,17 @@ namespace PocketBase.Blazor.Clients
             return HttpUtility.UrlEncode(param) ?? "";
         }
 
+        /// <inheritdoc />
+        public virtual Task<Result<ListResult<T>>> GetListAsync<T>(int page = 1, int perPage = 30, CommonOptions? options = null, CancellationToken cancellationToken = default)
+        {
+            options ??= new CommonOptions();
+
+            options.Query ??= new Dictionary<string, object?>();
+            options.Query["page"] = page;
+            options.Query["perPage"] = perPage;
+
+            return Http.SendAsync<ListResult<T>>(HttpMethod.Get, BasePath, query: options.Query, cancellationToken: cancellationToken);
+        }
     }
 }
 

@@ -1,5 +1,6 @@
+using System.Collections.Generic;
+using System.Net;
 using System.Net.Http;
-using System.Text.Json;
 using PocketBase.Blazor.Clients.Admin;
 using PocketBase.Blazor.Clients.Backup;
 using PocketBase.Blazor.Clients.Batch;
@@ -20,17 +21,19 @@ namespace PocketBase.Blazor;
 /// <inheritdoc />
 public class PocketBase : IPocketBase
 {
+    private Dictionary<string, RecordClient> _recordClients = [];
+
     public string BaseUrl { get; }
 
     public IAdminsClient Admins { get; }
     public IBackupClient Backup { get; }
     public IBatchClient Batch { get; }
+    public ICollectionClient Collections { get; }
     public ICronJobClient CronJob { get; }
     public IFilesClient Files { get; }
     public IHealthClient Health { get; }
     public ILogClient Log { get; }
     public IRealtimeClient Realtime { get; }
-    public IRecordClient Record { get; }
     public ISettingsClient Settings { get; }
     public PocketBaseStore AuthStore { get; }
 
@@ -45,11 +48,11 @@ public class PocketBase : IPocketBase
         Admins = new AdminsClient(_http);
         Backup = new BackupClient(_http);
         Batch = new BatchClient(_http);
+        Collections = new CollectionClient(_http);
         CronJob = new CronJobClient(_http);
         Log = new LogClient(_http);
         Files = new FilesClient(_http);
         Realtime = new RealtimeClient(_http);
-        Record = new RecordClient(_http);
         Health = new HealthClient(_http);
         Settings = new SettingsClient(_http);
 
@@ -64,8 +67,17 @@ public class PocketBase : IPocketBase
     }
 
     /// <inheritdoc />
-    public ICollectionClient Collection(string name)
-        => new CollectionClient(name, _http, AuthStore);
+    public IRecordClient Collection(string collectionName)
+    {
+        var encodedName = WebUtility.UrlEncode(collectionName);
+        if (_recordClients.TryGetValue(encodedName, out var value))
+        {
+            return value;
+        }
+        var newRecordClient = new RecordClient(encodedName, _http);
+        _recordClients[encodedName] = newRecordClient;
+        return newRecordClient;
+    }
 
     /// <inheritdoc />
     public void EnableAutoCancellation(bool enabled)
