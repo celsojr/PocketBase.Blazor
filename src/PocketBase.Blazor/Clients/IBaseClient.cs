@@ -37,7 +37,7 @@ namespace PocketBase.Blazor.Clients
         /// <exception cref="ClientResponseError">
         /// Thrown when the client receives an invalid response.
         /// </exception>
-        Task<Result<ListResult<T>>> GetListAsync<T>(int page = 1, int perPage = 30, CommonOptions? options = null, CancellationToken cancellationToken = default);
+        Task<Result<ListResult<T>>> GetListAsync<T>(int page = 1, int perPage = 30, ListOptions? options = null, CancellationToken cancellationToken = default);
     }
 }
 
