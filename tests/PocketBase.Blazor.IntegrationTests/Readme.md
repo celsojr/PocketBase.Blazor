@@ -117,6 +117,16 @@ password: Nyp9wiGaAC4qGWz
 
 These credentials are used by the integration tests for authentication scenarios.
 
+### Curl Example:
+```powershell
+curl -X POST "http://127.0.0.1:8092/api/collections/_superusers/auth-with-password" `
+	-H "Content-Type: application/json" `
+	-d '{ "identity": "", "password": "" }'
+
+curl "http://127.0.0.1:8092/api/collections/admins" `
+	-H "Content-Type: application/json" `
+	-H "Authorization: "
+```
 ---
 
 ## Step 4: Run Integration Tests
