@@ -23,7 +23,7 @@ namespace PocketBase.Blazor.Clients.Admin
         }
 
         /// <inheritdoc />
-        public async Task<Result<AuthResponse>> AuthWithPasswordAsync(string email, string password, CancellationToken cancellationToken = default)
+        public async Task<Result<AuthResponse>> AuthWithPasswordAsync(string email, string password, bool isAdmin =false, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(email))
                 throw new ArgumentException("Email must be provided.", nameof(email));
@@ -39,8 +39,7 @@ namespace PocketBase.Blazor.Clients.Admin
 
             var result = await _http.SendAsync<AuthResponse>(
                 HttpMethod.Post,
-                //"api/collections/_superusers/auth-with-password",
-                "api/collections/users/auth-with-password",
+                $"api/collections/{(isAdmin ? "_superusers" : "users")}/auth-with-password",
                 body,
                 cancellationToken: cancellationToken
             );
@@ -57,28 +56,29 @@ namespace PocketBase.Blazor.Clients.Admin
         }
 
         /// <inheritdoc />
-        public async Task<Result<AuthResponse>> RefreshAsync(CancellationToken cancellationToken = default)
+        public async Task<Result<AuthResponse>> RefreshAsync(bool isAdmin = false, CancellationToken cancellationToken = default)
         {
             return await _http.SendAsync<AuthResponse>(
                 HttpMethod.Post,
-                "api/admins/auth-refresh",
+                $"api/{(isAdmin ? "_superusers" : "users")}/auth-refresh",
                 body: null,
                 cancellationToken: cancellationToken
             );
         }
 
         /// <inheritdoc />
-        public async Task<Result> LogoutAsync(CancellationToken cancellationToken = default)
+        public async Task<Result> LogoutAsync(bool isAdmin = false, CancellationToken cancellationToken = default)
         {
             await _http.SendAsync(
                 HttpMethod.Post,
-                "api/admins/logout",
+                $"api/{(isAdmin ? "_superusers" : "users")}/logout",
                 body: null,
                 cancellationToken: cancellationToken
             );
             return Result.Ok();
         }
 
+        /// <inheritdoc />
         public void SetStore(PocketBaseStore store)
         {
             _authStore = store ?? throw new ArgumentNullException(nameof(store));

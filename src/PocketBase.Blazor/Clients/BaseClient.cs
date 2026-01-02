@@ -33,7 +33,7 @@ namespace PocketBase.Blazor.Clients
         }
 
         /// <inheritdoc />
-        public virtual Task<Result<ListResult<T>>> GetListAsync<T>(int page = 1, int perPage = 30, ListOptions? options = null, CancellationToken cancellationToken = default)
+        public virtual async Task<Result<ListResult<T>>> GetListAsync<T>(int page = 1, int perPage = 30, ListOptions? options = null, CancellationToken cancellationToken = default)
         {
             options ??= new ListOptions();
 
@@ -41,7 +41,7 @@ namespace PocketBase.Blazor.Clients
             options.Query["page"] = page;
             options.Query["perPage"] = perPage;
 
-            return Http.SendAsync<ListResult<T>>(HttpMethod.Get, BasePath, query: options.Query, cancellationToken: cancellationToken);
+            return await Http.SendAsync<ListResult<T>>(HttpMethod.Get, BasePath, query: options.Query, cancellationToken: cancellationToken);
         }
 
         /// <inheritdoc />
@@ -74,39 +74,39 @@ namespace PocketBase.Blazor.Clients
         }
 
         /// <inheritdoc />
-        public Task<Result<List<T>>> GetFullListAsync<T>(CancellationToken cancellationToken = default)
+        public virtual async Task<Result<List<T>>> GetFullListAsync<T>(CancellationToken cancellationToken = default)
         {
-            return GetFullListInternalAsync<T>(
+            return await GetFullListInternalAsync<T>(
                 batch: 500,
                 options: null,
                 cancellationToken);
         }
 
         /// <inheritdoc />
-        public Task<Result<List<T>>> GetFullListAsync<T>(int batch, CancellationToken cancellationToken = default)
+        public virtual async Task<Result<List<T>>> GetFullListAsync<T>(int batch, CancellationToken cancellationToken = default)
         {
-            return GetFullListInternalAsync<T>(
+            return await GetFullListInternalAsync<T>(
                 batch,
                 options: null,
                 cancellationToken);
         }
 
         /// <inheritdoc />
-        public Task<Result<List<T>>> GetFullListAsync<T>(FullListOptions options, CancellationToken cancellationToken = default)
+        public virtual async Task<Result<List<T>>> GetFullListAsync<T>(FullListOptions options, CancellationToken cancellationToken = default)
         {
             var batch = options.Batch ?? 500;
-            return GetFullListInternalAsync<T>(
+            return await GetFullListInternalAsync<T>(
                 batch,
                 options,
                 cancellationToken);
         }
 
         /// <inheritdoc />
-        public virtual Task<Result<T>> GetOneAsync<T>(string id, CommonOptions? options = null, CancellationToken cancellationToken = default)
+        public virtual async Task<Result<T>> GetOneAsync<T>(string id, CommonOptions? options = null, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(id))
             {
-                return Task.FromResult(
+                return await Task.FromResult(
                     Result.Fail<T>(
                         new Error("Missing required record id.")
                             .WithMetadata("status", 404)
@@ -116,14 +116,14 @@ namespace PocketBase.Blazor.Clients
 
             var url = $"{BasePath}/{UrlEncode(id)}";
 
-            return Http.SendAsync<T>(HttpMethod.Get, url, query: options?.Query, cancellationToken: cancellationToken);
+            return await Http.SendAsync<T>(HttpMethod.Get, url, query: options?.Query, cancellationToken: cancellationToken);
         }
 
         /// <inheritdoc />
-        public virtual Task<Result<T>> CreateAsync<T>(object? body = null, CommonOptions? options = null, CancellationToken cancellationToken = default)
+        public virtual async Task<Result<T>> CreateAsync<T>(object? body = null, CommonOptions? options = null, CancellationToken cancellationToken = default)
             where T : BaseModel
         {
-            return Http.SendAsync<T>(
+            return await Http.SendAsync<T>(
                 HttpMethod.Post,
                 BasePath,
                 body: body ?? options?.Body,

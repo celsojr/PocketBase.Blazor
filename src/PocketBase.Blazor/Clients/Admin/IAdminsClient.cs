@@ -16,22 +16,25 @@ namespace PocketBase.Blazor.Clients.Admin
         /// </summary>
         /// <param name="email">Admin email or identity.</param>
         /// <param name="password">Admin password.</param>
+        /// <param name="isAdmin">Indicates if the user is an admin.</param>
         /// <param name="cancellationToken">Optional cancellation token.</param>
         /// <returns>The authentication response containing the session token.</returns>
-        Task<Result<AuthResponse>> AuthWithPasswordAsync(string email, string password, CancellationToken cancellationToken = default);
+        Task<Result<AuthResponse>> AuthWithPasswordAsync(string email, string password, bool isAdmin = false, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Refreshes the currently authenticated admin session.
         /// </summary>
+        /// <param name="isAdmin">Indicates if the user is an admin.</param>
         /// <param name="cancellationToken">Optional cancellation token.</param>
         /// <returns>The updated authentication response.</returns>
-        Task<Result<AuthResponse>> RefreshAsync(CancellationToken cancellationToken = default);
+        Task<Result<AuthResponse>> RefreshAsync(bool isAdmin = false, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Logs out the currently authenticated admin.
         /// </summary>
+        /// <param name="isAdmin">Indicates if the user is an admin.</param>
         /// <param name="cancellationToken">Optional cancellation token.</param>
-        Task<Result> LogoutAsync(CancellationToken cancellationToken = default);
+        Task<Result> LogoutAsync(bool isAdmin = false, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Sets the PocketBase store for managing authentication state.

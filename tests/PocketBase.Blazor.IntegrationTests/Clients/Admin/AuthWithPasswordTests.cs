@@ -17,8 +17,8 @@ public class AuthWithPasswordTests
 
         var result = await pb.Admins
             .AuthWithPasswordAsync(
-                _fixture.Settings.TestUserEmail,
-                _fixture.Settings.TestUserPassword
+                _fixture.Settings.UserTesterEmail,
+                _fixture.Settings.UserTesterPassword
             );
 
         result.IsSuccess.Should().BeTrue();

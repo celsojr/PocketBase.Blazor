@@ -23,6 +23,7 @@ public interface IPocketBase
     public IAdminsClient Admins { get; }
     public IBackupClient Backup { get; }
     public IBatchClient Batch { get; }
+    public ICollectionClient Collections { get; }
     public ICronJobClient CronJob { get; }
     public IFilesClient Files { get; }
     public IHealthClient Health { get; }

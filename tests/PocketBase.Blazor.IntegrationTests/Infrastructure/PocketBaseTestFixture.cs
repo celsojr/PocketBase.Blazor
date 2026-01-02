@@ -12,11 +12,10 @@ public sealed class PocketBaseTestFixture : IAsyncLifetime
 
         Client = new PocketBase(Settings.BaseUrl, options: options);
 
-        var auth = await Client
-            .Collection("users")
+        var auth = await Client.Admins
             .AuthWithPasswordAsync(
-                Settings.TestUserEmail,
-                Settings.TestUserPassword
+                Settings.UserTesterEmail,
+                Settings.UserTesterPassword 
             );
 
         auth.IsSuccess.Should().BeTrue("auth must succeed for integration tests");

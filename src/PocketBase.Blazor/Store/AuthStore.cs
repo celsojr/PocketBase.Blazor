@@ -22,9 +22,9 @@ namespace PocketBase.Blazor.Store
             _admins = adminsClient ?? throw new ArgumentNullException(nameof(adminsClient));
         }
 
-        public async Task<Result<AuthResponse>> AuthWithPasswordAsync(string identity, string password, CancellationToken cancellationToken = default)
+        public async Task<Result<AuthResponse>> AuthWithPasswordAsync(string identity, string password, bool isAdmin = false, CancellationToken cancellationToken = default)
         {
-            var result = await _admins.AuthWithPasswordAsync(identity, password, cancellationToken);
+            var result = await _admins.AuthWithPasswordAsync(identity, password, isAdmin, cancellationToken: cancellationToken);
             if (result.IsSuccess)
             {
                 _currentSession = result.Value;
@@ -32,9 +32,9 @@ namespace PocketBase.Blazor.Store
             return result;
         }
 
-        public async Task<Result<AuthResponse>> RefreshAsync(CancellationToken cancellationToken = default)
+        public async Task<Result<AuthResponse>> RefreshAsync(bool isAdmin = false, CancellationToken cancellationToken = default)
         {
-            var result = await _admins.RefreshAsync(cancellationToken);
+            var result = await _admins.RefreshAsync(isAdmin, cancellationToken: cancellationToken);
             if (result.IsSuccess)
             {
                 _currentSession = result.Value;
@@ -42,9 +42,9 @@ namespace PocketBase.Blazor.Store
             return result;
         }
 
-        public async Task<Result> LogoutAsync(CancellationToken cancellationToken = default)
+        public async Task<Result> LogoutAsync(bool isAdmin = false, CancellationToken cancellationToken = default)
         {
-            await _admins.LogoutAsync(cancellationToken);
+            await _admins.LogoutAsync(isAdmin, cancellationToken: cancellationToken);
             _currentSession = null;
             return Result.Ok();
         }

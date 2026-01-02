@@ -12,7 +12,7 @@ namespace PocketBase.Blazor.Clients.Collections
     /// Represents a client for a single PocketBase collection.
     /// Provides authentication, CRUD operations, file uploads, and realtime subscriptions.
     /// </summary>
-    public interface ICollectionClient
+    public interface ICollectionClient : IBaseClient
     {
         /// <summary>
         /// Imports the provided collections.
