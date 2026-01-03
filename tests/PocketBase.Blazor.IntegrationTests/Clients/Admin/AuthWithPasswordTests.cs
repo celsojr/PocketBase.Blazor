@@ -3,9 +3,9 @@ namespace PocketBase.Blazor.IntegrationTests.Clients.Admin;
 [Collection("PocketBase.Blazor Clients")]
 public class AuthWithPasswordTests
 {
-    private readonly PocketBaseTestFixture _fixture;
+    private readonly PocketBaseUserFixture _fixture;
 
-    public AuthWithPasswordTests(PocketBaseTestFixture fixture)
+    public AuthWithPasswordTests(PocketBaseUserFixture fixture)
     {
         _fixture = fixture;
     }

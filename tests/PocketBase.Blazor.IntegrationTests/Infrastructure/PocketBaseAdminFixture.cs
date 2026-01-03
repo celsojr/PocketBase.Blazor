@@ -1,6 +1,6 @@
 namespace PocketBase.Blazor.IntegrationTests.Infrastructure;
 
-public sealed class PocketBaseTestFixture : IAsyncLifetime
+public class PocketBaseAdminFixture : IAsyncLifetime
 {
     public IPocketBase Client { get; private set; } = null!;
     public TestSettings Settings { get; } = new();
@@ -14,8 +14,8 @@ public sealed class PocketBaseTestFixture : IAsyncLifetime
 
         var auth = await Client.Admins
             .AuthWithPasswordAsync(
-                Settings.UserTesterEmail,
-                Settings.UserTesterPassword 
+                Settings.AdminTesterEmail,
+                Settings.AdminTesterPassword
             );
 
         auth.IsSuccess.Should().BeTrue("auth must succeed for integration tests");

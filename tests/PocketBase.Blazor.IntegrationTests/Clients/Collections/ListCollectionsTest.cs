@@ -8,7 +8,10 @@ namespace PocketBase.Blazor.IntegrationTests.Clients.Collections
 {
     public class ListCollectionsTest
     {
-
+        public ListCollectionsTest()
+        {
+            
+        }
     }
 }
 

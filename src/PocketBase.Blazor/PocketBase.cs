@@ -74,7 +74,7 @@ public class PocketBase : IPocketBase
         {
             return value;
         }
-        var newRecordClient = new RecordClient(encodedName, _http);
+        var newRecordClient = new RecordClient(encodedName, _http, AuthStore);
         _recordClients[encodedName] = newRecordClient;
         return newRecordClient;
     }

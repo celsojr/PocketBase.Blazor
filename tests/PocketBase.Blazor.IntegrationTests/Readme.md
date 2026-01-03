@@ -123,7 +123,7 @@ curl -X POST "http://127.0.0.1:8092/api/collections/_superusers/auth-with-passwo
 	-H "Content-Type: application/json" `
 	-d '{ "identity": "", "password": "" }'
 
-curl "http://127.0.0.1:8092/api/collections/admins" `
+curl "http://127.0.0.1:8092/api/collections/_superusers" `
 	-H "Content-Type: application/json" `
 	-H "Authorization: "
 ```

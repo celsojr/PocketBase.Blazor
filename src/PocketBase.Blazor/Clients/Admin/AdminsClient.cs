@@ -23,7 +23,7 @@ namespace PocketBase.Blazor.Clients.Admin
         }
 
         /// <inheritdoc />
-        public async Task<Result<AuthResponse>> AuthWithPasswordAsync(string email, string password, bool isAdmin =false, CancellationToken cancellationToken = default)
+        public async Task<Result<AuthResponse>> AuthWithPasswordAsync(string email, string password, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(email))
                 throw new ArgumentException("Email must be provided.", nameof(email));
@@ -39,7 +39,7 @@ namespace PocketBase.Blazor.Clients.Admin
 
             var result = await _http.SendAsync<AuthResponse>(
                 HttpMethod.Post,
-                $"api/collections/{(isAdmin ? "_superusers" : "users")}/auth-with-password",
+                "api/collections/_superusers/auth-with-password",
                 body,
                 cancellationToken: cancellationToken
             );
@@ -56,22 +56,22 @@ namespace PocketBase.Blazor.Clients.Admin
         }
 
         /// <inheritdoc />
-        public async Task<Result<AuthResponse>> RefreshAsync(bool isAdmin = false, CancellationToken cancellationToken = default)
+        public async Task<Result<AuthResponse>> RefreshAsync(CancellationToken cancellationToken = default)
         {
             return await _http.SendAsync<AuthResponse>(
                 HttpMethod.Post,
-                $"api/{(isAdmin ? "_superusers" : "users")}/auth-refresh",
+                "api/_superusers/auth-refresh",
                 body: null,
                 cancellationToken: cancellationToken
             );
         }
 
         /// <inheritdoc />
-        public async Task<Result> LogoutAsync(bool isAdmin = false, CancellationToken cancellationToken = default)
+        public async Task<Result> LogoutAsync(CancellationToken cancellationToken = default)
         {
             await _http.SendAsync(
                 HttpMethod.Post,
-                $"api/{(isAdmin ? "_superusers" : "users")}/logout",
+                "api/_superusers/logout",
                 body: null,
                 cancellationToken: cancellationToken
             );

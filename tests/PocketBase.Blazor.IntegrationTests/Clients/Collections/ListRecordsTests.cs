@@ -5,13 +5,13 @@ namespace PocketBase.Blazor.IntegrationTests.Clients.Collections;
 //using IntegrationTests.Helpers;
 using Models;
 
-[Collection("PocketBase.Blazor Clients")]
+[Collection("PocketBase.Blazor.Admin")]
 public class ListRecordsTests
 {
     private readonly IPocketBase _pb;
-    private readonly PocketBaseTestFixture _fixture;
+    private readonly PocketBaseAdminFixture _fixture;
 
-    public ListRecordsTests(PocketBaseTestFixture fixture)
+    public ListRecordsTests(PocketBaseAdminFixture fixture)
     {
         _fixture = fixture;
         _pb = fixture.Client;
@@ -25,8 +25,7 @@ public class ListRecordsTests
         _ = await adminPb.Admins
             .AuthWithPasswordAsync(
                 _fixture.Settings.AdminTesterEmail,
-                _fixture.Settings.AdminTesterPassword,
-                isAdmin: true
+                _fixture.Settings.AdminTesterPassword
             );
 
         var result = await adminPb

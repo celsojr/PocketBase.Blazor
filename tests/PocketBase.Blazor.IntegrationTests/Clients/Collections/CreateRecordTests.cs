@@ -5,7 +5,7 @@ public class CreateRecordTests
 {
     private readonly IPocketBase _pb;
 
-    public CreateRecordTests(PocketBaseTestFixture fixture)
+    public CreateRecordTests(PocketBaseUserFixture fixture)
     {
         _pb = fixture.Client;
     }

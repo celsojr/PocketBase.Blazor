@@ -8,7 +8,7 @@ public class HealthCheckTests
 {
     private readonly IPocketBase _pb;
 
-    public HealthCheckTests(PocketBaseTestFixture fixture)
+    public HealthCheckTests(PocketBaseUserFixture fixture)
     {
         _pb = fixture.Client;
     }
