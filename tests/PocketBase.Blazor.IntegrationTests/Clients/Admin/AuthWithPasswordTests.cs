@@ -1,5 +1,7 @@
 namespace PocketBase.Blazor.IntegrationTests.Clients.Admin;
 
+using static IntegrationTests.Helpers.JwtTokenValidator;
+
 [Collection("PocketBase.Blazor.Admin")]
 public class AuthWithPasswordTests
 {
@@ -23,19 +25,61 @@ public class AuthWithPasswordTests
 
         result.IsSuccess.Should().BeTrue();
         result.Value.Token.Should().NotBeNullOrEmpty();
-        CheckTokenParts(result.Value.Token).Should().BeTrue();
+
+        var tokenParts = result.Value.Token.Split('.');
+        tokenParts.Should().HaveCount(3, "JWT tokens should have 3 parts");
+
+        var expiry = GetTokenExpiry(result.Value.Token);
+        expiry.Should().BeAfter(DateTimeOffset.Now, "Token should not be expired");
     }
 
-    private static bool CheckTokenParts(string token)
+    [Fact]
+    public async Task Auth_with_invalid_email_returns_error()
     {
-        var opt = StringSplitOptions.RemoveEmptyEntries;
-        var parts = token.Split('.', opt);
-        if (parts.Length == 3)
-        {
-            return true;
-        }
-        return false;
+        var result = await _pb.Admins
+            .AuthWithPasswordAsync("wrong@email.com", _fixture.Settings.AdminTesterPassword);
+
+        result.IsSuccess.Should().BeFalse();
     }
 
+    [Fact]
+    public async Task Auth_with_invalid_password_returns_error()
+    {
+        var result = await _pb.Admins
+            .AuthWithPasswordAsync(_fixture.Settings.AdminTesterEmail, "wrongpassword");
+
+        result.IsSuccess.Should().BeFalse();
+    }
+
+    [Theory]
+    [InlineData(null, "password")]
+    [InlineData("", "password")]
+    [InlineData("   ", "password")]
+    [InlineData("test@example.com", null)]
+    [InlineData("test@example.com", "")]
+    [InlineData("test@example.com", "   ")]
+    public async Task Auth_with_invalid_arguments_throws_exception(string email, string password)
+    {
+        Func<Task> act = async () => await _pb.Admins
+            .AuthWithPasswordAsync(email, password);
+
+        await act.Should().ThrowAsync<ArgumentException>();
+    }
+
+    [Fact]
+    public async Task Auth_can_be_cancelled()
+    {
+        using var cts = new CancellationTokenSource();
+        cts.CancelAfter(1); // Cancel almost immediately
+
+        Func<Task> act = async () => await _pb.Admins
+            .AuthWithPasswordAsync(
+                _fixture.Settings.AdminTesterEmail,
+                _fixture.Settings.AdminTesterPassword,
+                cts.Token
+            );
+
+        await act.Should().ThrowAsync<TaskCanceledException>();
+    }
 }
 
