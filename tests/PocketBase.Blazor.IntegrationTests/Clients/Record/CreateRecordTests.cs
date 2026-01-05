@@ -1,4 +1,4 @@
-namespace PocketBase.Blazor.IntegrationTests.Clients.Collections;
+namespace PocketBase.Blazor.IntegrationTests.Clients.Record;
 
 [Collection("PocketBase.Blazor Clients")]
 public class CreateRecordTests
@@ -9,6 +9,5 @@ public class CreateRecordTests
     {
         _pb = fixture.Client;
     }
-
-
 }
+

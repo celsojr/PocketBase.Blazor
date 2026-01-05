@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace PocketBase.Blazor.Options
 {
     /// <summary>
@@ -29,6 +31,27 @@ namespace PocketBase.Blazor.Options
         /// If true, skips the total count calculation for performance optimization.
         /// </summary>
         public bool SkipTotal { get; set; }
+
+        internal Dictionary<string, object?> BuildQuery(int page = 1, int perPage = 30)
+        {
+            // PocketBase defaults are page=1 and perPage=30
+            var query = new Dictionary<string, object?>
+            {
+                ["page"] = page != 1 ? page : Page,
+                ["perPage"] = perPage != 30 ? perPage : PerPage
+            };
+
+            if (!string.IsNullOrEmpty(Sort))
+                query["sort"] = Sort;
+
+            if (!string.IsNullOrEmpty(Filter))
+                query["filter"] = Filter;
+
+            if (SkipTotal)
+                query["skipTotal"] = "true";
+
+            return query;
+        }
     }
 }
 

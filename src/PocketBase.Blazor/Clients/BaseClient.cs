@@ -36,10 +36,7 @@ namespace PocketBase.Blazor.Clients
         public virtual async Task<Result<ListResult<T>>> GetListAsync<T>(int page = 1, int perPage = 30, ListOptions? options = null, CancellationToken cancellationToken = default)
         {
             options ??= new ListOptions();
-
-            options.Query ??= new Dictionary<string, object?>();
-            options.Query["page"] = page;
-            options.Query["perPage"] = perPage;
+            options.Query = options.BuildQuery(page, perPage);
 
             return await Http.SendAsync<ListResult<T>>(HttpMethod.Get, BasePath, query: options.Query, cancellationToken: cancellationToken);
         }

@@ -1,39 +1,20 @@
-namespace PocketBase.Blazor.IntegrationTests.Clients.Collections;
+namespace PocketBase.Blazor.IntegrationTests.Clients.Record;
 
 //using Requests;
 //using Responses;
 //using IntegrationTests.Helpers;
 using Models;
 
-[Collection("PocketBase.Blazor.Admin")]
+[Collection("PocketBase.Blazor.User")]
 public class ListRecordsTests
 {
     private readonly IPocketBase _pb;
-    private readonly PocketBaseAdminFixture _fixture;
+    private readonly PocketBaseUserFixture _fixture;
 
-    public ListRecordsTests(PocketBaseAdminFixture fixture)
+    public ListRecordsTests(PocketBaseUserFixture fixture)
     {
         _fixture = fixture;
         _pb = fixture.Client;
-    }
-
-    [Fact]
-    public async Task List_collections()
-    {
-        var adminPb = new PocketBase(_pb.BaseUrl);
-
-        _ = await adminPb.Admins
-            .AuthWithPasswordAsync(
-                _fixture.Settings.AdminTesterEmail,
-                _fixture.Settings.AdminTesterPassword
-            );
-
-        var result = await adminPb
-            .Collections
-            .GetListAsync<CollectionModel>();
-
-        result.IsSuccess.Should().BeTrue();
-        result.Value.Items.Should().NotBeEmpty();
     }
 
     //[Fact]
