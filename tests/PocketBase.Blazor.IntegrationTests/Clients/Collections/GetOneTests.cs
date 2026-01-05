@@ -42,9 +42,8 @@ public class GetOneTests
 
         result.IsSuccess.Should().BeFalse();
         result.Errors.Should().NotBeNull();
-        result.Errors.First().Message.Should().Contain("Missing required item id");
-
-        result.Errors.First().Metadata.GetValueOrDefault("status").Should().Be(404);
+        result.Errors[0].Message.Should().Contain("Missing required item id");
+        result.Errors[0].Metadata.GetValueOrDefault("status").Should().Be(404);
     }
 
     [Fact]
@@ -56,6 +55,7 @@ public class GetOneTests
         result.IsSuccess.Should().BeFalse();
         result.Errors.Should().NotBeNull();
         result.Errors[0].Message.Should().Contain("Missing required item id");
+        result.Errors[0].Metadata.GetValueOrDefault("status").Should().Be(404);
     }
 
     [Fact]
@@ -67,6 +67,7 @@ public class GetOneTests
         result.IsSuccess.Should().BeFalse();
         result.Errors.Should().NotBeNull();
         result.Errors[0].Message.Should().Contain("Missing required item id");
+        result.Errors[0].Metadata.GetValueOrDefault("status").Should().Be(404);
     }
 
     [Fact]
