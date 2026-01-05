@@ -8,5 +8,15 @@ namespace PocketBase.Blazor.Options
         public Dictionary<string, object?>? Query { get; set; }
         public object? Body { get; set; }
         public string? RequestKey { get; set; }
+
+        public virtual Dictionary<string, object?> BuildQuery(int page = 1, int perPage = 30)
+        {
+            var query = new Dictionary<string, object?>
+            {
+                ["page"] = page,
+                ["perPage"] = perPage
+            };
+            return Query ?? query;
+        }
     }
 }

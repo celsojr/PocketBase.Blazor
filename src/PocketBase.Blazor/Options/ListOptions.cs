@@ -34,12 +34,11 @@ namespace PocketBase.Blazor.Options
 
         internal Dictionary<string, object?> BuildQuery(int page = 1, int perPage = 30)
         {
+            var query = base.BuildQuery(page, perPage);
+
             // PocketBase defaults are page=1 and perPage=30
-            var query = new Dictionary<string, object?>
-            {
-                ["page"] = page != 1 ? page : Page,
-                ["perPage"] = perPage != 30 ? perPage : PerPage
-            };
+            query["page"] = page != 1 ? page : Page;
+            query["perPage"] = perPage != 30 ? perPage : PerPage;
 
             if (!string.IsNullOrEmpty(Sort))
                 query["sort"] = Sort;

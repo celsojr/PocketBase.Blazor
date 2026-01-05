@@ -99,17 +99,20 @@ namespace PocketBase.Blazor.Clients
         }
 
         /// <inheritdoc />
-        public virtual async Task<Result<T>> GetOneAsync<T>(string id, CommonOptions? options = null, CancellationToken cancellationToken = default)
+        public virtual async Task<Result<T>> GetOneAsync<T>(string? id, CommonOptions? options = null, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(id))
             {
                 return await Task.FromResult(
                     Result.Fail<T>(
-                        new Error("Missing required record id.")
+                        new Error("Missing required item id.")
                             .WithMetadata("status", 404)
                     )
                 );
             }
+
+            options ??= new CommonOptions();
+            options.Query = options.BuildQuery();
 
             var url = $"{BasePath}/{UrlEncode(id)}";
 

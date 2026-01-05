@@ -6,11 +6,9 @@ using Blazor.Models;
 public class ListCollectionsTest
 {
     private readonly IPocketBase _pb;
-    private readonly PocketBaseAdminFixture _fixture;
 
     public ListCollectionsTest(PocketBaseAdminFixture fixture)
     {
-        _fixture = fixture;
         _pb = fixture.Client;
     }
 

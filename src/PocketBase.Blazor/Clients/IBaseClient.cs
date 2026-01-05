@@ -38,6 +38,18 @@ namespace PocketBase.Blazor.Clients
         /// Thrown when the client receives an invalid response.
         /// </exception>
         Task<Result<ListResult<T>>> GetListAsync<T>(int page = 1, int perPage = 30, ListOptions? options = null, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Gets a single item of type T by its ID.
+        /// </summary>
+        /// <param name="id">The ID of the item to retrieve.</param>
+        /// <param name="options">Additional options for the request.</param>
+        /// <param name="cancellationToken">A cancellation token to cancel the request.</param>
+        /// <returns>A task representing the asynchronous operation, with a result of the requested item.</returns>
+        /// <exception cref="ClientResponseError">
+        /// Thrown when the client receives an invalid response.
+        /// </exception>
+        Task<Result<T>> GetOneAsync<T>(string? id, CommonOptions? options = null, CancellationToken cancellationToken = default);
     }
 }
 
