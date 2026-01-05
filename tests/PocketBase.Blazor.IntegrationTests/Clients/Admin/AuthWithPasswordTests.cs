@@ -17,12 +17,25 @@ public class AuthWithPasswordTests
     {
         var result = await _pb.Admins
             .AuthWithPasswordAsync(
-                _fixture.Settings.UserTesterEmail,
-                _fixture.Settings.UserTesterPassword
+                _fixture.Settings.AdminTesterEmail,
+                _fixture.Settings.AdminTesterPassword
             );
 
         result.IsSuccess.Should().BeTrue();
         result.Value.Token.Should().NotBeNullOrEmpty();
+        CheckTokenParts(result.Value.Token).Should().BeTrue();
     }
+
+    private static bool CheckTokenParts(string token)
+    {
+        var opt = StringSplitOptions.RemoveEmptyEntries;
+        var parts = token.Split('.', opt);
+        if (parts.Length == 3)
+        {
+            return true;
+        }
+        return false;
+    }
+
 }
 
