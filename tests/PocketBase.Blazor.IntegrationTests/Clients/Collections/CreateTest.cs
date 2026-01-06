@@ -1,6 +1,5 @@
 namespace PocketBase.Blazor.IntegrationTests.Clients.Collections;
 
-using System.Text.Json.Serialization;
 using Blazor.Models;
 using Blazor.Models.Collection;
 
@@ -65,20 +64,7 @@ public class CreateTest
             }
         };
 
-        var options = new PocketBaseOptions();
-        options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
-        options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
-
-        var client = new PocketBase(_pb.BaseUrl, options: options);
-
-        var auth = await client.Admins.AuthWithPasswordAsync(
-            _fixture.Settings.AdminTesterEmail,
-            _fixture.Settings.AdminTesterPassword
-        );
-
-        auth.IsSuccess.Should().BeTrue();
-
-        var result = await client.Collections.CreateAsync(newCollection);
+        var result = await _pb.Collections.CreateAsync(newCollection);
 
         result.IsSuccess.Should().BeTrue();
         result.Value.Name.Should().Be(newCollection.Name);
@@ -97,20 +83,7 @@ public class CreateTest
             ViewQuery = "SELECT id, email FROM users"
         };
 
-        var options = new PocketBaseOptions();
-        options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
-        options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
-
-        var client = new PocketBase(_pb.BaseUrl, options: options);
-
-        var auth = await client.Admins.AuthWithPasswordAsync(
-            _fixture.Settings.AdminTesterEmail,
-            _fixture.Settings.AdminTesterPassword
-        );
-
-        auth.IsSuccess.Should().BeTrue();
-
-        var result = await client.Collections.CreateAsync(newCollection);
+        var result = await _pb.Collections.CreateAsync(newCollection);
 
         result.IsSuccess.Should().BeTrue();
         result.Value.Name.Should().Be(newCollection.Name);

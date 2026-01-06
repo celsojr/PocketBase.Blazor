@@ -13,13 +13,13 @@ namespace PocketBase.Blazor.Models.Collection
         /// Collection fields.
         /// Required for base/auth collections, optional for views.
         /// </summary>
-        public IList<FieldModel>? Fields { get; init; }
+        public IList<FieldModel>? Fields { get; init; } = [];
 
         /// <summary>
         /// SQL indexes and unique constraints.
         /// Not supported for view collections.
         /// </summary>
-        public IList<string>? Indexes { get; init; }
+        public IList<string>? Indexes { get; init; } = [];
 
         /// <summary>
         /// Marks collection as system (restricted mutations).

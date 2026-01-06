@@ -1,5 +1,7 @@
 namespace PocketBase.Blazor.IntegrationTests.Infrastructure;
 
+using System.Text.Json.Serialization;
+
 public class PocketBaseAdminFixture : IAsyncLifetime
 {
     public IPocketBase Client { get; private set; } = null!;
@@ -8,7 +10,10 @@ public class PocketBaseAdminFixture : IAsyncLifetime
     public async Task InitializeAsync()
     {
         var options = new PocketBaseOptions();
-        options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower;
+        //options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower;
+        options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+        options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.Never;
+        options.JsonSerializerOptions.WriteIndented = true;
 
         Client = new PocketBase(Settings.BaseUrl, options: options);
 
