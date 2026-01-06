@@ -13,7 +13,7 @@ namespace PocketBase.Blazor.Models.Collection
 
         public AuthCollectionCreateModel()
         {
-            Type = CollectionType.Auth;
+            Type = nameof(CollectionType.Auth).ToLowerInvariant();
         }
     }
 }

@@ -6,7 +6,7 @@ namespace PocketBase.Blazor.Models.Collection
     {
         public BoolFieldModel()
         {
-            Type = FieldType.Bool;
+            Type = nameof(FieldType.Bool).ToLowerInvariant();
         }
     }
 }

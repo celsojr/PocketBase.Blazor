@@ -9,7 +9,7 @@ namespace PocketBase.Blazor.Models.Collection
 
         public TextFieldModel()
         {
-            Type = FieldType.Text;
+            Type = nameof(FieldType.Text).ToLowerInvariant();
         }
     }
 }

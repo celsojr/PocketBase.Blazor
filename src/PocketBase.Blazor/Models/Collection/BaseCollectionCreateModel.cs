@@ -6,7 +6,7 @@ namespace PocketBase.Blazor.Models.Collection
     {
         public BaseCollectionCreateModel()
         {
-            Type = CollectionType.Base;
+            Type = nameof(CollectionType.Base).ToLowerInvariant();
         }
     }
 }

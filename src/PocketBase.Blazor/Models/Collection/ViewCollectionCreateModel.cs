@@ -2,7 +2,6 @@ using PocketBase.Blazor.Enums;
 
 namespace PocketBase.Blazor.Models.Collection
 {
-
     public sealed class ViewCollectionCreateModel : CollectionCreateModel
     {
         public string? ListRule { get; init; }
@@ -11,7 +10,7 @@ namespace PocketBase.Blazor.Models.Collection
 
         public ViewCollectionCreateModel()
         {
-            Type = CollectionType.View;
+            Type = nameof(CollectionType.View).ToLowerInvariant();
         }
     }
 }

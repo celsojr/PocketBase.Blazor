@@ -1,5 +1,6 @@
 namespace PocketBase.Blazor.IntegrationTests.Clients.Collections;
 
+using System.Text.Json.Serialization;
 using Blazor.Models;
 using Blazor.Models.Collection;
 
@@ -7,10 +8,12 @@ using Blazor.Models.Collection;
 public class CreateTest
 {
     private readonly IPocketBase _pb;
+    private readonly PocketBaseAdminFixture _fixture;
 
     public CreateTest(PocketBaseAdminFixture fixture)
     {
         _pb = fixture.Client;
+        _fixture = fixture;
     }
 
     [Fact]
@@ -62,12 +65,26 @@ public class CreateTest
             }
         };
 
-        var createResult = await _pb.Collections.CreateAsync(newCollection);
-        createResult.IsSuccess.Should().BeTrue();
-        createResult.Value.Name.Should().Be(newCollection.Name);
-        createResult.Value.CreateRule.Should().Be(newCollection.CreateRule);
-        createResult.Value.UpdateRule.Should().Be(newCollection.UpdateRule);
-        createResult.Value.DeleteRule.Should().Be(newCollection.DeleteRule);
+        var options = new PocketBaseOptions();
+        options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+        options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+
+        var client = new PocketBase(_pb.BaseUrl, options: options);
+
+        var auth = await client.Admins.AuthWithPasswordAsync(
+            _fixture.Settings.AdminTesterEmail,
+            _fixture.Settings.AdminTesterPassword
+        );
+
+        auth.IsSuccess.Should().BeTrue();
+
+        var result = await client.Collections.CreateAsync(newCollection);
+
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Name.Should().Be(newCollection.Name);
+        result.Value.CreateRule.Should().Be(newCollection.CreateRule);
+        result.Value.UpdateRule.Should().Be(newCollection.UpdateRule);
+        result.Value.DeleteRule.Should().Be(newCollection.DeleteRule);
     }
 
     [Fact]
@@ -77,14 +94,28 @@ public class CreateTest
         {
             Name = "exampleView",
             ListRule = "@request.auth.id != \"\"",
-            ViewQuery = "SELECT id, name FROM posts"
+            ViewQuery = "SELECT id, email FROM users"
         };
 
-        var createResult = await _pb.Collections.CreateAsync(newCollection);
-        createResult.IsSuccess.Should().BeTrue();
-        createResult.Value.Name.Should().Be(newCollection.Name);
-        createResult.Value.ListRule.Should().Be(newCollection.ListRule);
-        createResult.Value.ViewQuery.Should().Be(newCollection.ViewQuery);
+        var options = new PocketBaseOptions();
+        options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+        options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+
+        var client = new PocketBase(_pb.BaseUrl, options: options);
+
+        var auth = await client.Admins.AuthWithPasswordAsync(
+            _fixture.Settings.AdminTesterEmail,
+            _fixture.Settings.AdminTesterPassword
+        );
+
+        auth.IsSuccess.Should().BeTrue();
+
+        var result = await client.Collections.CreateAsync(newCollection);
+
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Name.Should().Be(newCollection.Name);
+        result.Value.ListRule.Should().Be(newCollection.ListRule);
+        result.Value.ViewQuery.Should().Be(newCollection.ViewQuery);
     }
 
     [Fact]
