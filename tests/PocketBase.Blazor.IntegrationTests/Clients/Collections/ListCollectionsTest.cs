@@ -146,7 +146,7 @@ public class ListCollectionsTest
     public async Task List_collections_respects_cancellation_token()
     {
         using var cts = new CancellationTokenSource();
-        cts.CancelAfter(1); // Cancel after 100ms
+        cts.CancelAfter(0); // Cancel immediately
 
         Func<Task> act = async () => await _pb.Collections
             .GetListAsync<CollectionModel>(cancellationToken: cts.Token);

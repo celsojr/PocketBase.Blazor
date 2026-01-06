@@ -70,7 +70,7 @@ public class AuthWithPasswordTests
     public async Task Auth_can_be_cancelled()
     {
         using var cts = new CancellationTokenSource();
-        cts.CancelAfter(1); // Cancel almost immediately
+        cts.CancelAfter(0); // Cancel immediately
 
         Func<Task> act = async () => await _pb.Admins
             .AuthWithPasswordAsync(

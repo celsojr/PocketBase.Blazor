@@ -3,7 +3,7 @@ namespace PocketBase.Blazor.IntegrationTests.Clients.Health;
 using Responses;
 using System.Net;
 
-[Collection("PocketBase.Blazor Clients")]
+[Collection("PocketBase.Blazor.User")]
 public class HealthCheckTests
 {
     private readonly IPocketBase _pb;
