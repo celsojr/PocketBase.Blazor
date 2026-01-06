@@ -75,6 +75,26 @@ namespace PocketBase.Blazor.Clients
         /// </exception>
         Task<Result<CollectionModel>> CreateAsync(CollectionCreateModel model, CancellationToken cancellationToken = default);
 
+        /// <summary>
+        /// Updates an existing item of type T in the specified collection.
+        /// </summary>
+        /// <typeparam name="T">The type of the item to update.</typeparam>
+        /// <param name="collectionIdOrName">The ID or name of the collection.</param>
+        /// <param name="body">The updated data for the item.</param>
+        /// <param name="options">Additional options for the request.</param>
+        /// <param name="cancellationToken">A cancellation token to cancel the request.</param>
+        /// <returns>A task representing the asynchronous operation, with a result of the updated item.</returns>
+        Task<Result<T>> UpdateAsync<T>(string collectionIdOrName, object? body = null, CommonOptions? options = null, CancellationToken cancellationToken = default) where T : BaseModel;
+
+        /// <summary>
+        /// Updates an existing collection.
+        /// </summary>
+        /// <param name="collectionIdOrName">The ID or name of the collection to update.</param>
+        /// <param name="model">The updated collection data.</param>
+        /// <param name="cancellationToken">A cancellation token to cancel the request.</param>
+        /// <returns>A task representing the asynchronous operation, with a result of the updated collection.</returns>
+        Task<Result<CollectionModel>> UpdateAsync(string collectionIdOrName, CollectionUpdateModel model, CancellationToken cancellationToken = default);
+
     }
 }
 

@@ -141,6 +141,37 @@ namespace PocketBase.Blazor.Clients
                 body: model,
                 cancellationToken: cancellationToken);
         }
+
+        /// <inheritdoc />
+        public virtual async Task<Result<T>> UpdateAsync<T>(string collectionIdOrName, object? body = null, CommonOptions? options = null, CancellationToken cancellationToken = default) where T : BaseModel
+        {
+            if (string.IsNullOrWhiteSpace(collectionIdOrName))
+                throw new ArgumentException("Collection id or name is required.", nameof(collectionIdOrName));
+
+            return await Http.SendAsync<T>(
+                HttpMethod.Patch,
+                $"{BasePath}/{UrlEncode(collectionIdOrName)}",
+                body: body ?? options?.Body,
+                query: options?.Query,
+                cancellationToken: cancellationToken
+            );
+        }
+
+        /// <inheritdoc />
+        public virtual async Task<Result<CollectionModel>> UpdateAsync(string collectionIdOrName, CollectionUpdateModel model, CancellationToken cancellationToken = default)
+        {
+            if (string.IsNullOrWhiteSpace(collectionIdOrName))
+                throw new ArgumentException("Collection id or name is required.", nameof(collectionIdOrName));
+
+            return await Http.SendAsync<CollectionModel>(
+                HttpMethod.Patch,
+                $"{BasePath}/{UrlEncode(collectionIdOrName)}",
+                body: model,
+                cancellationToken: cancellationToken
+            );
+        }
+
+
     }
 }
 
