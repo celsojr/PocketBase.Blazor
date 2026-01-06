@@ -4,6 +4,7 @@ using FluentResults;
 using PocketBase.Blazor.Exceptions;
 using PocketBase.Blazor.Http;
 using PocketBase.Blazor.Models;
+using PocketBase.Blazor.Models.Collection;
 using PocketBase.Blazor.Options;
 
 namespace PocketBase.Blazor.Clients
@@ -50,6 +51,30 @@ namespace PocketBase.Blazor.Clients
         /// Thrown when the client receives an invalid response.
         /// </exception>
         Task<Result<T>> GetOneAsync<T>(string? id, CommonOptions? options = null, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Creates a new item of type T.
+        /// </summary>
+        /// <param name="body">The data to create the item with.</param>
+        /// <param name="options">Additional options for the request.</param>
+        /// <param name="cancellationToken">A cancellation token to cancel the request.</param>
+        /// <returns>A task representing the asynchronous operation, with a result of the created item.</returns>
+        /// <exception cref="ClientResponseError">
+        /// Thrown when the client receives an invalid response.
+        /// </exception>
+        Task<Result<T>> CreateAsync<T>(object? body = null, CommonOptions? options = null, CancellationToken cancellationToken = default) where T : BaseModel;
+
+        /// <summary>
+        /// Creates a new collection.
+        /// </summary>
+        /// <param name="model">The model representing the collection to create.</param>
+        /// <param name="cancellationToken">A cancellation token to cancel the request.</param>
+        /// <returns>A task representing the asynchronous operation, with a result of the created collection.</returns>
+        /// <exception cref="ClientResponseError">
+        /// Thrown when the client receives an invalid response.
+        /// </exception>
+        Task<Result<CollectionModel>> CreateAsync(CollectionCreateModel model, CancellationToken cancellationToken = default);
+
     }
 }
 

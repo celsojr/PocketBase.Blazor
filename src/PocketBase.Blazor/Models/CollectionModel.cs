@@ -1,7 +1,4 @@
-using System;
 using System.Collections.Generic;
-using System.Text.Json.Serialization;
-using PocketBase.Blazor.Converters;
 using PocketBase.Blazor.Options;
 
 namespace PocketBase.Blazor.Models
@@ -9,25 +6,8 @@ namespace PocketBase.Blazor.Models
     /// <summary>
     /// Represents a PocketBase collection model.
     /// </summary>
-    public class CollectionModel
+    public class CollectionModel : BaseModel
     {
-        /// <summary>
-        /// Gets or sets the unique identifier of the collection.
-        /// </summary>
-        public string? Id { get; set; }
-
-        /// <summary>
-        /// Gets or sets the creation timestamp of the collection.
-        /// </summary>
-        [JsonConverter(typeof(DateTimeConverter))]
-        public DateTime? Created { get; set; }
-
-        /// <summary>
-        /// Gets or sets the last updated timestamp of the collection.
-        /// </summary>
-        [JsonConverter(typeof(DateTimeConverter))]
-        public DateTime? Updated { get; set; }
-
         /// <summary>
         /// Gets or sets the name of the collection.
         /// </summary>
@@ -52,6 +32,11 @@ namespace PocketBase.Blazor.Models
         /// Gets or sets the view access rule of the collection.
         /// </summary>
         public string? ViewRule { get; set; }
+
+        /// <summary>
+        /// Gets or sets the view query of the collection.
+        /// </summary>
+        public string? ViewQuery { get; set; }
 
         /// <summary>
         /// Gets or sets the create access rule of the collection.

@@ -7,6 +7,7 @@ using System.Web;
 using FluentResults;
 using PocketBase.Blazor.Http;
 using PocketBase.Blazor.Models;
+using PocketBase.Blazor.Models.Collection;
 using PocketBase.Blazor.Options;
 
 namespace PocketBase.Blazor.Clients
@@ -131,6 +132,15 @@ namespace PocketBase.Blazor.Clients
                 cancellationToken: cancellationToken);
         }
 
+        /// <inheritdoc />
+        public virtual async Task<Result<CollectionModel>> CreateAsync(CollectionCreateModel model, CancellationToken cancellationToken = default)
+        {
+            return await Http.SendAsync<CollectionModel>(
+                HttpMethod.Post,
+                BasePath,
+                body: model,
+                cancellationToken: cancellationToken);
+        }
     }
 }
 
