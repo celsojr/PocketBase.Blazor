@@ -12,6 +12,7 @@ namespace PocketBase.Blazor.Models.Collection
         /// Collection type (e.g. base, auth, etc.).
         /// </summary>
         public string Type { get; init; } = null!;
+
         /// <summary>
         /// Unique collection name (table name).
         /// </summary>

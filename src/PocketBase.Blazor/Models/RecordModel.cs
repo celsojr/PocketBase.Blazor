@@ -1,17 +1,14 @@
-using System;
 using System.Collections.Generic;
 using System.Text.Json;
 
-namespace PocketBase.Blazor.Models;
-
-public class RecordModel
+namespace PocketBase.Blazor.Models
 {
-    public string Id { get; set; } = "";
-    public DateTime Created { get; set; }
-    public DateTime Updated { get; set; }
+    public class RecordModel : BaseModel
+    {
+        // dynamic fields
+        public Dictionary<string, object> Data { get; set; } = new();
 
-    // dynamic fields
-    public Dictionary<string, object> Data { get; set; } = new();
-
-    public JsonElement? Expand { get; set; }
+        public JsonElement? Expand { get; set; }
+    }
 }
+

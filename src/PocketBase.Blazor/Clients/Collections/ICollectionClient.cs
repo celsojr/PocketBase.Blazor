@@ -45,13 +45,10 @@ namespace PocketBase.Blazor.Clients.Collections
         /// Deletes all records associated with the specified collection.
         /// </summary>
         /// <param name="collectionNameOrId">The name or ID of the collection to truncate.</param>
-        /// <param name="options">Additional options for the request.</param>
         /// <param name="cancellationToken">Optional cancellation token.</param>
         /// <returns>A result indicating the success or failure of the operation.</returns>
-        /// <exception cref="ClientResponseError">
-        /// Thrown when the client receives an invalid response.
-        /// </exception>
-        Task<Result> TruncateAsync(string collectionNameOrId, CommonOptions? options = null, CancellationToken cancellationToken = default);
+        /// <exception cref="ClientResponseError">Thrown when the client receives an invalid response.</exception>
+        Task<Result> TruncateAsync(string collectionNameOrId, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Creates a new collection.

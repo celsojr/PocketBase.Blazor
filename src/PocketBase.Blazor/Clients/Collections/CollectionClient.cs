@@ -50,15 +50,9 @@ namespace PocketBase.Blazor.Clients.Collections
         }
 
         /// <inheritdoc />
-        public async Task<Result> TruncateAsync(string collectionNameOrId, CommonOptions? options = null, CancellationToken cancellationToken = default)
+        public async Task<Result> TruncateAsync(string collectionNameOrId, CancellationToken cancellationToken = default)
         {
-            return await Http.SendAsync(
-                HttpMethod.Delete,
-                $"{BasePath}/{UrlEncode(collectionNameOrId)}/truncate",
-                body: options?.Body,
-                query: options?.Query,
-                cancellationToken: cancellationToken
-            );
+            return await Http.SendAsync(HttpMethod.Delete, $"{BasePath}/{UrlEncode(collectionNameOrId)}/truncate", cancellationToken: cancellationToken);
         }
 
         /// <inheritdoc />
