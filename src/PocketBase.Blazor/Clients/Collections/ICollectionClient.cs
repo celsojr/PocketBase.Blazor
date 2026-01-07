@@ -28,7 +28,7 @@ namespace PocketBase.Blazor.Clients.Collections
         /// <exception cref="ClientResponseError">
         /// Thrown when the client receives an invalid response.
         /// </exception>
-        Task<Result> ImportAsync(IEnumerable<CollectionModel> collections, bool deleteMissing = false, CommonOptions? options = null, CancellationToken cancellationToken = default);
+        Task<Result> ImportAsync(IReadOnlyList<CollectionCreateModel> collections, bool deleteMissing = false, CommonOptions? options = null, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Retrieves the scaffold for the collection.

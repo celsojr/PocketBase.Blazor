@@ -24,9 +24,10 @@ namespace PocketBase.Blazor.Clients.Collections
         }
 
         /// <inheritdoc />
-        public async Task<Result> ImportAsync(IEnumerable<CollectionModel> collections, bool deleteMissing = false, CommonOptions? options = null, CancellationToken cancellationToken = default)
+        public async Task<Result> ImportAsync(IReadOnlyList<CollectionCreateModel> collections, bool deleteMissing = false, CommonOptions? options = null, CancellationToken cancellationToken = default)
         {
             options ??= new CommonOptions();
+            options.BuildQuery();
 
             options.Body = new Dictionary<string, object>
             {

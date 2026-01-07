@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 using PocketBase.Blazor.Models.Collection.Fields;
 
 namespace PocketBase.Blazor.Models.Collection
@@ -6,13 +7,12 @@ namespace PocketBase.Blazor.Models.Collection
     /// <summary>
     /// Base model for creating a new collection.
     /// </summary>
+    [JsonPolymorphic(TypeDiscriminatorPropertyName = "type")]
+    [JsonDerivedType(typeof(AuthCollectionCreateModel), "auth")]
+    [JsonDerivedType(typeof(BaseCollectionCreateModel), "base")]
+    [JsonDerivedType(typeof(ViewCollectionCreateModel), "view")]
     public abstract class CollectionCreateModel
     {
-        /// <summary>
-        /// Collection type (e.g. base, auth, etc.).
-        /// </summary>
-        public string Type { get; init; } = null!;
-
         /// <summary>
         /// Unique collection name (table name).
         /// </summary>

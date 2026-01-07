@@ -1,4 +1,3 @@
-using PocketBase.Blazor.Enums;
 using PocketBase.Blazor.Options;
 
 namespace PocketBase.Blazor.Models.Collection
@@ -10,11 +9,6 @@ namespace PocketBase.Blazor.Models.Collection
         public string? DeleteRule { get; init; }
 
         public PasswordAuthOptions PasswordAuth { get; init; } = new();
-
-        public AuthCollectionCreateModel()
-        {
-            Type = nameof(CollectionType.Auth).ToLowerInvariant();
-        }
     }
 }
 
