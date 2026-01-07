@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using PocketBase.Blazor.Models.Collection.Fields;
 
 namespace PocketBase.Blazor.Models.Collection
 {

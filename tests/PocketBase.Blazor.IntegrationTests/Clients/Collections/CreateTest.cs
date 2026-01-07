@@ -2,6 +2,7 @@ namespace PocketBase.Blazor.IntegrationTests.Clients.Collections;
 
 using Blazor.Models;
 using Blazor.Models.Collection;
+using Blazor.Models.Collection.Fields;
 
 [Collection("PocketBase.Blazor.Admin")]
 public class CreateTest
