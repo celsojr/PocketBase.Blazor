@@ -7,12 +7,10 @@ using Blazor.Models.Collection.Fields;
 public class UpdateTest
 {
     private readonly IPocketBase _pb;
-    private readonly PocketBaseAdminFixture _fixture;
-    
+ 
     public UpdateTest(PocketBaseAdminFixture fixture)
     {
         _pb = fixture.Client;
-        _fixture = fixture;
     }
 
     [Fact]

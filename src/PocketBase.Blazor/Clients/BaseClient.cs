@@ -7,7 +7,6 @@ using System.Web;
 using FluentResults;
 using PocketBase.Blazor.Http;
 using PocketBase.Blazor.Models;
-using PocketBase.Blazor.Models.Collection;
 using PocketBase.Blazor.Options;
 
 namespace PocketBase.Blazor.Clients
@@ -133,24 +132,14 @@ namespace PocketBase.Blazor.Clients
         }
 
         /// <inheritdoc />
-        public virtual async Task<Result<CollectionModel>> CreateAsync(CollectionCreateModel model, CancellationToken cancellationToken = default)
+        public virtual async Task<Result<T>> UpdateAsync<T>(string? id, object? body = null, CommonOptions? options = null, CancellationToken cancellationToken = default) where T : BaseModel
         {
-            return await Http.SendAsync<CollectionModel>(
-                HttpMethod.Post,
-                BasePath,
-                body: model,
-                cancellationToken: cancellationToken);
-        }
-
-        /// <inheritdoc />
-        public virtual async Task<Result<T>> UpdateAsync<T>(string collectionIdOrName, object? body = null, CommonOptions? options = null, CancellationToken cancellationToken = default) where T : BaseModel
-        {
-            if (string.IsNullOrWhiteSpace(collectionIdOrName))
-                throw new ArgumentException("Collection id or name is required.", nameof(collectionIdOrName));
+            if (string.IsNullOrWhiteSpace(id))
+                throw new ArgumentException("Collection id or name is required.", nameof(id));
 
             return await Http.SendAsync<T>(
                 HttpMethod.Patch,
-                $"{BasePath}/{UrlEncode(collectionIdOrName)}",
+                $"{BasePath}/{UrlEncode(id)}",
                 body: body ?? options?.Body,
                 query: options?.Query,
                 cancellationToken: cancellationToken
@@ -158,19 +147,20 @@ namespace PocketBase.Blazor.Clients
         }
 
         /// <inheritdoc />
-        public virtual async Task<Result<CollectionModel>> UpdateAsync(string collectionIdOrName, CollectionUpdateModel model, CancellationToken cancellationToken = default)
+        public virtual async Task<Result> DeleteAsync(string? id, CancellationToken cancellationToken = default)
         {
-            if (string.IsNullOrWhiteSpace(collectionIdOrName))
-                throw new ArgumentException("Collection id or name is required.", nameof(collectionIdOrName));
+            if (string.IsNullOrWhiteSpace(id))
+            {
+                return await Task.FromResult(
+                    Result.Fail(
+                        new Error("Missing required item id.")
+                            .WithMetadata("status", 404)
+                    )
+                );
+            }
 
-            return await Http.SendAsync<CollectionModel>(
-                HttpMethod.Patch,
-                $"{BasePath}/{UrlEncode(collectionIdOrName)}",
-                body: model,
-                cancellationToken: cancellationToken
-            );
+            return await Http.SendAsync(HttpMethod.Delete, $"{BasePath}/{UrlEncode(id)}", cancellationToken: cancellationToken);
         }
-
 
     }
 }

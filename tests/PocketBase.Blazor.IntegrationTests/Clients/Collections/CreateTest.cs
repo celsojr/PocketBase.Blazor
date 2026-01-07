@@ -8,12 +8,10 @@ using Blazor.Models.Collection.Fields;
 public class CreateTest
 {
     private readonly IPocketBase _pb;
-    private readonly PocketBaseAdminFixture _fixture;
 
     public CreateTest(PocketBaseAdminFixture fixture)
     {
         _pb = fixture.Client;
-        _fixture = fixture;
     }
 
     [Fact]

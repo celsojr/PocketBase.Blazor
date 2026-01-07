@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading;
@@ -5,6 +6,7 @@ using System.Threading.Tasks;
 using FluentResults;
 using PocketBase.Blazor.Http;
 using PocketBase.Blazor.Models;
+using PocketBase.Blazor.Models.Collection;
 using PocketBase.Blazor.Options;
 
 namespace PocketBase.Blazor.Clients.Collections
@@ -55,6 +57,30 @@ namespace PocketBase.Blazor.Clients.Collections
                 $"{BasePath}/{UrlEncode(collectionNameOrId)}/truncate",
                 body: options?.Body,
                 query: options?.Query,
+                cancellationToken: cancellationToken
+            );
+        }
+
+        /// <inheritdoc />
+        public virtual async Task<Result<CollectionModel>> CreateAsync(CollectionCreateModel model, CancellationToken cancellationToken = default)
+        {
+            return await Http.SendAsync<CollectionModel>(
+                HttpMethod.Post,
+                BasePath,
+                body: model,
+                cancellationToken: cancellationToken);
+        }
+
+        /// <inheritdoc />
+        public virtual async Task<Result<CollectionModel>> UpdateAsync(string collectionIdOrName, CollectionUpdateModel model, CancellationToken cancellationToken = default)
+        {
+            if (string.IsNullOrWhiteSpace(collectionIdOrName))
+                throw new ArgumentException("Collection id or name is required.", nameof(collectionIdOrName));
+
+            return await Http.SendAsync<CollectionModel>(
+                HttpMethod.Patch,
+                $"{BasePath}/{UrlEncode(collectionIdOrName)}",
+                body: model,
                 cancellationToken: cancellationToken
             );
         }

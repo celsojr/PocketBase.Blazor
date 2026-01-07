@@ -4,7 +4,6 @@ using FluentResults;
 using PocketBase.Blazor.Exceptions;
 using PocketBase.Blazor.Http;
 using PocketBase.Blazor.Models;
-using PocketBase.Blazor.Models.Collection;
 using PocketBase.Blazor.Options;
 
 namespace PocketBase.Blazor.Clients
@@ -65,36 +64,25 @@ namespace PocketBase.Blazor.Clients
         Task<Result<T>> CreateAsync<T>(object? body = null, CommonOptions? options = null, CancellationToken cancellationToken = default) where T : BaseModel;
 
         /// <summary>
-        /// Creates a new collection.
-        /// </summary>
-        /// <param name="model">The model representing the collection to create.</param>
-        /// <param name="cancellationToken">A cancellation token to cancel the request.</param>
-        /// <returns>A task representing the asynchronous operation, with a result of the created collection.</returns>
-        /// <exception cref="ClientResponseError">
-        /// Thrown when the client receives an invalid response.
-        /// </exception>
-        Task<Result<CollectionModel>> CreateAsync(CollectionCreateModel model, CancellationToken cancellationToken = default);
-
-        /// <summary>
         /// Updates an existing item of type T in the specified collection.
         /// </summary>
         /// <typeparam name="T">The type of the item to update.</typeparam>
-        /// <param name="collectionIdOrName">The ID or name of the collection.</param>
+        /// <param name="id">The ID or name of the collection.</param>
         /// <param name="body">The updated data for the item.</param>
         /// <param name="options">Additional options for the request.</param>
         /// <param name="cancellationToken">A cancellation token to cancel the request.</param>
         /// <returns>A task representing the asynchronous operation, with a result of the updated item.</returns>
-        Task<Result<T>> UpdateAsync<T>(string collectionIdOrName, object? body = null, CommonOptions? options = null, CancellationToken cancellationToken = default) where T : BaseModel;
+        /// <exception cref="ClientResponseError">Thrown when the client receives an invalid response.</exception>
+        Task<Result<T>> UpdateAsync<T>(string? id, object? body = null, CommonOptions? options = null, CancellationToken cancellationToken = default) where T : BaseModel;
 
         /// <summary>
-        /// Updates an existing collection.
+        /// Deletes an existing item by its ID.
         /// </summary>
-        /// <param name="collectionIdOrName">The ID or name of the collection to update.</param>
-        /// <param name="model">The updated collection data.</param>
+        /// <param name="id">The ID of the item to delete.</param>
         /// <param name="cancellationToken">A cancellation token to cancel the request.</param>
-        /// <returns>A task representing the asynchronous operation, with a result of the updated collection.</returns>
-        Task<Result<CollectionModel>> UpdateAsync(string collectionIdOrName, CollectionUpdateModel model, CancellationToken cancellationToken = default);
-
+        /// <returns>A task representing the asynchronous operation, with a result indicating the success or failure of the deletion.</returns>
+        /// <exception cref="ClientResponseError">Thrown when the client receives an invalid response.</exception>
+        Task<Result> DeleteAsync(string? id, CancellationToken cancellationToken = default);
     }
 }
 
