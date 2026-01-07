@@ -3,6 +3,9 @@ using PocketBase.Blazor.Models.Collection.Fields;
 
 namespace PocketBase.Blazor.Models.Collection
 {
+    /// <summary>
+    /// Base model for updating an existing collection.
+    /// </summary>
     public abstract class CollectionUpdateModel
     {
         /// <summary>

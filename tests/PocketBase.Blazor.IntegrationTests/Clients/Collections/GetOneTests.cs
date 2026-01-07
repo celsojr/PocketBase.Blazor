@@ -1,9 +1,9 @@
 namespace PocketBase.Blazor.IntegrationTests.Clients.Collections;
 
-using Blazor.Models;
-using Blazor.IntegrationTests.Helpers;
 using System.Diagnostics;
 using System.Net;
+using Blazor.Models;
+using Blazor.Responses;
 
 [Collection("PocketBase.Blazor.Admin")]
 public class GetOneTests
@@ -44,9 +44,12 @@ public class GetOneTests
 
         result.IsSuccess.Should().BeFalse();
         result.Errors.Should().NotBeNull();
-        result.Errors[0].Message.Should().Contain("Missing required item id");
-        result.Errors[0].Metadata.GetValueOrDefault("status")
-            .Should().Be((int)HttpStatusCode.NotFound, new BoxedIntEqualityComparer());
+
+        var error = JsonSerializer.Deserialize<ErrorResponse>(result.Errors[0].Message);
+
+        error.Should().NotBeNull();
+        error.Message.Should().Be("Missing required item id");
+        error.Status.Should().Be((int)HttpStatusCode.NotFound);
     }
 
     [Fact]
@@ -57,9 +60,12 @@ public class GetOneTests
 
         result.IsSuccess.Should().BeFalse();
         result.Errors.Should().NotBeNull();
-        result.Errors[0].Message.Should().Contain("Missing required item id");
-        result.Errors[0].Metadata.GetValueOrDefault("status")
-            .Should().Be((int)HttpStatusCode.NotFound, new BoxedIntEqualityComparer());
+        
+        var error = JsonSerializer.Deserialize<ErrorResponse>(result.Errors[0].Message);
+
+        error.Should().NotBeNull();
+        error.Message.Should().Be("Missing required item id");
+        error.Status.Should().Be((int)HttpStatusCode.NotFound);
     }
 
     [Fact]
@@ -70,9 +76,12 @@ public class GetOneTests
 
         result.IsSuccess.Should().BeFalse();
         result.Errors.Should().NotBeNull();
-        result.Errors[0].Message.Should().Contain("Missing required item id");
-        result.Errors[0].Metadata.GetValueOrDefault("status")
-            .Should().Be((int)HttpStatusCode.NotFound, new BoxedIntEqualityComparer());
+        
+        var error = JsonSerializer.Deserialize<ErrorResponse>(result.Errors[0].Message);
+
+        error.Should().NotBeNull();
+        error.Message.Should().Be("Missing required item id");
+        error.Status.Should().Be((int)HttpStatusCode.NotFound);
     }
 
     [Fact]
