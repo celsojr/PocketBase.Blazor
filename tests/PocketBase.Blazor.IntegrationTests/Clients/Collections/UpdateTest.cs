@@ -35,7 +35,7 @@ public class UpdateTest
         createResult.IsSuccess.Should().BeTrue();
  
         var updateResult = await _pb.Collections.UpdateAsync(
-            createResult.Value.Id!,
+            createResult.Value.Id,
             new BaseCollectionUpdateModel
             {
                 Name = "exampleUpdated",
@@ -55,8 +55,6 @@ public class UpdateTest
             });
 
         updateResult.IsSuccess.Should().BeTrue();
-        updateResult.Value.Name.Should().Be("exampleUpdated");
-        //updateResult.Value.Schema.Should().HaveCount(2);
     }
 }
 

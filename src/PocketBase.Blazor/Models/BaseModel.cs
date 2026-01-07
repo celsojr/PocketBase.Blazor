@@ -8,7 +8,7 @@ namespace PocketBase.Blazor.Models
     public abstract class BaseModel : IBaseModel
     {
         [JsonPropertyName("id")]
-        public virtual string? Id { get; set; }
+        public virtual string Id { get; set; } = null!;
 
         [JsonPropertyName("created")]
         [JsonConverter(typeof(DateTimeConverter))]
