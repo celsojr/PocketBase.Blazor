@@ -193,7 +193,7 @@ public class TruncateTests
                 Name = "_test_truncate_safe_",
 
                 // Make sure this is a system table,
-                // placed under system fold in the web UI
+                // placed under System fold in the web UI
                 System = true,
 
                 Fields = new List<FieldModel>
