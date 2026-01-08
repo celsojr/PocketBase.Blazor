@@ -8,6 +8,7 @@ using PocketBase.Blazor.Http;
 using PocketBase.Blazor.Models;
 using PocketBase.Blazor.Models.Collection;
 using PocketBase.Blazor.Options;
+using PocketBase.Blazor.Responses.Scaffolds;
 
 namespace PocketBase.Blazor.Clients.Collections
 {
@@ -39,9 +40,12 @@ namespace PocketBase.Blazor.Clients.Collections
         }
 
         /// <inheritdoc />
-        public async Task<Result<CollectionModel>> GetScaffoldsAsync(CommonOptions? options = null,  CancellationToken cancellationToken = default)
+        public async Task<Result<CollectionScaffoldsResponse>> GetScaffoldsAsync(CommonOptions? options = null,  CancellationToken cancellationToken = default)
         {
-            return await Http.SendAsync<CollectionModel>(
+            options ??= new CommonOptions();
+            options.BuildQuery();
+
+            return await Http.SendAsync<CollectionScaffoldsResponse>(
                 HttpMethod.Get,
                 $"{BasePath}/meta/scaffolds",
                 body: options?.Body,

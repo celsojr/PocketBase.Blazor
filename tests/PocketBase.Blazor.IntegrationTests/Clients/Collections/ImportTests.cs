@@ -1,8 +1,8 @@
-using PocketBase.Blazor.Models;
-using PocketBase.Blazor.Models.Collection;
-using PocketBase.Blazor.Models.Collection.Fields;
-
 namespace PocketBase.Blazor.IntegrationTests.Clients.Collections;
+
+using Blazor.Models;
+using Blazor.Models.Collection;
+using Blazor.Models.Collection.Fields;
 
 [Collection("PocketBase.Blazor.Admin")]
 public class ImportTests

@@ -1,6 +1,6 @@
-using System.Text.Json;
-
 namespace PocketBase.Blazor.Options;
+
+using System.Text.Json;
 
 public class PocketBaseOptions
 {

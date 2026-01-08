@@ -6,6 +6,7 @@ using PocketBase.Blazor.Exceptions;
 using PocketBase.Blazor.Models;
 using PocketBase.Blazor.Models.Collection;
 using PocketBase.Blazor.Options;
+using PocketBase.Blazor.Responses.Scaffolds;
 
 namespace PocketBase.Blazor.Clients.Collections
 {
@@ -39,7 +40,7 @@ namespace PocketBase.Blazor.Clients.Collections
         /// <exception cref="ClientResponseError">
         /// Thrown when the client receives an invalid response.
         /// </exception>
-        Task<Result<CollectionModel>> GetScaffoldsAsync(CommonOptions? options = null, CancellationToken cancellationToken = default);
+        Task<Result<CollectionScaffoldsResponse>> GetScaffoldsAsync(CommonOptions? options = null, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Deletes all records associated with the specified collection.

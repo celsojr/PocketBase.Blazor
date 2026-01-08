@@ -184,14 +184,19 @@ public class TruncateTests
     }
 
     [Fact]
-    public async Task Truncate_regular_collection_should_succeed()
+    public async Task Truncate_system_collection_should_succeed()
     {
+        // **This test is destructive — isolate it carefully**
         // Create a system collection for testing
         var createResult = await _pb.Collections.CreateAsync(
             new BaseCollectionCreateModel
             {
                 Name = "_test_truncate_safe_",
+
+                // Make sure this is a system table,
+                // placed under system fold in the web UI
                 System = true,
+
                 Fields = new List<FieldModel>
                 {
                     new TextFieldModel { Name = "data" }
