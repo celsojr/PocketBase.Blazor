@@ -121,7 +121,7 @@ public class ImportTests
         getExisting.IsSuccess.Should().BeTrue();
     }
 
-    [Fact]
+    [Fact(Skip = "Destructive test - run only in isolated environment")]
     public async Task Import_with_deleteMissing_removes_non_imported_collections()
     {
         // **This test is destructive — isolate it carefully**

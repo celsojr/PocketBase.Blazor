@@ -186,7 +186,6 @@ public class TruncateTests
     [Fact]
     public async Task Truncate_system_collection_should_succeed()
     {
-        // **This test is destructive — isolate it carefully**
         // Create a system collection for testing
         var createResult = await _pb.Collections.CreateAsync(
             new BaseCollectionCreateModel

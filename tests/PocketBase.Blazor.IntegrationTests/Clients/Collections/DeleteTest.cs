@@ -23,7 +23,7 @@ public class DeleteTest
         var createResult = await _pb.Collections.CreateAsync(
             new BaseCollectionCreateModel
             {
-                Name = "exampleToDelete",
+                Name = "exampleToDeleteSuccessfully",
                 Fields = new List<FieldModel>
                 {
                     new TextFieldModel

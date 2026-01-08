@@ -13,4 +13,7 @@ INSERT INTO posts VALUES('Grace','<p>Seventh time&rsquo;s the charm.</p>','2025-
 INSERT INTO posts VALUES('Heidi','<p>Almost done with our sample data.</p>','2025-12-21 15:30:43.077Z','7sfcqks933gfe1z','Eighth Post','2025-12-21 17:17:08.591Z',0,'eighth-post');
 INSERT INTO posts VALUES('Ivan','<p>Just one more after this!</p>','2025-12-21 15:30:56.036Z','b4su072kshh5xet','Ninth Post','2025-12-21 17:14:29.833Z',1,'ninth-post');
 INSERT INTO posts VALUES('Judy','<p>This is the last dummy post.</p>','2025-12-21 15:31:13.413Z','ixodttnw2w3jouz','Tenth Post','2025-12-21 17:14:12.739Z',1,'tenth-post');
+CREATE TABLE `users` (`avatar` TEXT DEFAULT '' NOT NULL, `created` TEXT DEFAULT '' NOT NULL, `email` TEXT DEFAULT '' NOT NULL, `emailVisibility` BOOLEAN DEFAULT FALSE NOT NULL, `id` TEXT PRIMARY KEY DEFAULT ('r'||lower(hex(randomblob(7)))) NOT NULL, `name` TEXT DEFAULT '' NOT NULL, `password` TEXT DEFAULT '' NOT NULL, `tokenKey` TEXT DEFAULT '' NOT NULL, `updated` TEXT DEFAULT '' NOT NULL, `verified` BOOLEAN DEFAULT FALSE NOT NULL);
+INSERT INTO users VALUES('','2025-12-26 08:36:01.657Z','joe.doe@email.com',0,'y5zyt2hku32glvj','Joe Doe','$2a$10$4h6sdy.hj3MS7LQmY1mKn.4SVPTqXc0cUM1N5u56X8geOK9cFIW5u','V9cMs5ZOftf2p3XUrC6yV7997VKuwgjUUDStrvhNgTZLKZkqIt','2025-12-26 08:36:01.657Z',1);
 COMMIT;
+
