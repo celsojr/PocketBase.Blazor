@@ -7,11 +7,9 @@ using Responses;
 public class ListRecordsTests
 {
     private readonly IPocketBase _pb;
-    private readonly PocketBaseUserFixture _fixture;
 
     public ListRecordsTests(PocketBaseUserFixture fixture)
     {
-        _fixture = fixture;
         _pb = fixture.Client;
     }
 
@@ -66,11 +64,13 @@ public class ListRecordsTests
             .GetListAsync<RecordResponse>(
                 options: new ListOptions
                 {
-                    Filter = "created > \"2025-12-21 15:30:03.028Z\""
+                    Filter = "created > \"2025-12-21 15:30:03.028Z\"",
+                    SkipTotal = true // Performance optimization
                 });
 
         result.IsSuccess.Should().BeTrue();
         result.Value.Items.Should().NotBeEmpty();
+        result.Value.TotalItems.Should().Be(-1);
     }
 
     [Fact]

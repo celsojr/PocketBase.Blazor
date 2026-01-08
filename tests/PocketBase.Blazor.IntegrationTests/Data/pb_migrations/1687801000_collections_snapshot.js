@@ -776,8 +776,6 @@ migrate((app) => {
       "viewRule": "id = @request.auth.id"
     },
     {
-      "createRule": null,
-      "deleteRule": null,
       "fields": [
         {
           "autogeneratePattern": "[a-z0-9]{15}",
@@ -791,6 +789,20 @@ migrate((app) => {
           "primaryKey": true,
           "required": true,
           "system": true,
+          "type": "text"
+        },
+        {
+          "autogeneratePattern": "",
+          "hidden": false,
+          "id": "text2560465762",
+          "max": 0,
+          "min": 0,
+          "name": "slug",
+          "pattern": "",
+          "presentable": false,
+          "primaryKey": false,
+          "required": true,
+          "system": false,
           "type": "text"
         },
         {
@@ -834,6 +846,15 @@ migrate((app) => {
         },
         {
           "hidden": false,
+          "id": "bool1875119480",
+          "name": "is_published",
+          "presentable": false,
+          "required": false,
+          "system": false,
+          "type": "bool"
+        },
+        {
+          "hidden": false,
           "id": "autodate2990389176",
           "name": "created",
           "onCreate": true,
@@ -855,7 +876,8 @@ migrate((app) => {
       ],
       "id": "pbc_1125843985",
       "indexes": [
-        "CREATE INDEX `idx_P1U2DlTSyL` ON `posts` (`title`)"
+        "CREATE INDEX `idx_P1U2DlTSyL` ON `posts` (`title`)",
+        "CREATE INDEX `idx_785jc6wkFu` ON `posts` (`slug`)"
       ],
       "name": "posts",
       "system": false,
