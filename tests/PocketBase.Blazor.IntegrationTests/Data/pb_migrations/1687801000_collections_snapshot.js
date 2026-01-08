@@ -857,12 +857,14 @@ migrate((app) => {
       "indexes": [
         "CREATE INDEX `idx_P1U2DlTSyL` ON `posts` (`title`)"
       ],
-      "listRule": null,
       "name": "posts",
       "system": false,
       "type": "base",
-      "updateRule": null,
-      "viewRule": null
+      "listRule": "@request.auth.id != \"\"",
+      "viewRule": "@request.auth.id != \"\"",
+      "createRule": "@request.auth.id != \"\"",
+      "updateRule": "@request.auth.id != \"\"",
+      "deleteRule": "@request.auth.id != \"\"",
     }
   ];
 

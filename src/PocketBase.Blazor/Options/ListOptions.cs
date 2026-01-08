@@ -36,9 +36,14 @@ namespace PocketBase.Blazor.Options
         {
             var query = base.BuildQuery(page, perPage);
 
-            // PocketBase defaults are page=1 and perPage=30
-            query["page"] = page != 1 ? page : Page;
-            query["perPage"] = perPage != 30 ? perPage : PerPage;
+            var effectivePage = Page ?? page;
+            var effectivePerPage = PerPage ?? perPage;
+
+            if (effectivePage != 1)
+                query["page"] = effectivePage;
+            
+            if (effectivePerPage != 30)
+                query["perPage"] = effectivePerPage;
 
             if (!string.IsNullOrEmpty(Sort))
                 query["sort"] = Sort;
