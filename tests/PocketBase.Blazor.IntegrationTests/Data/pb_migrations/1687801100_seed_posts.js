@@ -76,6 +76,8 @@ migrate((app) => {
         },
     ]
 
+    const categories = app.findRecordsByFilter("categories", "")
+
     for (const item of data) {
         const record = new Record(posts)
 
@@ -84,6 +86,11 @@ migrate((app) => {
         record.set("slug", item.slug)
         record.set("content", item.content)
         record.set("is_published", item.is_published)
+
+        if (categories.length > 0) {
+            const randomCategory = categories[Math.floor(Math.random() * categories.length)]
+            record.set("field", randomCategory.id)
+        }
 
         app.save(record)
     }

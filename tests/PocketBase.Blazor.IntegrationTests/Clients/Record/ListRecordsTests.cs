@@ -85,5 +85,37 @@ public class ListRecordsTests
         result.IsSuccess.Should().BeTrue();
         result.Value.Items.Should().BeEmpty();
     }
+
+    [Fact]
+    public async Task Get_posts_with_expanded_category_should_include_category_data()
+    {
+        var result = await _pb.Collection("posts")
+            .GetListAsync<PostResponse>(options: new ListOptions()
+            {
+                Expand = "field"
+            });
+
+        result.Value.Items.Should().NotBeEmpty();
+
+        var post = result.Value.Items.First();
+        post.Expand.Should().NotBeNull();
+        post.Expand.Should().ContainKey("field");
+
+        var fieldExpansion = post.Expand["field"];
+        fieldExpansion.Should().NotBeNull();
+
+        var options = new PocketBaseOptions();
+        options.JsonSerializerOptions.WriteIndented = true;
+
+        var fieldJson = JsonSerializer.Serialize(fieldExpansion, options.JsonSerializerOptions);
+        var category = JsonSerializer.Deserialize<CategoryResponse>(fieldJson, options.JsonSerializerOptions);
+
+        category.Should().NotBeNull();
+        category.Name.Should().NotBeNullOrWhiteSpace();
+        category.Slug.Should().NotBeNullOrWhiteSpace();
+        category.Created.Kind.Should().Be(DateTimeKind.Utc);
+    }
 }
+
+record CategoryResponse(string Name, string Slug, DateTime Created);
 

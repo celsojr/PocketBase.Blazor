@@ -11,6 +11,6 @@ public class PostResponse : RecordResponse
     public string? Author { get; init; }
 
     [JsonPropertyName("is_published")]
-    public bool IsPublished { get; set; }
+    public bool IsPublished { get; init; }
 }
 

@@ -5,16 +5,23 @@ namespace PocketBase.Blazor.Options
     public class CommonOptions : SendOptions
     {
         public string? Fields { get; set; }
+        public string? Expand { get; set; }
 
         public override Dictionary<string, object?> BuildQuery(int page = 1, int perPage = 30)
         {
+            var query = base.BuildQuery(page, perPage);
+
             if (!string.IsNullOrEmpty(Fields))
             {
-                var query = base.BuildQuery(page, perPage);
                 query["fields"] = Fields;
-                return query;
             }
-            return base.BuildQuery(page, perPage);
+
+            if (!string.IsNullOrEmpty(Expand))
+            {
+                query["expand"] = Expand;
+            }
+
+            return query;
         }
     }
 }
