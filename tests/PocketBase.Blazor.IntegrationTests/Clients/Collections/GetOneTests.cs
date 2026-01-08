@@ -2,8 +2,8 @@ namespace PocketBase.Blazor.IntegrationTests.Clients.Collections;
 
 using System.Diagnostics;
 using System.Net;
+using Blazor.IntegrationTests.Helpers;
 using Blazor.Models;
-using Blazor.Responses;
 
 [Collection("PocketBase.Blazor.Admin")]
 public class GetOneTests
@@ -45,11 +45,9 @@ public class GetOneTests
         result.IsSuccess.Should().BeFalse();
         result.Errors.Should().NotBeNull();
 
-        var error = JsonSerializer.Deserialize<ErrorResponse>(result.Errors[0].Message);
-
-        error.Should().NotBeNull();
-        error.Message.Should().Be("Missing required item id");
-        error.Status.Should().Be((int)HttpStatusCode.NotFound);
+        result.Errors[0].Message.Should().Contain("Missing required item id");
+        result.Errors[0].Metadata.GetValueOrDefault("status")
+            .Should().Be((int)HttpStatusCode.NotFound, new BoxedIntEqualityComparer());
     }
 
     [Fact]
@@ -60,12 +58,10 @@ public class GetOneTests
 
         result.IsSuccess.Should().BeFalse();
         result.Errors.Should().NotBeNull();
-        
-        var error = JsonSerializer.Deserialize<ErrorResponse>(result.Errors[0].Message);
-
-        error.Should().NotBeNull();
-        error.Message.Should().Be("Missing required item id");
-        error.Status.Should().Be((int)HttpStatusCode.NotFound);
+ 
+        result.Errors[0].Message.Should().Contain("Missing required item id");
+        result.Errors[0].Metadata.GetValueOrDefault("status")
+            .Should().Be((int)HttpStatusCode.NotFound, new BoxedIntEqualityComparer());
     }
 
     [Fact]
@@ -77,11 +73,9 @@ public class GetOneTests
         result.IsSuccess.Should().BeFalse();
         result.Errors.Should().NotBeNull();
         
-        var error = JsonSerializer.Deserialize<ErrorResponse>(result.Errors[0].Message);
-
-        error.Should().NotBeNull();
-        error.Message.Should().Be("Missing required item id");
-        error.Status.Should().Be((int)HttpStatusCode.NotFound);
+        result.Errors[0].Message.Should().Contain("Missing required item id");
+        result.Errors[0].Metadata.GetValueOrDefault("status")
+            .Should().Be((int)HttpStatusCode.NotFound, new BoxedIntEqualityComparer());
     }
 
     [Fact]
