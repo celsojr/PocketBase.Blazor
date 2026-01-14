@@ -90,18 +90,21 @@ public class ListRecordsTests
     public async Task Get_posts_with_expanded_category_should_include_category_data()
     {
         var result = await _pb.Collection("posts")
-            .GetListAsync<PostResponse>(options: new ListOptions()
-            {
-                Expand = "field"
-            });
+            .GetListAsync<PostResponse>(
+                perPage: 1,
+                options: new ListOptions()
+                {
+                    Expand = "category",
+                    SkipTotal = true
+                });
 
         result.Value.Items.Should().NotBeEmpty();
 
         var post = result.Value.Items.First();
         post.Expand.Should().NotBeNull();
-        post.Expand.Should().ContainKey("field");
+        post.Expand.Should().ContainKey("category");
 
-        var fieldExpansion = post.Expand["field"];
+        var fieldExpansion = post.Expand["category"];
         fieldExpansion.Should().NotBeNull();
 
         var options = new PocketBaseOptions();

@@ -89,7 +89,7 @@ migrate((app) => {
 
         if (categories.length > 0) {
             const randomCategory = categories[Math.floor(Math.random() * categories.length)]
-            record.set("field", randomCategory.id)
+            record.set("category", randomCategory.id)
         }
 
         app.save(record)

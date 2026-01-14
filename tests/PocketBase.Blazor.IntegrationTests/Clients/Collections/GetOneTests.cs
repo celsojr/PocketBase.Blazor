@@ -18,7 +18,13 @@ public class GetOneTests
     [Fact]
     public async Task Get_one_collection_by_id()
     {
-        var listResult = await _pb.Collections.GetListAsync<CollectionModel>();
+        var listResult = await _pb.Collections.GetListAsync<CollectionModel>(
+            perPage: 1,
+            options: new ListOptions()
+            { 
+                SkipTotal = true
+            });
+
         listResult.IsSuccess.Should().BeTrue();
         var collectionId = listResult.Value.Items.First().Id;
 
@@ -81,7 +87,13 @@ public class GetOneTests
     [Fact]
     public async Task Get_one_with_fields_option()
     {
-        var listResult = await _pb.Collections.GetListAsync<CollectionModel>();
+        var listResult = await _pb.Collections.GetListAsync<CollectionModel>(
+            perPage: 1,
+            options: new ListOptions()
+            { 
+                SkipTotal = true
+            });
+
         var collectionId = listResult.Value.Items.First().Id;
 
         var result = await _pb.Collections.GetOneAsync<CollectionModel>(
@@ -98,7 +110,13 @@ public class GetOneTests
     [Fact]
     public async Task Get_one_returns_complete_model_data()
     {
-        var listResult = await _pb.Collections.GetListAsync<CollectionModel>();
+        var listResult = await _pb.Collections.GetListAsync<CollectionModel>(
+            perPage: 1,
+            options: new ListOptions()
+            { 
+                SkipTotal = true
+            });
+
         var collection = listResult.Value.Items.First();
 
         var getResult = await _pb.Collections
@@ -117,7 +135,13 @@ public class GetOneTests
     [Fact]
     public async Task Get_one_with_custom_model_type()
     {
-        var listResult = await _pb.Collections.GetListAsync<CollectionModel>();
+        var listResult = await _pb.Collections.GetListAsync<CollectionModel>(
+            perPage: 1,
+            options: new ListOptions()
+            { 
+                SkipTotal = true
+            });
+
         var collectionId = listResult.Value.Items.First().Id;
 
         var result = await _pb.Collections
@@ -133,7 +157,13 @@ public class GetOneTests
     [Fact]
     public async Task Get_one_respects_cancellation_token()
     {
-        var listResult = await _pb.Collections.GetListAsync<CollectionModel>();
+        var listResult = await _pb.Collections.GetListAsync<CollectionModel>(
+            perPage: 1,
+            options: new ListOptions()
+            { 
+                SkipTotal = true
+            });
+
         var collectionId = listResult.Value.Items.First().Id;
 
         using var cts = new CancellationTokenSource();
@@ -148,7 +178,13 @@ public class GetOneTests
     [Fact]
     public async Task Get_one_returns_quickly_for_existing_collection()
     {
-        var listResult = await _pb.Collections.GetListAsync<CollectionModel>();
+        var listResult = await _pb.Collections.GetListAsync<CollectionModel>(
+            perPage: 1,
+            options: new ListOptions()
+            { 
+                SkipTotal = true
+            });
+
         var collectionId = listResult.Value.Items.First().Id;
 
         var stopwatch = Stopwatch.StartNew();
@@ -179,7 +215,13 @@ public class GetOneTests
     public async Task Get_one_system_collection()
     {
         var listResult = await _pb.Collections
-            .GetListAsync<CollectionModel>(options: new ListOptions { Filter = "system = true" });
+            .GetListAsync<CollectionModel>(
+            perPage: 1,
+            options: new ListOptions()
+            { 
+                Filter = "system = true",
+                SkipTotal = true,
+            });
 
         var systemCollection = listResult.Value.Items.First();
         var result = await _pb.Collections
@@ -193,7 +235,13 @@ public class GetOneTests
     public async Task Get_one_base_collection()
     {
         var listResult = await _pb.Collections
-            .GetListAsync<CollectionModel>(options: new ListOptions { Filter = "type = 'base'" });
+            .GetListAsync<CollectionModel>(
+            perPage: 1,
+            options: new ListOptions()
+            { 
+                Filter = "type = 'base'",
+                SkipTotal = true,
+            });
 
         var baseCollection = listResult.Value.Items.First();
         var result = await _pb.Collections
@@ -207,7 +255,13 @@ public class GetOneTests
     public async Task Get_one_view_collection()
     {
         var listResult = await _pb.Collections
-            .GetListAsync<CollectionModel>(options: new ListOptions { Filter = "type = 'view'" });
+            .GetListAsync<CollectionModel>(
+            perPage: 1,
+            options: new ListOptions()
+            { 
+                Filter = "type = 'view'",
+                SkipTotal = true,
+            });
 
         if (listResult.Value.Items.Count != 0)
         {

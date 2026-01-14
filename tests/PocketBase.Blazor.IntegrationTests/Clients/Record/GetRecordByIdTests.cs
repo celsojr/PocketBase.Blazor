@@ -16,7 +16,13 @@ public class GetRecordByIdTests
     public async Task Get_one_record_by_id()
     {
         var listResult = await _pb.Collection("users")
-            .GetListAsync<RecordResponse>(perPage: 1);
+            .GetListAsync<RecordResponse>(
+                perPage: 1,
+                options: new ListOptions()
+                {
+                    SkipTotal = true,
+                }
+            );
 
         listResult.IsSuccess.Should().BeTrue();
         var recordId = listResult.Value.Items.First().Id;

@@ -151,7 +151,7 @@ public class ImportTests
                     ]
                 }
             ],
-            deleteMissing: true
+            deleteMissing: true // This permanently deletes all other tables.
         );
 
         importResult.IsSuccess.Should().BeTrue();
