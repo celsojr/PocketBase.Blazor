@@ -1,0 +1,40 @@
+{
+  "id": "post_123456",
+  "created": "2023-10-15T14:30:00.000Z",
+  "updated": "2023-10-16T09:15:00.000Z",
+  "collectionId": "posts",
+  "collectionName": "blog_posts",
+  "title": "Complete Blog Post Example",
+  "slug": "complete-blog-post-example",
+  "content": "This is a comprehensive example of a blog post with all properties filled. It demonstrates JSON serialization and deserialization.",
+  "author": "Jane Smith",
+  "category": "Software Development",
+  "is_published": true,
+  "expand": {
+    "author": {
+      "id": "user_789",
+      "name": "Jane Smith",
+      "email": "jane@example.com",
+      "role": "Author"
+    },
+    "category": {
+      "id": "cat_456",
+      "name": "Software Development",
+      "description": "Posts about software development practices"
+    },
+    "tags": [
+      {
+        "id": "tag_1",
+        "name": "C#"
+      },
+      {
+        "id": "tag_2",
+        "name": ".NET"
+      },
+      {
+        "id": "tag_3",
+        "name": "Testing"
+      }
+    ]
+  }
+}

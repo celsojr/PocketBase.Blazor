@@ -36,7 +36,7 @@ public class CreateRecordTests
         // Act
         var postRequest = new PostCreateRequest
         {
-            Category = categoryResult.Value.Id,
+            Category = categoryResult.Value.Id, // Or categoryId
             Slug = "eleven-post",
             Title = "Eleven Post",
             Author = "Tester",
@@ -58,4 +58,3 @@ public class CreateRecordTests
     }
 
 }
-

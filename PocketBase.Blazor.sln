@@ -36,9 +36,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspireSample.ApiService", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspireSample.AppHost", "samples\AspireSample\AspireSample.AppHost\AspireSample.AppHost.csproj", "{5D235F71-3EE5-407A-9B6C-978402B7505A}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PocketBase.Blazor.IntegrationTests", "PocketBase.Blazor.IntegrationTests", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PocketBase.Blazor.UnitTests", "tests\PocketBase.Blazor.UnitTests\PocketBase.Blazor.UnitTests.csproj", "{650EB415-64D6-4C5B-840A-AE4962D3F419}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PocketBase.Blazor.IntegrationTests", "tests\PocketBase.Blazor.IntegrationTests\PocketBase.Blazor.IntegrationTests.csproj", "{F2A2CF32-D47D-40C5-A571-58939C7D7872}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PocketBase.Blazor.IntegrationTests", "tests\PocketBase.Blazor.IntegrationTests\PocketBase.Blazor.IntegrationTests.csproj", "{2056669B-2B8B-92A4-AE4E-1B8F4A8F1CB2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -70,10 +70,14 @@ Global
 		{5D235F71-3EE5-407A-9B6C-978402B7505A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5D235F71-3EE5-407A-9B6C-978402B7505A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5D235F71-3EE5-407A-9B6C-978402B7505A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F2A2CF32-D47D-40C5-A571-58939C7D7872}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F2A2CF32-D47D-40C5-A571-58939C7D7872}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F2A2CF32-D47D-40C5-A571-58939C7D7872}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F2A2CF32-D47D-40C5-A571-58939C7D7872}.Release|Any CPU.Build.0 = Release|Any CPU
+		{650EB415-64D6-4C5B-840A-AE4962D3F419}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{650EB415-64D6-4C5B-840A-AE4962D3F419}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{650EB415-64D6-4C5B-840A-AE4962D3F419}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{650EB415-64D6-4C5B-840A-AE4962D3F419}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2056669B-2B8B-92A4-AE4E-1B8F4A8F1CB2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2056669B-2B8B-92A4-AE4E-1B8F4A8F1CB2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2056669B-2B8B-92A4-AE4E-1B8F4A8F1CB2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2056669B-2B8B-92A4-AE4E-1B8F4A8F1CB2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -86,8 +90,8 @@ Global
 		{ACE75411-5603-4696-940A-28A8BB91DB9E} = {92159112-33D9-4588-8928-DB221955A66D}
 		{3CB4B84E-DF43-4BDA-BBD9-6F346C54D57F} = {92159112-33D9-4588-8928-DB221955A66D}
 		{5D235F71-3EE5-407A-9B6C-978402B7505A} = {92159112-33D9-4588-8928-DB221955A66D}
-		{02EA681E-C7D8-13C7-8484-4AC65E1B71E8} = {8948AFE3-5CC9-44E1-BFE8-4890FB79598B}
-		{F2A2CF32-D47D-40C5-A571-58939C7D7872} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{650EB415-64D6-4C5B-840A-AE4962D3F419} = {8948AFE3-5CC9-44E1-BFE8-4890FB79598B}
+		{2056669B-2B8B-92A4-AE4E-1B8F4A8F1CB2} = {8948AFE3-5CC9-44E1-BFE8-4890FB79598B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {F86EFA39-6E7F-4FCF-85FA-499D1F2B697B}
