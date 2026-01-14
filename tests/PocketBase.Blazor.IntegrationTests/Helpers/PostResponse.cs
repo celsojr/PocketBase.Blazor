@@ -9,6 +9,7 @@ public class PostResponse : RecordResponse
     public string? Slug { get; init; }
     public string? Content { get; init; }
     public string? Author { get; init; }
+    public string? Category { get; set; }
 
     [JsonPropertyName("is_published")]
     public bool IsPublished { get; init; }

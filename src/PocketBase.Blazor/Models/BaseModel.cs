@@ -26,7 +26,8 @@ namespace PocketBase.Blazor.Models
 
         public override string ToString()
         {
-            return JsonSerializer.Serialize(this);
+            return JsonSerializer.Serialize(this,
+                new JsonSerializerOptions { WriteIndented = true });
         }
     }
 }
