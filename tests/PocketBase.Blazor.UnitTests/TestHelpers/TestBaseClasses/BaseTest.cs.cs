@@ -49,14 +49,39 @@ public abstract class BaseTest : IDisposable
 
     protected async Task<T> LoadTestDataAsync<T>(string relativePath)
     {
-        var basePath = AppContext.BaseDirectory;
-        var fullPath = Path.Combine(basePath, "TestData", relativePath);
+        var json = await LoadTestDataAsStringAsync(relativePath);
+        return JsonSerializer.Deserialize<T>(json, JsonOptions)!;
+    }
 
+    protected static async Task<string> LoadTestDataAsStringAsync(string relativePath)
+    {
+        var basePath = AppContext.BaseDirectory;
+    
+        relativePath = relativePath
+            .Replace('/', Path.DirectorySeparatorChar)
+            .Replace('\\', Path.DirectorySeparatorChar)
+            .TrimStart(Path.DirectorySeparatorChar);
+
+        var fullPath = Path.Combine(basePath, relativePath);
+    
         if (!File.Exists(fullPath))
             throw new FileNotFoundException($"Test data file not found: {fullPath}");
+    
+        return await File.ReadAllTextAsync(fullPath);
+    }
 
-        var json = await File.ReadAllTextAsync(fullPath);
-        return JsonSerializer.Deserialize<T>(json, JsonOptions)!;
+    public static IEnumerable<object[]> GetTestDataFiles()
+    {
+        var files = new[]
+        {
+            "TestData/Json/Responses/PostResponse/MinimalPost.json",
+            "TestData/Json/Responses/PostResponse/CompletePost.json",
+            "TestData/Json/Responses/PostResponse/WithExpand.json",
+            "TestData/Json/Responses/PostResponse/WithNullValues.json",
+            "TestData/Json/Responses/PostResponse/WithEmptyExpand.json"
+        };
+        
+        return files.Select(f => new object[] { f });
     }
 
     public void Dispose()
@@ -72,12 +97,6 @@ public class AutoFixtureCustomization : ICustomization
     {
         fixture.Register(() => DateTime.UtcNow);
         fixture.Register(() => Guid.NewGuid().ToString());
-
-        // Customize PostResponse
-        //fixture.Customize<PostResponse>(static composer => composer
-        //    .Without(x => x.Expand)
-        //    .With(x => x.IsPublished, true)
-        //    .With(x => x.Slug, f => f.Lorem.Slug()));
 
         // Customize PostResponse
         fixture.Customize<PostResponse>(composer => composer

@@ -1,0 +1,56 @@
+{
+  "id": "expand_001",
+  "created": "2023-11-01T10:00:00Z",
+  "updated": "2023-11-02T14:30:00Z",
+  "collectionId": "posts",
+  "collectionName": "blog_posts",
+  "title": "Post with Expand Data",
+  "slug": "post-with-expand-data",
+  "content": "This post has expand data for testing",
+  "author": "Test Author",
+  "category": "Testing",
+  "is_published": true,
+  "expand": {
+    "author": {
+      "id": "auth_123",
+      "name": "Test Author",
+      "email": "author@test.com",
+      "role": "Writer",
+      "isActive": true,
+      "created": "2023-01-01T00:00:00Z"
+    },
+    "category": {
+      "id": "cat_456",
+      "name": "Testing",
+      "description": "Testing category",
+      "slug": "testing",
+      "postCount": 42
+    },
+    "tags": [
+      {
+        "id": "tag_001",
+        "name": "Unit Testing",
+        "color": "#FF5733"
+      },
+      {
+        "id": "tag_002",
+        "name": "Integration",
+        "color": "#33FF57"
+      }
+    ],
+    "comments": [
+      {
+        "id": "comment_001",
+        "text": "Great post!",
+        "author": "Reader 1",
+        "created": "2023-11-01T11:00:00Z"
+      },
+      {
+        "id": "comment_002",
+        "text": "Very helpful, thanks!",
+        "author": "Reader 2",
+        "created": "2023-11-01T12:30:00Z"
+      }
+    ]
+  }
+}

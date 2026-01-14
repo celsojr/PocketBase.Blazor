@@ -18,8 +18,7 @@ public class PostResponseTests : BaseTest
     public async Task Deserialize_FromCompleteJsonFile_ShouldCreateValidPostResponse()
     {
         // Arrange
-        var json = await File.ReadAllTextAsync(
-            Path.Combine("TestData", "Json", "Responses", "PostResponse", "CompletePost.json"));
+        var json = await File.ReadAllTextAsync("TestData/Json/Responses/PostResponse/CompletePost.json");
 
         // Act
         var result = JsonSerializer.Deserialize<PostResponse>(json, JsonOptions);
@@ -41,16 +40,42 @@ public class PostResponseTests : BaseTest
     }
 
     [Theory]
-    [InlineData("TestData/Json/Responses/PostResponse/CompletePost.json")]
-    [InlineData("TestData/Json/Responses/PostResponse/MinimalPost.json")]
-    [InlineData("TestData/Json/Responses/PostResponse/WithExpand.json")]
+    [MemberData(nameof(GetTestDataFiles))]
     public async Task Deserialize_FromVariousTestFiles_ShouldAllSucceed(string testFile)
     {
         // Arrange
-        var json = await LoadTestDataAsync<string>(testFile);
+        var json = await LoadTestDataAsStringAsync(testFile);
 
         // Act & Assert
         json.ShouldDeserializeFromJson<PostResponse>();
+    }
+
+    [Theory]
+    [MemberData(nameof(GetTestDataFiles))]
+    public async Task Deserialize_FromTestFile_ShouldCreateValidPostResponse(string testFile)
+    {
+        // Arrange
+        var json = await LoadTestDataAsStringAsync(testFile);
+    
+        // Act
+        var result = JsonSerializer.Deserialize<PostResponse>(json, JsonOptions);
+    
+        // Assert
+        Assert.NotNull(result);
+        Assert.NotNull(result.Id);
+        Assert.NotEmpty(result.Id);
+    }
+
+    [Theory]
+    [MemberData(nameof(GetTestDataFiles))]
+    public async Task LoadTestData_ShouldDeserializeToPostResponse(string testFile)
+    {
+        // Act
+        var result = await LoadTestDataAsync<PostResponse>(testFile);
+    
+        // Assert
+        Assert.NotNull(result);
+        Assert.NotNull(result.Id);
     }
 
     [Fact]

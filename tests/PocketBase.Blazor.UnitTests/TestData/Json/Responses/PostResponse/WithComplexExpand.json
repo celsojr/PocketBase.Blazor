@@ -1,0 +1,46 @@
+{
+  "id": "complex_expand_001",
+  "title": "Complex Expand Structure Test",
+  "slug": "complex-expand-test",
+  "is_published": true,
+  "expand": {
+    "nested": {
+      "level1": {
+        "level2": {
+          "level3": {
+            "value": "deeply nested",
+            "items": [ "item1", "item2", "item3" ]
+          }
+        }
+      }
+    },
+    "array_of_objects": [
+      {
+        "id": 1,
+        "name": "First",
+        "data": {
+          "score": 95.5,
+          "passed": true
+        }
+      },
+      {
+        "id": 2,
+        "name": "Second",
+        "data": {
+          "score": 87.3,
+          "passed": true
+        }
+      }
+    ],
+    "mixed_types": {
+      "string": "text",
+      "number": 123,
+      "boolean": true,
+      "null": null,
+      "array": [ 1, 2, 3 ],
+      "object": {
+        "nested": "value"
+      }
+    }
+  }
+}

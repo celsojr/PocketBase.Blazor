@@ -1,0 +1,6 @@
+{
+  "id": "empty_expand_001",
+  "title": "Post with Empty Expand",
+  "is_published": true,
+  "expand": {}
+}
