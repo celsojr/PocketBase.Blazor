@@ -20,19 +20,18 @@ Ensure the following tools are installed and available on your PATH:
 
 ```
 PocketBase.Blazor/
-??? tests/
-    ??? PocketBase.Blazor.IntegrationTests/
-        ??? Data/
-        ?   ??? pb_data/
-        ?   ??? pb_migrations/
-        ??? ReverseProxy/
-        ?   ??? Caddyfile
-        ??? Fixtures/
-        ?   ??? PocketBaseTestFixture.cs
-        ??? Auth/
-        ??? Collections/
-        ??? PocketBase.Blazor.IntegrationTests.csproj
-
+├── tests/
+│   └── PocketBase.Blazor.IntegrationTests/
+│       ├── Data/
+│       │   ├── pb_data/
+│       │   └── pb_migrations/
+│       ├── ReverseProxy/
+│       │   └── Caddyfile
+│       ├── Fixtures/
+│       │   └── PocketBaseTestFixture.cs
+│       ├── Auth/
+│       ├── Collections/
+│       └── PocketBase.Blazor.IntegrationTests.csproj
 ```
 
 ---
@@ -149,7 +148,7 @@ Notes:
 
 ## Additional Notes
 
-- **No Docker required** � all dependencies are native
+- **No Docker required** – all dependencies are native
 - **Migrations**: Ensure `pb_migrations` contains the correct schema for your tests
 - **Caddy**: Used to simulate production-like environment and isolate the test server from the default port
 - **Cleanup**: Simply stop PocketBase and Caddy; delete `pb_data` contents if needed
