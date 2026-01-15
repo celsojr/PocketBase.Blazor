@@ -1,7 +1,7 @@
-using PocketBase.Blazor.IntegrationTests.Helpers;
-using PocketBase.Blazor.Responses;
-
 namespace PocketBase.Blazor.IntegrationTests.Clients.Record;
+
+using Blazor.IntegrationTests.Helpers;
+using Blazor.Responses;
 
 [Collection("PocketBase.Blazor.Admin")]
 public class CreateRecordTests
@@ -22,6 +22,7 @@ public class CreateRecordTests
         // If not set, it will be auto generated.
         string categoryId = $"{Guid.NewGuid():N}"[..15];
 
+        // Anonymous object model
         var categoryResult = await _pb.Collection("categories")
             .CreateAsync<RecordResponse>(new
             {
@@ -34,6 +35,7 @@ public class CreateRecordTests
         categoryResult.Value.Id.Should().Be(categoryId);
 
         // Act
+        // POCO model (properties names must match with db schema)
         var postRequest = new PostCreateRequest
         {
             Category = categoryResult.Value.Id, // Or categoryId
