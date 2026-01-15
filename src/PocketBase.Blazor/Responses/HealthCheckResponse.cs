@@ -21,6 +21,13 @@ namespace PocketBase.Blazor.Responses
         /// Additional data.
         /// </summary>
         public JsonElement? Data { get; set; }
+
+        /// <inheritdoc />
+        public override string ToString()
+        {
+            return JsonSerializer.Serialize(this,
+                new JsonSerializerOptions { WriteIndented = true });
+        }
     }
 }
 

@@ -1,4 +1,5 @@
 using System;
+using System.Text.Json;
 
 namespace PocketBase.Blazor.Responses
 {
@@ -21,5 +22,13 @@ namespace PocketBase.Blazor.Responses
         /// Size in bytes.
         /// </summary>
         public long Size { get; set; }
+
+        /// <inheritdoc />
+        public override string ToString()
+        {
+            return JsonSerializer.Serialize(this,
+                new JsonSerializerOptions { WriteIndented = true });
+        }
     }
 }
+

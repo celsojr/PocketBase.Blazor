@@ -2,7 +2,6 @@ namespace PocketBase.Blazor.UnitTests.TestHelpers.Builders;
 
 using System.Text.Json;
 using Blazor.UnitTests.TestHelpers.Utilities;
-using Blazor.Responses;
 
 public class PostResponseBuilder
 {
@@ -31,37 +30,19 @@ public class PostResponseBuilder
 
     public PostResponseBuilder WithTitle(string title)
     {
-        _post.Title = title;
+        SetProperty(nameof(_post.Title), title);
         return this;
     }
 
     public PostResponseBuilder WithSlug(string slug)
     {
-        _post.Slug = slug;
+        SetProperty(nameof(_post.Slug), slug);
         return this;
     }
 
     public PostResponseBuilder WithExpand(Dictionary<string, JsonElement?> expand)
     {
-        // Create a new PostResponse with the expand data
-        // Since Expand property is init-only, we need to use reflection or create a new instance
-        var post = Build(); // Get current post
-
-        // Use reflection to set the Expand property
-        var expandProperty = typeof(RecordResponse).GetProperty("Expand",
-            System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
-
-        if (expandProperty != null && expandProperty.CanWrite)
-        {
-            expandProperty.SetValue(post, expand);
-        }
-        else
-        {
-            // If property doesn't have a setter, we need to create a new PostResponse
-            // with the expand data using object initializer syntax
-            throw new InvalidOperationException("Expand property is not writable. Consider creating a new PostResponse instance.");
-        }
-
+        SetProperty(nameof(_post.Expand), expand);
         return this;
     }
 
@@ -91,5 +72,27 @@ public class PostResponseBuilder
 
     public static PostResponse CreateValidPost() =>
         new PostResponseBuilder().Build();
+
+    private void SetProperty(string key, object value)
+    {
+        // Create a new PostResponse with the expand data
+        // Since Expand property is init-only, we need to use reflection or create a new instance
+        var post = Build(); // Get current post
+
+        // Use reflection to set the Expand property
+        var expandProperty = typeof(PostResponse).GetProperty(key,
+            System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
+
+        if (expandProperty != null && expandProperty.CanWrite)
+        {
+            expandProperty.SetValue(post, value);
+        }
+        else
+        {
+            // If property doesn't have a setter, we need to create a new PostResponse
+            // with the expand data using object initializer syntax
+            throw new InvalidOperationException($"Expand property is not writable. Consider creating a new ${nameof(PostResponse)} instance.");
+        }
+    }
 }
 

@@ -21,6 +21,13 @@ namespace PocketBase.Blazor.Responses
         /// deserialization methods to convert this to strongly-typed models when needed.
         /// </remarks>
         public Dictionary<string, JsonElement?>? Expand { get; init; }
+
+        /// <inheritdoc />
+        public override string ToString()
+        {
+            return JsonSerializer.Serialize(this,
+                new JsonSerializerOptions { WriteIndented = true });
+        }
     }
 }
 

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace PocketBase.Blazor.Responses
@@ -45,6 +46,13 @@ namespace PocketBase.Blazor.Responses
 
         [JsonPropertyName("deleteRule")]
         public string? DeleteRule { get; set; }
+
+        /// <inheritdoc />
+        public override string ToString()
+        {
+            return JsonSerializer.Serialize(this,
+                new JsonSerializerOptions { WriteIndented = true });
+        }
     }
 }
 
