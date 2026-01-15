@@ -49,15 +49,16 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        // is_published in PB is snake_case, so we need to set the naming policy
+        // is_published in PB is snake_case, so we do need to set the naming policy
         var options = new PocketBaseOptions();
         options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower;
 
         // Registering the client with the PocketBase URL
         var pb = new PocketBase("http://localhost:8090", options: options);
 
-        // Or pb.Collection("users").AuthWithPasswordAsync(...) for user auth
-        var authResult = await pb.Admins.AuthWithPasswordAsync("joe.doe@email.com", "1qgk4YjLLI_MBs8");
+        // Or pb.Admin.AuthWithPasswordAsync(...) for admin auth
+        var authResult = await pb.Collection("users")
+            .AuthWithPasswordAsync("user_tester@email.com", "Nyp9wiGaAC4qGWz");
 
         Console.WriteLine($"Auth result: {authResult.IsSuccess}");
         Console.WriteLine($"Auth result Token: {authResult.Value.Token}");
@@ -95,25 +96,25 @@ else
 
     public class Post
     {
-        public string Id { get; set; } = null!;
-        public string? Title { get; set; }
-        public string? Slug { get; set; }
-        public string? Content { get; set; }
-        public string? Author { get; set; }
-        public bool IsPublished { get; set; }
-        public DateTime? Created { get; set; }
+        public string Id { get; init; } = null!;
+        public string? Title { get; init; }
+        public string? Slug { get; init; }
+        public string? Content { get; init; }
+        public string? Author { get; init; }
+        public bool IsPublished { get; init; }
+        public DateTime? Created { get; init; }
     }
 
     public class PbError
     {
         [JsonPropertyName("message")]
-        public string Message { get; set; } = null!;
+        public string Message { get; init; } = null!;
 
         [JsonPropertyName("status")]
-        public int Status { get; set; }
+        public int Status { get; init; }
 
         [JsonPropertyName("data")]
-        public JsonElement? Data { get; set; }
+        public JsonElement? Data { get; init; }
     }
  }
 
