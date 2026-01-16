@@ -1,6 +1,7 @@
 namespace PocketBase.Blazor.IntegrationTests.Clients.Record;
 
 using Blazor.Responses;
+using Blazor.IntegrationTests.Helpers;
 
 [Collection("PocketBase.Blazor.User")]
 public class GetRecordByIdTests
@@ -41,6 +42,29 @@ public class GetRecordByIdTests
             .GetOneAsync<RecordResponse>("invalid-id-that-doesnt-exist");
 
         result.IsSuccess.Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task Get_posts_with_expanded_category_should_include_category_data()
+    {
+        var result = await _pb.Collection("posts")
+            .GetListAsync<PostResponse>(
+                perPage: 1,
+                options: new ListOptions()
+                {
+                    Expand = "category",
+                    SkipTotal = true
+                });
+
+        result.Value.Items.Should().NotBeEmpty();
+
+        var post = result.Value.Items.First();
+    
+        var category = post.GetExpandedCategory();
+        category.Should().NotBeNull();
+        category!.Name.Should().NotBeNullOrWhiteSpace();
+        category.Slug.Should().NotBeNullOrWhiteSpace();
+        category.Created?.Kind.Should().Be(DateTimeKind.Utc);
     }
 }
 
