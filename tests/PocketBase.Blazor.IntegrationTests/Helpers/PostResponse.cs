@@ -16,29 +16,27 @@ public sealed class PostResponse : RecordResponse
 
     public CategoryResponse? GetExpandedCategory()
     {
-        if (Expand?.TryGetValue("category", out var categoryExpansion) == true && 
-            categoryExpansion != null)
+        if (Expand?.TryGetValue("category", out var categoryExpansion) != true ||
+            categoryExpansion is not JsonElement jsonElement)
         {
-            try
-            {
-                // Handle single expansion (object) vs multiple expansion (array)
-                if (categoryExpansion is JsonElement jsonElement)
-                {
-                    if (jsonElement.ValueKind == JsonValueKind.Object)
-                    {
-                        return JsonSerializer.Deserialize<CategoryResponse>(
-                            jsonElement.GetRawText(),
-                            new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                    }
-                }
-            }
-            catch
-            {
-                // Log if needed, return null if deserialization fails
-                return null;
-            }
+            return null;
         }
-        return null;
+
+        if (jsonElement.ValueKind != JsonValueKind.Object)
+        {
+            return null;
+        }
+
+        try
+        {
+            return JsonSerializer.Deserialize<CategoryResponse>(
+                jsonElement.GetRawText(),
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+        }
+        catch (JsonException)
+        {
+            return null;
+        }
     }
 
     /// <inheritdoc />
