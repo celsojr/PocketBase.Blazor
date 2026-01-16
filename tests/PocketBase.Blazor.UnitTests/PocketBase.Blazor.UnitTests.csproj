@@ -27,17 +27,17 @@
 
   <ItemGroup>
     <!-- Copy test data files to output -->
-    <None Update="TestData\**\*">
+    <None Update="TestData/**/*.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
 
     <!-- Embed test resources -->
-    <EmbeddedResource Include="TestData\**\*.json" />
-    <EmbeddedResource Include="TestData\**\*.sql" />
+    <EmbeddedResource Include="TestData/**/*.json" />
+    <EmbeddedResource Include="TestData/**/*.sql" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\PocketBase.Blazor\PocketBase.Blazor.csproj" />
+    <ProjectReference Include="../../src/PocketBase.Blazor/PocketBase.Blazor.csproj" />
   </ItemGroup>
 
   <ItemGroup>
