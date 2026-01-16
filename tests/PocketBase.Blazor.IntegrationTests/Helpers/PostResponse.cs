@@ -14,30 +14,11 @@ public sealed class PostResponse : RecordResponse
     [JsonPropertyName("is_published")]
     public bool IsPublished { get; init; }
 
-    public CategoryResponse? GetExpandedCategory()
-    {
-        if (Expand?.TryGetValue("category", out var categoryExpansion) != true ||
-            categoryExpansion is not JsonElement jsonElement)
-        {
-            return null;
-        }
-
-        if (jsonElement.ValueKind != JsonValueKind.Object)
-        {
-            return null;
-        }
-
-        try
-        {
-            return JsonSerializer.Deserialize<CategoryResponse>(
-                jsonElement.GetRawText(),
-                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-        }
-        catch (JsonException)
-        {
-            return null;
-        }
-    }
+    /// <summary>
+    /// Gets the expanded category if it exists in the Expand dictionary.
+    /// </summary>
+    [JsonIgnore]
+    public CategoryResponse? ExpandedCategory => GetExpandedRecord<CategoryResponse>("category");
 
     /// <inheritdoc />
     public override string ToString()

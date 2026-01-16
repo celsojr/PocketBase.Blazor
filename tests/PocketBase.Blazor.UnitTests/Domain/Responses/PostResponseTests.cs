@@ -4,6 +4,7 @@ using System.Text.Json;
 using Blazor.UnitTests.TestHelpers.Builders;
 using Blazor.UnitTests.TestHelpers.Extensions;
 using Blazor.UnitTests.TestHelpers.TestBaseClasses;
+using FluentAssertions;
 using Xunit.Abstractions;
 
 [Trait("Category", "Unit")]
@@ -24,19 +25,19 @@ public class PostResponseTests : BaseTest
         var result = JsonSerializer.Deserialize<PostResponse>(json, JsonOptions);
 
         // Assert
-        Assert.NotNull(result);
+        result.Should().NotBeNull();
         result.ShouldHaveValidId();
         result.ShouldHaveValidTimestamps();
-        Assert.Equal("Complete Blog Post Example", result.Title);
-        Assert.Equal("complete-blog-post-example", result.Slug);
-        Assert.True(result.IsPublished);
+        result.Title.Should().Be("Complete Blog Post Example");
+        result.Slug.Should().Be("complete-blog-post-example");
+        result.IsPublished.Should().BeTrue();
 
         // Verify expand data
-        Assert.NotNull(result.Expand);
-        Assert.Equal(3, result.Expand.Count);
-        Assert.Contains("author", result.Expand.Keys);
-        Assert.Contains("category", result.Expand.Keys);
-        Assert.Contains("tags", result.Expand.Keys);
+        result.Expand.Should().NotBeNull();
+        result.Expand.Should().HaveCount(3);
+        result.Expand.Should().ContainKey("author");
+        result.Expand.Should().ContainKey("category");
+        result.Expand.Should().ContainKey("tags");
     }
 
     [Theory]
@@ -56,14 +57,13 @@ public class PostResponseTests : BaseTest
     {
         // Arrange
         var json = await LoadTestDataAsStringAsync(testFile);
-    
+
         // Act
         var result = JsonSerializer.Deserialize<PostResponse>(json, JsonOptions);
-    
+
         // Assert
-        Assert.NotNull(result);
-        Assert.NotNull(result.Id);
-        Assert.NotEmpty(result.Id);
+        result.Should().NotBeNull();
+        result.Id.Should().NotBeNullOrEmpty();
     }
 
     [Theory]
@@ -72,10 +72,10 @@ public class PostResponseTests : BaseTest
     {
         // Act
         var result = await LoadTestDataAsync<PostResponse>(testFile);
-    
+
         // Assert
-        Assert.NotNull(result);
-        Assert.NotNull(result.Id);
+        result.Should().NotBeNull();
+        result.Id.Should().NotBeNullOrEmpty();
     }
 
     [Fact]
@@ -89,11 +89,11 @@ public class PostResponseTests : BaseTest
             .Build();
 
         // Assert
-        Assert.NotNull(post);
-        Assert.Equal("Builder Test", post.Title);
-        Assert.Equal("builder-test", post.Slug);
-        Assert.NotNull(post.Expand);
-        Assert.Equal(2, post.Expand?.Count);
+        post.Should().NotBeNull();
+        post.Title.Should().Be("Builder Test");
+        post.Slug.Should().Be("builder-test");
+        post.Expand.Should().NotBeNull();
+        post.Expand.Should().HaveCount(2);
     }
 
     [Fact]
@@ -109,13 +109,86 @@ public class PostResponseTests : BaseTest
 
         // Assert
         var doc = JsonDocument.Parse(json);
-        Assert.True(doc.RootElement.TryGetProperty("title", out var titleProp));
-        Assert.Equal("Serialization Test", titleProp.GetString());
+        doc.RootElement.TryGetProperty("title", out var titleProp).Should().BeTrue();
+        titleProp.GetString().Should().Be("Serialization Test");
 
-        Assert.True(doc.RootElement.TryGetProperty("id", out var idProp));
-        Assert.Equal("test_123", idProp.GetString());
+        doc.RootElement.TryGetProperty("id", out var idProp).Should().BeTrue();
+        idProp.GetString().Should().Be("test_123");
 
         LogJson(doc, "Generated JSON");
+    }
+
+    [Fact]
+    public async Task PostResponse_ExpandedTags_ShouldDeserializeTagsFromExpand()
+    {
+        // Arrange
+        var json = await File.ReadAllTextAsync("TestData/Json/Responses/PostResponse/CompletePost.json");
+        var post = JsonSerializer.Deserialize<PostResponse>(json, JsonOptions);
+
+        // Act
+        var expandedTags = post?.ExpandedTags;
+
+        // Assert
+        post.Should().NotBeNull();
+        expandedTags.Should().NotBeNull();
+        expandedTags.Should().HaveCount(3);
+    
+        // Verify individual tag properties
+        expandedTags[0].Id.Should().Be("tag_1");
+        expandedTags[0].Name.Should().Be("C#");
+    
+        expandedTags[1].Id.Should().Be("tag_2");
+        expandedTags[1].Name.Should().Be(".NET");
+    
+        expandedTags[2].Id.Should().Be("tag_3");
+        expandedTags[2].Name.Should().Be("Testing");
+    }
+
+    [Fact]
+    public void PostResponse_ExpandedTags_ShouldReturnEmptyListWhenNoTagsExpand()
+    {
+        // Arrange - JSON without tags in expand
+        var json = @"
+        {
+            ""id"": ""post_123"",
+            ""title"": ""Test Post"",
+            ""expand"": {
+                ""author"": {
+                    ""id"": ""user_1"",
+                    ""name"": ""Author Name""
+                }
+            }
+        }";
+    
+        var post = JsonSerializer.Deserialize<PostResponse>(json, JsonOptions);
+
+        // Act
+        var expandedTags = post?.ExpandedTags;
+
+        // Assert
+        expandedTags.Should().NotBeNull();
+        expandedTags.Should().BeEmpty();
+        expandedTags.Should().HaveCount(0);
+    }
+
+    [Fact]
+    public void PostResponse_ExpandedTags_ShouldReturnEmptyListWhenExpandIsNull()
+    {
+        // Arrange - JSON without any expand
+        var json = @"
+        {
+            ""id"": ""post_123"",
+            ""title"": ""Test Post""
+        }";
+    
+        var post = JsonSerializer.Deserialize<PostResponse>(json, JsonOptions);
+
+        // Act
+        var expandedTags = post?.ExpandedTags;
+
+        // Assert
+        expandedTags.Should().NotBeNull();
+        expandedTags.Should().BeEmpty();
     }
 }
 

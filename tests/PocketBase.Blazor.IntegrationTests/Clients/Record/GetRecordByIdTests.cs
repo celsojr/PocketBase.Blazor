@@ -60,7 +60,7 @@ public class GetRecordByIdTests
 
         var post = result.Value.Items.First();
     
-        var category = post.GetExpandedCategory();
+        var category = post.ExpandedCategory;
         category.Should().NotBeNull();
         category!.Name.Should().NotBeNullOrWhiteSpace();
         category.Slug.Should().NotBeNullOrWhiteSpace();
