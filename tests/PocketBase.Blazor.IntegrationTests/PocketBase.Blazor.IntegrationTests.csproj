@@ -22,11 +22,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Data\pb_data\" />
+    <Folder Include="Data/pb_data/" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="D:\Celso\Side projects\PocketBase.Blazor\src\PocketBase.Blazor\PocketBase.Blazor.csproj" />
+    <ProjectReference Include="../../src/PocketBase.Blazor/PocketBase.Blazor.csproj" />
   </ItemGroup>
 
 </Project>
