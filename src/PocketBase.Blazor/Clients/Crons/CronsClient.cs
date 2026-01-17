@@ -9,34 +9,34 @@ using PocketBase.Blazor.Http;
 using PocketBase.Blazor.Options;
 using PocketBase.Blazor.Responses;
 
-namespace PocketBase.Blazor.Clients.CronJob
+namespace PocketBase.Blazor.Clients.Crons
 {
     /// <inheritdoc />
-    public class CronJobClient : ICronJobClient
+    public class CronsClient : ICronsClient
     {
         private readonly IHttpTransport _http;
 
         /// <inheritdoc />
-        public CronJobClient(IHttpTransport http)
+        public CronsClient(IHttpTransport http)
         {
             _http = http ?? throw new ArgumentNullException(nameof(http));
         }
 
         /// <inheritdoc />
-        public Task<Result<IEnumerable<CronJobResponse>>> GetFullList(CommonOptions? options = null, CancellationToken cancellationToken = default)
+        public Task<Result<IEnumerable<CronsResponse>>> GetFullListAsync(CommonOptions? options = null, CancellationToken cancellationToken = default)
         {
             var query = options?.ToDictionary();
-            return _http.SendAsync<IEnumerable<CronJobResponse>>(HttpMethod.Get, "api/cron-jobs", query: query, cancellationToken: cancellationToken);
+            return _http.SendAsync<IEnumerable<CronsResponse>>(HttpMethod.Get, "api/crons", query: query, cancellationToken: cancellationToken);
         }
 
         /// <inheritdoc />
-        public Task<Result> Run(string id, CommonOptions? options = null, CancellationToken cancellationToken = default)
+        public Task<Result> RunAsync(string id, CommonOptions? options = null, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(id))
                 throw new ArgumentException("Cron job id is required.", nameof(id));
 
             var query = options?.ToDictionary();
-            return _http.SendAsync(HttpMethod.Post, $"api/cron-jobs/{id}/run", body: null, query: query, cancellationToken: cancellationToken);
+            return _http.SendAsync(HttpMethod.Post, $"api/crons/{id}/run", body: null, query: query, cancellationToken: cancellationToken);
         }
     }
 }

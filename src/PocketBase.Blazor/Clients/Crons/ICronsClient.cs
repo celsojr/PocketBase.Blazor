@@ -6,12 +6,12 @@ using PocketBase.Blazor.Exceptions;
 using PocketBase.Blazor.Options;
 using PocketBase.Blazor.Responses;
 
-namespace PocketBase.Blazor.Clients.CronJob
+namespace PocketBase.Blazor.Clients.Crons
 {
     /// <summary>
     /// Client interface for managing cron jobs in PocketBase.
     /// </summary>
-    public interface ICronJobClient
+    public interface ICronsClient
     {
         /// <summary>
         /// Returns list with all registered cron jobs.
@@ -21,7 +21,7 @@ namespace PocketBase.Blazor.Clients.CronJob
         /// <exception cref="ClientResponseError">
         /// Thrown when the client receives an invalid response.
         /// </exception>
-        Task<Result<IEnumerable<CronJobResponse>>> GetFullList(CommonOptions? options = null, CancellationToken cancellationToken = default);
+        Task<Result<IEnumerable<CronsResponse>>> GetFullListAsync(CommonOptions? options = null, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Runs a specific cron job.
@@ -32,7 +32,7 @@ namespace PocketBase.Blazor.Clients.CronJob
         /// <exception cref="ClientResponseError">
         /// Thrown when the client receives an invalid response.
         /// </exception>
-        Task<Result> Run(string id, CommonOptions? options = null, CancellationToken cancellationToken = default);
+        Task<Result> RunAsync(string id, CommonOptions? options = null, CancellationToken cancellationToken = default);
     }
 }
 

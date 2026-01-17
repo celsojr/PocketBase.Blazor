@@ -5,7 +5,7 @@ using PocketBase.Blazor.Clients.Admin;
 using PocketBase.Blazor.Clients.Backup;
 using PocketBase.Blazor.Clients.Batch;
 using PocketBase.Blazor.Clients.Collections;
-using PocketBase.Blazor.Clients.CronJob;
+using PocketBase.Blazor.Clients.Crons;
 using PocketBase.Blazor.Clients.Files;
 using PocketBase.Blazor.Clients.Health;
 using PocketBase.Blazor.Clients.Logging;
@@ -29,7 +29,7 @@ public class PocketBase : IPocketBase
     public IBackupClient Backup { get; }
     public IBatchClient Batch { get; }
     public ICollectionClient Collections { get; }
-    public ICronJobClient CronJob { get; }
+    public ICronsClient Crons { get; }
     public IFilesClient Files { get; }
     public IHealthClient Health { get; }
     public ILogClient Log { get; }
@@ -49,7 +49,7 @@ public class PocketBase : IPocketBase
         Backup = new BackupClient(_http);
         Batch = new BatchClient(_http);
         Collections = new CollectionClient(_http);
-        CronJob = new CronJobClient(_http);
+        Crons = new CronsClient(_http);
         Log = new LogClient(_http);
         Files = new FilesClient(_http);
         Realtime = new RealtimeClient(_http);
