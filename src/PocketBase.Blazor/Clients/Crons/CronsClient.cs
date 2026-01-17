@@ -7,6 +7,7 @@ using FluentResults;
 using PocketBase.Blazor.Extensions;
 using PocketBase.Blazor.Http;
 using PocketBase.Blazor.Options;
+using PocketBase.Blazor.Requests;
 using PocketBase.Blazor.Responses;
 
 namespace PocketBase.Blazor.Clients.Crons
@@ -38,6 +39,20 @@ namespace PocketBase.Blazor.Clients.Crons
             var query = options?.ToDictionary();
             return _http.SendAsync(HttpMethod.Post, $"api/crons/{id}", body: null, query: query, cancellationToken: cancellationToken);
         }
+
+        ///// <inheritdoc />
+        //public Task<Result<CronRegisterResponse>> RegisterAsync(CronRegisterRequest request, CancellationToken cancellationToken = default)
+        //{
+        //    ArgumentNullException.ThrowIfNull(request);
+
+        //    if (string.IsNullOrWhiteSpace(request.Id))
+        //        throw new ArgumentException("Cron id is required.", nameof(request.Id));
+
+        //    if (string.IsNullOrWhiteSpace(request.Expression))
+        //        throw new ArgumentException("Cron expression is required.", nameof(request.Expression));
+
+        //    return _http.SendAsync<CronRegisterResponse>(HttpMethod.Post, "internal/cron", body: request, cancellationToken: cancellationToken);
+        //}
     }
 }
 

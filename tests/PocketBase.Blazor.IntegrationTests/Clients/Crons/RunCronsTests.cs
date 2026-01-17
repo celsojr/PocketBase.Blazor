@@ -18,7 +18,7 @@ public class RunCronsTests
         // Arrange
         var cronList = await _pb.Crons.GetFullListAsync();
         var existingCron = cronList.Value.FirstOrDefault();
-    
+ 
         existingCron.Should().NotBeNull();
         existingCron.Id.Should().NotBeNullOrWhiteSpace();
 

@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using FluentResults;
 using PocketBase.Blazor.Exceptions;
 using PocketBase.Blazor.Options;
+using PocketBase.Blazor.Requests;
 using PocketBase.Blazor.Responses;
 
 namespace PocketBase.Blazor.Clients.Crons
@@ -33,6 +34,11 @@ namespace PocketBase.Blazor.Clients.Crons
         /// Thrown when the client receives an invalid response.
         /// </exception>
         Task<Result> RunAsync(string id, CommonOptions? options = null, CancellationToken cancellationToken = default);
+
+        ///// <summary>
+        ///// Registers or updates a cron job dynamically (custom PocketBase extension).
+        ///// </summary>
+        //Task<Result<CronRegisterResponse>> RegisterAsync(CronRegisterRequest request, CancellationToken cancellationToken = default);
     }
 }
 

@@ -1,0 +1,30 @@
+// package main
+// 
+// import (
+//     "os"
+//     "text/template"
+// )
+// 
+// const tpl = `package main
+// 
+// import "log"
+// 
+// var cronHandlers = map[string]func(){
+// {{- range . }}
+//     "{{ .ID }}": func() {
+//         log.Println("Cron {{ .ID }} executed")
+//     },
+// {{- end }}
+// }
+// `
+// 
+// func main() {
+//     f, _ := os.Create("cron_registry.go")
+//     defer f.Close()
+// 
+//     template.Must(template.New("").Parse(tpl)).Execute(f, cronSpecs)
+// }
+
+// Usage example:
+// go generate
+
