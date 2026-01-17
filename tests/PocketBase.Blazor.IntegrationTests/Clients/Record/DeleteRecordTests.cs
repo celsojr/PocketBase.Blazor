@@ -3,6 +3,8 @@ namespace PocketBase.Blazor.IntegrationTests.Clients.Record;
 using System.Net;
 using Blazor.IntegrationTests.Helpers;
 using Blazor.Responses;
+using Blazor.Models.Collection;
+using Blazor.Models.Collection.Fields;
 
 [Collection("PocketBase.Blazor.Admin")]
 public class DeleteRecordTests
@@ -56,7 +58,11 @@ public class DeleteRecordTests
             .GetOneAsync<PostResponse>(postId);
 
         getResult.IsSuccess.Should().BeFalse();
-        //getResult.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        getResult.Errors.Should().NotBeEmpty();
+
+        getResult.Errors[0].Message
+            .Should().Contain("The requested resource wasn't found.");
+        getResult.Errors[0].Message.Should().Contain("404");
     }
 
     [Fact]
@@ -100,7 +106,11 @@ public class DeleteRecordTests
             .GetOneAsync<RecordResponse>(categoryId);
 
         getCategoryResult.IsSuccess.Should().BeFalse();
-        //getCategoryResult.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        getCategoryResult.Errors.Should().NotBeEmpty();
+
+        getCategoryResult.Errors[0].Message
+            .Should().Contain("The requested resource wasn't found.");
+        getCategoryResult.Errors[0].Message.Should().Contain("404");
     }
 
     [Fact]
@@ -134,9 +144,13 @@ public class DeleteRecordTests
 
         // Assert
         deleteResult.IsSuccess.Should().BeFalse();
-        // Might return BadRequest or NotFound depending on PocketBase validation
-        //deleteResult.StatusCode.Should()
-        //    .BeOneOf(HttpStatusCode.BadRequest, HttpStatusCode.NotFound);
+        deleteResult.Errors.Should().NotBeNull();
+
+        var error = JsonSerializer.Deserialize<ErrorResponse>(deleteResult.Errors[0].Message);
+
+        error.Should().NotBeNull();
+        error.Message.Should().Be("The requested resource wasn't found.");
+        error.Status.Should().Be((int)HttpStatusCode.NotFound);
     }
 
     [Fact]
@@ -185,8 +199,72 @@ public class DeleteRecordTests
                 .GetOneAsync<PostResponse>(postId);
 
             getResult.IsSuccess.Should().BeFalse();
-            //getResult.StatusCode.Should().Be(HttpStatusCode.NotFound);
+            getResult.Errors.Should().NotBeEmpty();
+
+            getResult.Errors[0].Message
+                .Should().Contain("The requested resource wasn't found.");
+            getResult.Errors[0].Message.Should().Contain("404");
         }
+    }
+
+    [Fact]
+    public async Task Delete_parent_with_cascade_relation_should_delete_child()
+    {
+        // Arrange - Create parent collection
+        var parentResult = await _pb.Collections.CreateAsync(
+            new BaseCollectionCreateModel
+            {
+                Name = "authors",
+                Fields =
+                {
+                    new TextFieldModel { Name = "name", Required = true }
+                }
+            });
+    
+        var parentId = parentResult.Value.Id;
+
+        // Create child collection with cascade relation
+        var childResult = await _pb.Collections.CreateAsync(
+            new BaseCollectionCreateModel
+            {
+                Name = "books",
+                Fields =
+                {
+                    new TextFieldModel { Name = "title", Required = true },
+                    new RelationFieldModel 
+                    { 
+                        Name = "author",
+                        CollectionId = parentId,
+                        CascadeDelete = true // Enable cascade delete
+                    }
+                }
+            });
+
+        // Create parent record
+        var authorResult = await _pb.Collection("authors")
+            .CreateAsync<RecordResponse>(new { name = "John Doe" });
+        var authorId = authorResult.Value.Id;
+
+        // Create child record linked to parent
+        var bookResult = await _pb.Collection("books")
+            .CreateAsync<RecordResponse>(new { 
+                title = "Cascade Test Book", 
+                author = authorId 
+            });
+        var bookId = bookResult.Value.Id;
+
+        // Act - Delete parent (should cascade to child)
+        var deleteResult = await _pb.Collection("authors").DeleteAsync(authorId);
+
+        // Assert
+        deleteResult.IsSuccess.Should().BeTrue();
+    
+        // Verify both parent and child are deleted
+        var getAuthorResult = await _pb.Collection("authors").GetOneAsync<RecordResponse>(authorId);
+        getAuthorResult.IsSuccess.Should().BeFalse();
+    
+        var getBookResult = await _pb.Collection("books").GetOneAsync<RecordResponse>(bookId);
+        getBookResult.IsSuccess.Should().BeFalse();
     }
 }
 
