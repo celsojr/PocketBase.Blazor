@@ -36,7 +36,7 @@ namespace PocketBase.Blazor.Clients.Crons
                 throw new ArgumentException("Cron job id is required.", nameof(id));
 
             var query = options?.ToDictionary();
-            return _http.SendAsync(HttpMethod.Post, $"api/crons/{id}/run", body: null, query: query, cancellationToken: cancellationToken);
+            return _http.SendAsync(HttpMethod.Post, $"api/crons/{id}", body: null, query: query, cancellationToken: cancellationToken);
         }
     }
 }
