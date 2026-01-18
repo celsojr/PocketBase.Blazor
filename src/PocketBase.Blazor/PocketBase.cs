@@ -19,7 +19,7 @@ using PocketBase.Blazor.Store;
 namespace PocketBase.Blazor;
 
 /// <inheritdoc />
-public class PocketBase : IPocketBase
+public sealed class PocketBase : IPocketBase
 {
     private Dictionary<string, RecordClient> _recordClients = [];
 

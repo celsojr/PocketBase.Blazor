@@ -52,7 +52,7 @@ dotnet_naming_symbols.private_static_field.applicable_kinds             = field
 dotnet_naming_symbols.private_static_field.applicable_accessibilities   = private
 dotnet_naming_symbols.private_static_field.required_modifiers           = static
 dotnet_naming_style.private_static_field.capitalization                 = pascal_case
-dotnet_naming_rule.private_static_field.severity                        = error
+dotnet_naming_rule.private_static_field.severity                        = suggestion
 dotnet_naming_rule.private_static_field.symbols                         = private_static_field
 dotnet_naming_rule.private_static_field.style                           = private_static_field
 
