@@ -11,7 +11,8 @@ namespace PocketBase.Blazor.Hosting.Interfaces
         IPocketBaseHostBuilder UseOptions(Action<PocketBaseHostOptions> configure);
         IPocketBaseHostBuilder UseLogger(ILogger<PocketBaseHost> logger);
         IPocketBaseHostBuilder UseEnvironmentVariables(string prefix = "POCKETBASE_");
-        IPocketBaseHostBuilder UseConfigurationFile(string file);
+        IPocketBaseHostBuilder UseYamlConfiguration(string filePath);
+        IPocketBaseHostBuilder UseConfigurationFile(string filePath);
         Task<IPocketBaseHost> BuildAsync();
     }
 }

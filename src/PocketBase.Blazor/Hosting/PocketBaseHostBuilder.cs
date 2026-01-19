@@ -100,7 +100,7 @@ namespace PocketBase.Blazor.Hosting
             }
         }
 
-        public PocketBaseHostBuilder UseConfigurationFile(string filePath)
+        public IPocketBaseHostBuilder UseConfigurationFile(string filePath)
         {
             if (!File.Exists(filePath))
             {
@@ -134,6 +134,11 @@ namespace PocketBase.Blazor.Hosting
             return this;
         }
 
+        public IPocketBaseHostBuilder UseYamlConfiguration(string filePath)
+        {
+            throw new NotImplementedException();
+        }
+
         //public PocketBaseHostBuilder UseYamlConfiguration(string filePath)
         //{
         //    // Requires YamlDotNet package
@@ -146,7 +151,7 @@ namespace PocketBase.Blazor.Hosting
         //    return this;
         //}
 
-        public PocketBaseHostBuilder UseXmlConfiguration(string filePath)
+        public IPocketBaseHostBuilder UseXmlConfiguration(string filePath)
         {
             var xml = File.ReadAllText(filePath);
             var doc = XDocument.Parse(xml);
