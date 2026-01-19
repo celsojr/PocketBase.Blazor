@@ -8,5 +8,7 @@ namespace PocketBase.Blazor.Options
         public bool Dev { get; set; } = true;
         public bool Debug { get; set; } = false;
         public string? MigrationsDir { get; set; }
+        public string? Executable { get; set; }
     }
 }
+

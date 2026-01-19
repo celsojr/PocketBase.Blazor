@@ -15,8 +15,15 @@ namespace PocketBase.Blazor.Hosting
         private readonly ILogger<PocketBaseHost> _logger;
         private readonly PocketBaseHostOptions _options;
         private readonly CancellationTokenSource _cts = new();
+        private readonly string _executablePath;
 
         public string BaseUrl => $"http://{_options.Host}:{_options.Port}";
+
+        public PocketBaseHostOptions? Options => _options;
+
+        public Process? Process => _process;
+
+        public string? ExecutablePath => _executablePath;
 
         public PocketBaseHost(string executablePath, PocketBaseHostOptions? options = null, ILogger<PocketBaseHost>? logger = null)
         {
@@ -25,6 +32,8 @@ namespace PocketBase.Blazor.Hosting
 
             if (string.IsNullOrWhiteSpace(executablePath) || !File.Exists(executablePath))
                 throw new FileNotFoundException("PocketBase executable not found", executablePath);
+
+            _executablePath = executablePath;
 
             var args = BuildArguments();
 
@@ -48,16 +57,16 @@ namespace PocketBase.Blazor.Hosting
 
         private string BuildArguments()
         {
-            var args = $"serve --http={_options.Host}:{_options.Port}";
+            // Host and Port are still paused under investigation
+            //var args = $"serve --http={_options.Host}:{_options.Port}";
 
-            if (!string.IsNullOrWhiteSpace(_options.Dir))
-                args += $" --dir=\"{_options.Dir}\"";
+            var args = "serve";
 
             if (_options.Dev)
                 args += " --dev";
 
-            if (_options.Debug)
-                args += " --debug";
+            if (!string.IsNullOrWhiteSpace(_options.Dir))
+                args += $" --dir=\"{_options.Dir}\"";
 
             if (!string.IsNullOrWhiteSpace(_options.MigrationsDir))
                 args += $" --migrationsDir=\"{_options.MigrationsDir}\"";
