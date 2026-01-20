@@ -90,15 +90,7 @@ public class PocketBaseIntegrationTests : IAsyncLifetime
             await _host.DisposeAsync();
         }
 
-        // Clean up data directory
-        if (Directory.Exists(TestPaths.TestDataDirectory))
-        {
-            foreach (var file in Directory.GetFiles(TestPaths.TestDataDirectory))
-            {
-                if (Path.GetFileName(file) != ".gitignore")
-                    File.Delete(file);
-            }
-        }
+        TestPaths.CleanUpDataDir();
     }
 
     [Fact]
