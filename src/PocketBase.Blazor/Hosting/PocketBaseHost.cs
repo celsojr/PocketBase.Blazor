@@ -1,3 +1,4 @@
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Threading;
@@ -11,13 +12,16 @@ namespace PocketBase.Blazor.Hosting
 {
     public sealed class PocketBaseHost : IPocketBaseHost
     {
-        private readonly Process _process;
+        private Process _process = null!;
         private readonly ILogger<PocketBaseHost> _logger;
         private readonly PocketBaseHostOptions _options;
         private readonly CancellationTokenSource _cts = new();
         private readonly string _executablePath;
+        private bool _isRunning = false;
+        private readonly SemaphoreSlim _startLock = new(1, 1);
 
-        public string BaseUrl => $"http://{_options.Host}:{_options.Port}";
+        //public string BaseUrl => $"http://{_options.Host}:{_options.Port}";
+        public string BaseUrl => "http://127.0.0.1:8090";
 
         public PocketBaseHostOptions? Options => _options;
 
@@ -36,8 +40,12 @@ namespace PocketBase.Blazor.Hosting
             _executablePath = executablePath;
 
             var args = BuildArguments();
+            _process = CreateNewProcess(executablePath, args);
+        }
 
-            _process = new Process
+        private Process CreateNewProcess(string executablePath, string args)
+        {
+            var process = new Process
             {
                 StartInfo = new ProcessStartInfo
                 {
@@ -51,8 +59,10 @@ namespace PocketBase.Blazor.Hosting
                 EnableRaisingEvents = true
             };
 
-            _process.OutputDataReceived += OnOutputDataReceived;
-            _process.ErrorDataReceived += OnErrorDataReceived;
+            process.OutputDataReceived += OnOutputDataReceived;
+            process.ErrorDataReceived += OnErrorDataReceived;
+    
+            return process;
         }
 
         private string BuildArguments()
@@ -88,30 +98,69 @@ namespace PocketBase.Blazor.Hosting
 
         public async Task StartAsync(CancellationToken cancellationToken = default)
         {
-            _logger.LogInformation("Starting PocketBase on {BaseUrl}", BaseUrl);
+            await _startLock.WaitAsync(cancellationToken);
+            try
+            {
+                if (_isRunning)
+                {
+                    throw new InvalidOperationException(
+                        "PocketBase host is already running. Call StopAsync() first.");
+                }
 
-            _process.Start();
-            _process.BeginOutputReadLine();
-            _process.BeginErrorReadLine();
+                _logger.LogInformation("Starting PocketBase on {BaseUrl}", BaseUrl);
 
-            // Wait for PocketBase to start up
-            await Task.Delay(1000, cancellationToken);
+                var args = BuildArguments();
+                ArgumentException.ThrowIfNullOrWhiteSpace(ExecutablePath);
+                _process = CreateNewProcess(ExecutablePath, args);
 
-            _logger.LogInformation("PocketBase started successfully");
+                _process.Start();
+                _process.BeginOutputReadLine();
+                _process.BeginErrorReadLine();
+
+                // Wait for PocketBase to start up
+                await Task.Delay(1000, cancellationToken);
+
+                _isRunning = true;
+                _logger.LogInformation("PocketBase started successfully!");
+            }
+            finally
+            {
+                _startLock.Release();
+            }
         }
 
-        public Task StopAsync(CancellationToken cancellationToken = default)
+        public async Task RestartAsync(CancellationToken cancellationToken = default)
         {
-            _logger.LogInformation("Stopping PocketBase...");
+            await DisposeAsync();
+            await Task.Delay(500, cancellationToken); // Brief cooldown
+            await StartAsync(cancellationToken);
+        }
 
-            if (!_process.HasExited)
+        public async Task StopAsync(CancellationToken cancellationToken = default)
+        {
+            await _startLock.WaitAsync(cancellationToken);
+            try
             {
-                _process.Kill();
-                _process.WaitForExit(5000);
-            }
+                _logger.LogInformation("Stopping PocketBase...");
 
-            _logger.LogInformation("PocketBase stopped");
-            return Task.CompletedTask;
+                if (!_isRunning)
+                {
+                    return; // Already stopped
+                }
+
+                if (!_process.HasExited)
+                {
+                    _process.Kill();
+                    await _process.WaitForExitAsync(cancellationToken);
+                }
+
+                _isRunning = false;
+                _logger.LogInformation("PocketBase stopped");
+            }
+            finally
+            {
+                _startLock.Release();
+            }
         }
 
         public async ValueTask DisposeAsync()

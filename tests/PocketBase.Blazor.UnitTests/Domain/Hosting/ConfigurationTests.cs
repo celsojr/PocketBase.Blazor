@@ -19,7 +19,10 @@ public class ConfigurationTests
             var builder = PocketBaseHostBuilder.CreateDefault();
 
             // Act
-            await builder.UseEnvironmentVariables().BuildAsync();
+            await builder
+                .UseEnvironmentVariables()
+                .BuildAsync();
+
             var host = await builder.BuildAsync();
 
             // Assert

@@ -14,6 +14,7 @@ namespace PocketBase.Blazor.Hosting.Interfaces
         string? ExecutablePath { get; }
 
         Task StartAsync(CancellationToken cancellationToken = default);
+        Task RestartAsync(CancellationToken cancellationToken = default);
         Task StopAsync(CancellationToken cancellationToken = default);
     }
 }

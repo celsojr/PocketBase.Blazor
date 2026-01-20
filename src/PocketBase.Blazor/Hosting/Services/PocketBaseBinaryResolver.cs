@@ -1,5 +1,4 @@
 using System;
-using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Net.Http;
@@ -17,6 +16,17 @@ namespace PocketBase.Blazor.Hosting.Services
         private const string Version = "0.34.0";
         private const string BaseDownloadUrl = "https://github.com/pocketbase/pocketbase/releases/download";
 
+        public static ILogger Logger
+        {
+            get => _logger ?? NullLogger.Instance;
+            set => _logger = value;
+        }
+
+        public static void SetLogger(ILogger logger)
+        {
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        }
+
         public static async Task<string?> ResolveAsync()
         {
             // Check if already downloaded
@@ -31,13 +41,12 @@ namespace PocketBase.Blazor.Hosting.Services
         private static string GetLocalExecutablePath()
         {
             var os = GetOSPlatform();
-            var arch = RuntimeInformation.ProcessArchitecture;
             var extension = os == OSPlatform.Windows ? ".exe" : "";
 
             return Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
                 "pocketbase",
-                $"pocketbase_{os}_{arch}{extension}"
+                $"pocketbase{extension}"
             );
         }
 
@@ -47,12 +56,12 @@ namespace PocketBase.Blazor.Hosting.Services
             {
                 var os = GetOSPlatform();
                 var arch = GetArchitectureString();
-                var extension = os == OSPlatform.Windows ? "zip" : "tar.gz";
-                string platformName = GetOSPlatformName();
+                var platformName = GetOSPlatformName();
 
+                // In future we're gonna provide our own custom GO build to be able to create cron jobs also from this library
                 // https://github.com/pocketbase/pocketbase/releases/download/v0.34.0/pocketbase_0.34.0_windows_amd64.zip
 
-                var downloadUrl = $"{BaseDownloadUrl}/v{Version}/pocketbase_{Version}_{platformName}_{arch}.{extension}";
+                var downloadUrl = $"{BaseDownloadUrl}/v{Version}/pocketbase_{Version}_{platformName}_{arch}.zip";
 
                 var tempFile = Path.GetTempFileName();
                 var localPath = GetLocalExecutablePath();
@@ -64,26 +73,18 @@ namespace PocketBase.Blazor.Hosting.Services
                 using var response = await _httpClient.GetAsync(downloadUrl);
                 response.EnsureSuccessStatusCode();
 
-                await using var stream = await response.Content.ReadAsStreamAsync();
-                await using var fileStream = File.Create(tempFile);
-                await stream.CopyToAsync(fileStream);
+                using (var stream = await response.Content.ReadAsStreamAsync())
+                using (var fileStream = File.Create(tempFile))
+                {
+                    await stream.CopyToAsync(fileStream);
+                }
 
                 // Extract
-                if (extension == "zip")
-                {
-                    ZipFile.ExtractToDirectory(tempFile, Path.GetDirectoryName(localPath)!, true);
-                }
-                else
-                {
-                    // For tar.gz on Linux/macOS (simplified - in reality use SharpCompress)
-                    File.Move(tempFile, localPath, true);
-                    if (os != OSPlatform.Windows)
-                    {
-                        Process.Start("chmod", $"+x {localPath}");
-                    }
-                }
+                ZipFile.ExtractToDirectory(tempFile, Path.GetDirectoryName(localPath)!, true);
 
+                // Manual clean up
                 File.Delete(tempFile);
+
                 return localPath;
             }
             catch (Exception ex)

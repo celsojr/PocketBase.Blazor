@@ -1,5 +1,6 @@
 namespace PocketBase.Blazor.UnitTests.Domain.Hosting;
 
+using System.Runtime.InteropServices;
 using Blazor.Hosting;
 using FluentAssertions;
 
@@ -34,8 +35,9 @@ public class PocketBaseHostBuilderTests
             })
             .BuildAsync();
 
-        // Assert
         var host = await builder.BuildAsync();
+
+        // Assert
         host.Options.Should().NotBeNull();
         host.Options.Host.Should().Be("127.0.0.1");
         host.Options.Port.Should().Be(8888);
@@ -48,13 +50,22 @@ public class PocketBaseHostBuilderTests
     {
         // Arrange
         var builder = PocketBaseHostBuilder.CreateDefault();
-        var exePath = @"C:\tools\pocketbase.exe";
+
+        var os = GetOSPlatform();
+        var extension = os == OSPlatform.Windows ? ".exe" : "";
+        var appData = Environment.SpecialFolder.LocalApplicationData;
+
+        var exePath = Path.Combine(
+            Environment.GetFolderPath(appData),
+            "pocketbase",
+            $"pocketbase{extension}"
+        );
 
         // Act
         await builder.UseExecutable(exePath).BuildAsync();
+        var host = await builder.BuildAsync();
 
         // Assert
-        var host = await builder.BuildAsync();
         host.ExecutablePath.Should().Be(exePath);
     }
 
@@ -81,10 +92,22 @@ public class PocketBaseHostBuilderTests
 
         // Assert
         host.Options.Should().NotBeNull();
-        host.Options.Host.Should().Be("localhost");
+        host.Options.Host.Should().Be("127.0.0.1");
         host.Options.Port.Should().Be(8090);
-        host.Options.Dir.Should().Contain("pb_data");
+        host.Options.Dir.Should().BeNull();
         host.Options.Dev.Should().BeFalse();
+    }
+
+    private static OSPlatform GetOSPlatform()
+    {
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            return OSPlatform.Windows;
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            return OSPlatform.Linux;
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            return OSPlatform.OSX;
+
+        throw new PlatformNotSupportedException();
     }
 }
 

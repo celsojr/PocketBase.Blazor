@@ -43,6 +43,9 @@ namespace PocketBase.Blazor.Hosting
 
         public async Task<IPocketBaseHost> BuildAsync()
         {
+            if (_logger != null)
+                PocketBaseBinaryResolver.SetLogger(_logger);
+
             // If no executable specified, try to resolve it
             _executablePath ??= await PocketBaseBinaryResolver.ResolveAsync();
 
