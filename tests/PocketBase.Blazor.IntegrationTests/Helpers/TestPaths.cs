@@ -2,7 +2,8 @@ namespace PocketBase.Blazor.IntegrationTests.Helpers;
 
 public static class TestPaths
 {
-    public static string ProjectDirectory => Directory.GetParent(AppContext.BaseDirectory)!
+    public static string ProjectDirectory =>
+        Directory.GetParent(AppContext.BaseDirectory)!
         .Parent!.Parent!.Parent!.FullName;
 
     public static string TestDataDirectory => Path.Combine(

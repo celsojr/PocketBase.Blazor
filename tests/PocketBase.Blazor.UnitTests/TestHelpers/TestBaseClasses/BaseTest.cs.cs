@@ -55,14 +55,7 @@ public abstract class BaseTest : IDisposable
 
     protected static async Task<string> LoadTestDataAsStringAsync(string relativePath)
     {
-        var basePath = AppContext.BaseDirectory;
-    
-        relativePath = relativePath
-            .Replace('/', Path.DirectorySeparatorChar)
-            .Replace('\\', Path.DirectorySeparatorChar)
-            .TrimStart(Path.DirectorySeparatorChar);
-
-        var fullPath = Path.Combine(basePath, relativePath);
+        var fullPath = Path.Combine(TestPaths.PostResponsesDirectory, relativePath);
     
         if (!File.Exists(fullPath))
             throw new FileNotFoundException($"Test data file not found: {fullPath}");
@@ -74,11 +67,11 @@ public abstract class BaseTest : IDisposable
     {
         var files = new[]
         {
-            "TestData/Json/Responses/PostResponse/MinimalPost.json",
-            "TestData/Json/Responses/PostResponse/CompletePost.json",
-            "TestData/Json/Responses/PostResponse/WithExpand.json",
-            "TestData/Json/Responses/PostResponse/WithNullValues.json",
-            "TestData/Json/Responses/PostResponse/WithEmptyExpand.json"
+            "MinimalPost.json",
+            "CompletePost.json",
+            "WithExpand.json",
+            "WithNullValues.json",
+            "WithEmptyExpand.json"
         };
         
         return files.Select(f => new object[] { f });

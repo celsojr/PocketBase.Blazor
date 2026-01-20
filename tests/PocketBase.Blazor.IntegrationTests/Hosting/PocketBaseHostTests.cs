@@ -3,7 +3,6 @@ namespace PocketBase.Blazor.IntegrationTests.Hosting;
 using System.Diagnostics;
 using Blazor.Hosting;
 using Blazor.Hosting.Interfaces;
-using FluentAssertions;
 using Microsoft.Extensions.Logging;
 
 public class PocketBaseHostTests : IAsyncLifetime

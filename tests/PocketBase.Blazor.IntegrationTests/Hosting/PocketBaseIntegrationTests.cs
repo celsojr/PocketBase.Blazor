@@ -56,8 +56,12 @@ public class PocketBaseIntegrationTests : IAsyncLifetime
         await WaitForPocketBaseReady();
     }
 
-    private async Task WaitForPocketBaseReady(int maxAttempts = 30)
+    private async Task WaitForPocketBaseReady(int maxAttempts = 10)
     {
+        // Note: Production implementations should use robust retry mechanisms
+        // that handle transient failures, network issues, and service startup delays
+        // more gracefully than this simple linear retry approach.
+
         for (var i = 0; i < maxAttempts; i++)
         {
             try
@@ -126,38 +130,5 @@ public class PocketBaseIntegrationTests : IAsyncLifetime
         result.IsSuccess.Should().BeTrue();
         result.Value.Token.Should().NotBeNullOrEmpty();
     }
-
-    // TODO: WIP
-    //[Fact]
-    //public async Task CollectionsCRUD_ShouldWork()
-    //{
-    //    // Arrange - Create collection
-    //    var collectionData = new
-    //    {
-    //        name = "test_items",
-    //        type = "base",
-    //        schema = new object[]
-    //        {
-    //            new { name = "title", type = "text", required = true },
-    //            new { name = "description", type = "text" }
-    //        }
-    //    };
-
-    //    // Act - Create collection
-    //    _httpClient.Should().NotBeNull();
-    //    var createResponse = await _httpClient.PostAsync("/api/collections",
-    //        new StringContent(JsonSerializer.Serialize(collectionData),
-    //            Encoding.UTF8, "application/json"));
-
-    //    // Assert
-    //    createResponse.EnsureSuccessStatusCode();
-
-    //    // Verify collection exists
-    //    var listResponse = await _httpClient.GetAsync("/api/collections");
-    //    listResponse.EnsureSuccessStatusCode();
-
-    //    var collections = await listResponse.Content.ReadAsStringAsync();
-    //    collections.Should().Contain("test_items");
-    //}
 }
 

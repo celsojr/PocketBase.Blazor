@@ -4,6 +4,7 @@ using System.Text.Json;
 using Blazor.UnitTests.TestHelpers.Builders;
 using Blazor.UnitTests.TestHelpers.Extensions;
 using Blazor.UnitTests.TestHelpers.TestBaseClasses;
+using Blazor.UnitTests.TestHelpers.Utilities;
 using FluentAssertions;
 using Xunit.Abstractions;
 
@@ -19,7 +20,8 @@ public class PostResponseTests : BaseTest
     public async Task Deserialize_FromCompleteJsonFile_ShouldCreateValidPostResponse()
     {
         // Arrange
-        var json = await File.ReadAllTextAsync("TestData/Json/Responses/PostResponse/CompletePost.json");
+        var completePost = Path.Combine(TestPaths.PostResponsesDirectory, "CompletePost.json");
+        var json = await File.ReadAllTextAsync(completePost);
 
         // Act
         var result = JsonSerializer.Deserialize<PostResponse>(json, JsonOptions);
@@ -122,7 +124,8 @@ public class PostResponseTests : BaseTest
     public async Task PostResponse_ExpandedTags_ShouldDeserializeTagsFromExpand()
     {
         // Arrange
-        var json = await File.ReadAllTextAsync("TestData/Json/Responses/PostResponse/CompletePost.json");
+        var completePost = Path.Combine(TestPaths.PostResponsesDirectory, "CompletePost.json");
+        var json = await File.ReadAllTextAsync(completePost);
         var post = JsonSerializer.Deserialize<PostResponse>(json, JsonOptions);
 
         // Act
