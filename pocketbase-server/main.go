@@ -12,7 +12,7 @@ func main() {
     app := pocketbase.New()
 
     // app.OnServe().BindFunc(func(se *core.ServeEvent) error {
-    app.OnServe().Add(func(e *core.ServeEvent) error {
+    app.OnServe().Add(func(se *core.ServeEvent) error {
         router := se.Router
 
         router.POST("/internal/cron", func(c echo.Context) error {

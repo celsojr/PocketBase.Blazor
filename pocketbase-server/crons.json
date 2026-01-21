@@ -1,0 +1,14 @@
+{
+  "crons": [
+    {
+      "id": "hello",
+      "description": "Simple hello logger",
+      "handler": "hello"
+    },
+    {
+      "id": "reindex",
+      "description": "Reindex a collection",
+      "handler": "reindex"
+    }
+  ]
+}

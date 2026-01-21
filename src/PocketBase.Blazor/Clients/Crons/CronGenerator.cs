@@ -1,0 +1,185 @@
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+using PocketBase.Blazor.Models;
+using PocketBase.Blazor.Options;
+
+namespace PocketBase.Blazor.Clients.Crons
+{
+    public sealed class CronGenerator : ICronGenerator
+    {
+        public async Task GenerateAsync(
+            CronManifest cronManifest,
+            CronGenerationOptions options,
+            CancellationToken cancellationToken = default)
+        {
+            ArgumentNullException.ThrowIfNull(cronManifest);
+            ArgumentNullException.ThrowIfNull(options);
+
+            var outputDir = Path.Combine(options.ProjectDirectory, options.OutputDirectory);
+
+            if (options.CleanBeforeGenerate && Directory.Exists(outputDir))
+            {
+                Directory.Delete(outputDir, recursive: true);
+            }
+
+            Directory.CreateDirectory(outputDir);
+
+            await GenerateRegistryAsync(cronManifest, outputDir, cancellationToken);
+            await GenerateHandlersAsync(cronManifest, outputDir, cancellationToken);
+
+            if (options.BuildBinary)
+            {
+                await BuildGoBinaryAsync(options, cancellationToken);
+            }
+        }
+
+        private static async Task GenerateRegistryAsync(
+            CronManifest manifest,
+            string outputDir,
+            CancellationToken ct)
+        {
+            var sb = new StringBuilder();
+
+            sb.AppendLine("package crons");
+            sb.AppendLine();
+            sb.AppendLine("type CronHandler func(payload map[string]any)");
+            sb.AppendLine();
+            sb.AppendLine("var Registry = map[string]CronHandler{");
+
+            foreach (var cron in manifest.Crons)
+            {
+                sb.AppendLine($"    \"{cron.Id}\": {cron.Handler},");
+            }
+
+            sb.AppendLine("}");
+
+            var filePath = Path.Combine(outputDir, "registry.go");
+            await File.WriteAllTextAsync(filePath, sb.ToString(), ct);
+        }
+
+        private static async Task GenerateHandlersAsync(
+            CronManifest manifest,
+            string outputDir,
+            CancellationToken ct)
+        {
+            var sb = new StringBuilder();
+            var importedPackages = new HashSet<string> { "log" };
+
+            foreach (var cron in manifest.Crons)
+            {
+                if (cron.ImportPackages != null)
+                {
+                    foreach (var package in cron.ImportPackages)
+                    {
+                        if (!string.IsNullOrWhiteSpace(package))
+                        {
+                            importedPackages.Add(package.Trim());
+                        }
+                    }
+                }
+            }
+
+            sb.AppendLine("package crons");
+            sb.AppendLine();
+
+            if (importedPackages.Count > 0)
+            {
+                sb.AppendLine("import (");
+                foreach (var package in importedPackages.OrderBy(p => p))
+                {
+                    sb.AppendLine($"    \"{package}\"");
+                }
+                sb.AppendLine(")");
+                sb.AppendLine();
+            }
+
+            foreach (var cron in manifest.Crons)
+            {
+                sb.AppendLine($"// {cron.Description ?? cron.Id}");
+                sb.AppendLine($"func {cron.Handler}(payload map[string]any) {{");
+        
+                var handlerBody = !string.IsNullOrWhiteSpace(cron.HandlerBody) 
+                    ? cron.HandlerBody 
+                    : $"log.Println(\"cron '{cron.Id}' executed\", payload)";
+        
+                sb.AppendLine($"    {handlerBody}");
+                sb.AppendLine("}");
+                sb.AppendLine();
+            }
+
+            var filePath = Path.Combine(outputDir, "handlers.go");
+            await File.WriteAllTextAsync(filePath, sb.ToString(), ct);
+        }
+
+        private static async Task BuildGoBinaryAsync(
+            CronGenerationOptions options,
+            CancellationToken ct)
+        {
+            var psi = new ProcessStartInfo
+            {
+                FileName = options.GoExecutable,
+                Arguments = "build .",
+                WorkingDirectory = options.ProjectDirectory,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true
+            };
+
+            using var process = Process.Start(psi)
+                ?? throw new InvalidOperationException("Failed to start go build");
+
+            var stdout = await process.StandardOutput.ReadToEndAsync(ct);
+            var stderr = await process.StandardError.ReadToEndAsync(ct);
+
+            await process.WaitForExitAsync(ct);
+
+            if (process.ExitCode != 0)
+            {
+                throw new InvalidOperationException(
+                    $"Go build failed:\n{stderr}");
+            }
+        }
+    }
+}
+
+/*
+var builder = PocketBaseHostBuilder.CreateDefault();
+
+await builder
+    .UseLogger(logger)
+    .UseCrons(
+        cronGenerator,
+        new CronManifest
+        {
+            Crons =
+            [
+                new CronDefinition
+                {
+                    Id = "hello",
+                    Handler = "hello"
+                }
+            ]
+        },
+        new CronGenerationOptions
+        {
+            ProjectDirectory = TestPaths.GoProjectDirectory,
+            BuildBinary = true
+        })
+    .UseOptions(options =>
+    {
+        options.Host = "127.0.0.1";
+        options.Port = _port;
+        options.Dir = TestPaths.TestDataDirectory;
+        options.MigrationsDir = TestPaths.TestMigrationDirectory;
+        options.Dev = true;
+    })
+    .BuildAsync();
+
+_host = await builder.BuildAsync();
+await _host.StartAsync();
+*/

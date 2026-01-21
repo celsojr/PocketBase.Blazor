@@ -6,8 +6,10 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using Microsoft.Extensions.Logging;
+using PocketBase.Blazor.Clients.Crons;
 using PocketBase.Blazor.Hosting.Interfaces;
 using PocketBase.Blazor.Hosting.Services;
+using PocketBase.Blazor.Models;
 using PocketBase.Blazor.Options;
 
 namespace PocketBase.Blazor.Hosting
@@ -18,6 +20,10 @@ namespace PocketBase.Blazor.Hosting
         private PocketBaseHostOptions _options = new();
         private ILogger<PocketBaseHost>? _logger;
 
+        private ICronGenerator? _cronGenerator;
+        private CronManifest? _cronManifest;
+        private CronGenerationOptions? _cronOptions;
+
         public static IPocketBaseHostBuilder CreateDefault(string[]? args = null)
         {
             return new PocketBaseHostBuilder();
@@ -26,6 +32,14 @@ namespace PocketBase.Blazor.Hosting
         public IPocketBaseHostBuilder UseExecutable(string executablePath)
         {
             _executablePath = executablePath ?? throw new ArgumentNullException(nameof(executablePath));
+            return this;
+        }
+
+        public IPocketBaseHostBuilder UseCrons(ICronGenerator cronGenerator, CronManifest manifest, CronGenerationOptions options)
+        {
+            _cronGenerator = cronGenerator;
+            _cronManifest = manifest;
+            _cronOptions = options;
             return this;
         }
 
@@ -43,6 +57,15 @@ namespace PocketBase.Blazor.Hosting
 
         public async Task<IPocketBaseHost> BuildAsync()
         {
+            if (_cronGenerator is not null)
+            {
+                if (_cronManifest is null || _cronOptions is null)
+                    throw new InvalidOperationException(
+                        "Cron generator configured without manifest or options.");
+
+                await _cronGenerator.GenerateAsync(_cronManifest, _cronOptions);
+            }
+
             if (_logger != null)
                 PocketBaseBinaryResolver.SetLogger(_logger);
 

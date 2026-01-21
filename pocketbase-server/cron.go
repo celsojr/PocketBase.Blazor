@@ -7,8 +7,9 @@ import (
 )
 
 type CronRequest struct {
-    ID         string `json:"id"`
-    Expression string `json:"expression"`
+    ID         string                 `json:"id"`
+    Expression string                 `json:"expression"`
+    Payload    map[string]any         `json:"payload"`
 }
 
 func registerCron(app *pocketbase.PocketBase, req CronRequest) error {
@@ -19,7 +20,10 @@ func registerCron(app *pocketbase.PocketBase, req CronRequest) error {
 
     app.Cron().Remove(req.ID)
 
-    app.Cron().Add(req.ID, req.Expression, handler)
+    app.Cron().Add(req.ID, req.Expression, func() {
+        handler(req.Payload)
+    })
+
     return nil
 }
 

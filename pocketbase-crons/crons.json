@@ -1,0 +1,14 @@
+{
+  "crons": [
+    {
+      "id": "hello",
+      "handler": "HelloCron",
+      "description": "Prints hello message every interval"
+    },
+    {
+      "id": "send_email",
+      "handler": "SendEmailCron",
+      "description": "Sends an email to the specified user"
+    }
+  ]
+}

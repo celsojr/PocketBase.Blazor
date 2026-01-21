@@ -17,13 +17,18 @@ public class CreateCronsTests
     //    // Arrange
     //    var cronId = "hello";
     //    var expression = "*/5 * * * *";
+    //    var payload = new Dictionary<string, object>
+    //    {
+    //        ["userId"] = "123"
+    //    };
 
     //    // Act: register cron
     //    var registerResult = await _pb.Crons.RegisterAsync(
     //        new CronRegisterRequest
     //        {
     //            Id = cronId,
-    //            Expression = expression
+    //            Expression = expression,
+    //            Payload = payload
     //        });
 
     //    // Assert registration
