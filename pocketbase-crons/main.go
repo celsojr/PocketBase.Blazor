@@ -1,41 +1,39 @@
 package main
 
 import (
-    "log"
-    "net/http"
+	"log"
+	"net/http"
 
-    "github.com/labstack/echo/v4"
-    "github.com/pocketbase/pocketbase"
-    "github.com/pocketbase/pocketbase/core"
+	"github.com/pocketbase/pocketbase"
+	"github.com/pocketbase/pocketbase/core"
 )
 
 func main() {
-    app := pocketbase.New()
+	app := pocketbase.New()
 
-    app.OnServe().Add(func(e *core.ServeEvent) error {
-        router := e.Router
+	app.OnServe().BindFunc(func(e *core.ServeEvent) error {
+		e.Router.POST("/internal/cron", func(re *core.RequestEvent) error {
+			var req CronRequest
 
-        // POST /internal/cron
-        router.POST("/internal/cron", func(c echo.Context) error {
-            var req CronRequest
-            if err := c.Bind(&req); err != nil {
-                return c.JSON(http.StatusBadRequest, err.Error())
-            }
+			if err := re.BindBody(&req); err != nil {
+				return re.JSON(http.StatusBadRequest, err.Error())
+			}
 
-            if err := registerCron(app, req); err != nil {
-                return c.JSON(http.StatusBadRequest, err.Error())
-            }
+			if err := registerCron(app, req); err != nil {
+				return re.JSON(http.StatusBadRequest, err.Error())
+			}
 
-            return c.JSON(http.StatusOK, map[string]any{
-                "status": "cron registered",
-                "id":     req.ID,
-            })
-        })
+			return re.JSON(http.StatusOK, map[string]any{
+				"status": "cron registered",
+				"id":     req.ID,
+			})
+		})
 
-        return e.Next()
-    })
+		return e.Next()
+	})
 
-    if err := app.Start(); err != nil {
-        log.Fatal(err)
-    }
+	if err := app.Start(); err != nil {
+		log.Fatal(err)
+	}
 }
+
