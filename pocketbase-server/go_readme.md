@@ -60,7 +60,7 @@ go run main.go
 > 
 > Once triggered for the first time, the cron job will appear in the **Admin Web UI**, where it can also be executed manually.  
 > 
-> However, when running the same database via the standard **PocketBase executable**, the created cron job will **not** be visible or executed. This behavior is expected, since cron jobs are not stored in the database—they run **internally**, in **memory**, within the application.  
+> However, when running the same database via the standard **PocketBase executable**, the created cron job will **not** be visible or executed. This behavior is expected, since cron jobs are not stored in the database—they run **internally**, in **memory**, within the application that is tailor made for this purpose.  
 > 
 > Under the hood, PocketBase relies on the [**robfig/cron**](https://github.com/robfig/cron) package for scheduling and managing these cron jobs.
 
