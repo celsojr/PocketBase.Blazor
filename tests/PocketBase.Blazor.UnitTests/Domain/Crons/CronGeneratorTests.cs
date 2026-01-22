@@ -37,8 +37,8 @@ public class CronGeneratorTests
                     Id = "custom_logic", 
                     Handler = "CustomLogicCron",
                     Description = "Cron with custom imports",
-                    HandlerBody = "// import \"fmt\", \"time\"\ntime.Sleep(1 * time.Second)\nfmt.Println(\"Custom logic executed\")",
-                    ImportPackages = ["strings"]
+                    HandlerBody = "time.Sleep(1 * time.Second)\nfmt.Println(\"Custom logic executed\")",
+                    ImportPackages = ["fmt", "time", "strings"]
                 }
             ]
         };

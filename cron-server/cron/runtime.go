@@ -1,4 +1,4 @@
-package main
+package cron
 
 import (
     "errors"
@@ -6,11 +6,15 @@ import (
     "github.com/pocketbase/pocketbase"
 )
 
-func registerCron(app *pocketbase.PocketBase, req CronRequest) error {
+func RegisterCron(app *pocketbase.PocketBase, req CronRequest) error {
     handler, ok := cronHandlers[req.ID]
     if !ok {
         return errors.New("unknown cron id: " + req.ID)
     }
+
+    mu.Lock()
+    cronPayloads[req.ID] = req.Payload
+    mu.Unlock()
 
     app.Cron().Remove(req.ID)
 

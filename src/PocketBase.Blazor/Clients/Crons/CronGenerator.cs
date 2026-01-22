@@ -33,37 +33,12 @@ namespace PocketBase.Blazor.Clients.Crons
 
             Directory.CreateDirectory(outputDir);
 
-            //await GenerateRegistryAsync(cronManifest, outputDir, cancellationToken);
             await GenerateHandlersAsync(cronManifest, outputDir, cancellationToken);
 
             if (options.BuildBinary)
             {
                 await BuildGoBinaryAsync(options, cancellationToken);
             }
-        }
-
-        private static async Task GenerateRegistryAsync(
-            CronManifest manifest,
-            string outputDir,
-            CancellationToken ct)
-        {
-            var sb = new StringBuilder();
-
-            sb.AppendLine("package crons");
-            sb.AppendLine();
-            sb.AppendLine("type CronHandler func(payload map[string]any)");
-            sb.AppendLine();
-            sb.AppendLine("var Registry = map[string]CronHandler{");
-
-            foreach (var cron in manifest.Crons)
-            {
-                sb.AppendLine($"    \"{cron.Id}\": {cron.Handler},");
-            }
-
-            sb.AppendLine("}");
-
-            var filePath = Path.Combine(outputDir, "registry.go");
-            await File.WriteAllTextAsync(filePath, sb.ToString(), ct);
         }
 
         private static async Task GenerateHandlersAsync(

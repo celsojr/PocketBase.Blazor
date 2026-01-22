@@ -1,4 +1,4 @@
-package main
+package cron
 
 type CronRequest struct {
     ID         string         `json:"id"`
