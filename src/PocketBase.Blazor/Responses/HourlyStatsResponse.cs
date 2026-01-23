@@ -2,7 +2,7 @@ using System.Text.Json;
 
 namespace PocketBase.Blazor.Responses
 {
-    public class HourlyStatsResponse
+    public sealed class HourlyStatsResponse
     {
         public int Total { get; set; }
         public string? Date { get; set; }

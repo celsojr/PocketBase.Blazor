@@ -346,26 +346,19 @@ await builder
         {
             Crons =
             [
-                new CronDefinition
+                new()
                 {
                     Id = "hello",
-                    Handler = "hello"
-                }
+                    Description = "Hello cron",
+                    HandlerBody = log.Println(\"cron hello executed\", payload)
+                },
             ]
         },
         new CronGenerationOptions
         {
-            ProjectDirectory = TestPaths.GoProjectDirectory,
+            ProjectDirectory = "cron-server",
             BuildBinary = true
         })
-    .UseOptions(options =>
-    {
-        options.Host = "127.0.0.1";
-        options.Port = _port;
-        options.Dir = TestPaths.TestDataDirectory;
-        options.MigrationsDir = TestPaths.TestMigrationDirectory;
-        options.Dev = true;
-    })
     .BuildAsync();
 
 _host = await builder.BuildAsync();

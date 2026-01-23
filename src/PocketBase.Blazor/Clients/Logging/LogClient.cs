@@ -26,7 +26,7 @@ namespace PocketBase.Blazor.Clients.Logging
         /// <inheritdoc />
         public Task<Result<ListResult<LogResponse>>> GetListAsync(int page = 1, int perPage = 30, ListOptions? options = null, CancellationToken cancellationToken = default)
         {
-            var query = options?.ToDictionary() ?? new Dictionary<string, object?>();
+            var query = options?.BuildQuery() ?? new Dictionary<string, object?>();
             query["page"] = page.ToString();
             query["perPage"] = perPage.ToString();
 
