@@ -44,10 +44,10 @@ namespace PocketBase.Blazor.Clients.Logging
         }
 
         /// <inheritdoc />
-        public async Task<Result<HourlyStatsResponse>> GetStatsAsync(LogStatsOptions? options = null, CancellationToken cancellationToken = default)
+        public async Task<Result<List<HourlyStatsResponse>>> GetStatsAsync(LogStatsOptions? options = null, CancellationToken cancellationToken = default)
         {
             var query = options?.ToDictionary();
-            return await _http.SendAsync<HourlyStatsResponse>(HttpMethod.Get, "api/logs/stats", query: query, cancellationToken: cancellationToken);
+            return await _http.SendAsync<List<HourlyStatsResponse>>(HttpMethod.Get, "api/logs/stats", query: query, cancellationToken: cancellationToken);
         }
     }
 }

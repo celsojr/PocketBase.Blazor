@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using FluentResults;
@@ -45,7 +46,7 @@ namespace PocketBase.Blazor.Clients.Logging
         /// <exception cref="ClientResponseError">
         /// Thrown when the client receives an invalid response.
         /// </exception>
-        Task<Result<HourlyStatsResponse>> GetStatsAsync(LogStatsOptions? options = null, CancellationToken cancellationToken = default);
+        Task<Result<List<HourlyStatsResponse>>> GetStatsAsync(LogStatsOptions? options = null, CancellationToken cancellationToken = default);
     }
 }
 

@@ -4,12 +4,10 @@ namespace PocketBase.Blazor.IntegrationTests.Clients.Logging;
 public class GetOneTests
 {
     private readonly IPocketBase _pb;
-    private readonly PocketBaseAdminFixture _fixture;
 
     public GetOneTests(PocketBaseAdminFixture fixture)
     {
         _pb = fixture.Client;
-        _fixture = fixture;
     }
 
     [Fact]
