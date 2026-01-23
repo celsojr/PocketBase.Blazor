@@ -1,0 +1,41 @@
+outputDir := "./dump.sql"
+if dir, ok := payload["output_dir"].(string); ok && dir != "" {
+    outputDir = dir
+    log.Printf("[CRON] Using custom output path: %s", outputDir)
+} else {
+    log.Printf("[CRON] Using default output path: %s", outputDir)
+}
+
+dir := filepath.Dir(outputDir)
+if dir != "." && dir != "" {
+    if err := os.MkdirAll(dir, 0755); err != nil {
+        log.Printf("[CRON] Failed to create directory %s: %v", dir, err)
+        return
+    }
+}
+
+filterTables := []string{}
+if tables, ok := payload["tables"].([]any); ok {
+    for _, t := range tables {
+        if table, ok := t.(string); ok {
+            filterTables = append(filterTables, table)
+        }
+    }
+}
+
+cmd := exec.Command("sqlite3", "./pb_data/data.db", ".output "+outputDir, ".dump")
+if err := cmd.Run(); err != nil {
+    log.Printf("[CRON] Failed to dump database: %v", err)
+} else {
+    log.Printf("[CRON] Database dumped to %s", outputDir)
+}
+
+// # Basic cron registration with db-dump
+// curl -X POST http://localhost:8090/internal/cron \
+//   -H "Content-Type: application/json" \
+//   -d '{"id":"db-dump","expression":"* * * * *","payload":{}}'
+
+// # With custom output path
+// curl -X POST http://localhost:8090/internal/cron \
+//   -H "Content-Type: application/json" \
+//   -d '{"id":"db-dump","expression":"* * * * *","payload":{"output_dir":"./backups/db.sql"}}'

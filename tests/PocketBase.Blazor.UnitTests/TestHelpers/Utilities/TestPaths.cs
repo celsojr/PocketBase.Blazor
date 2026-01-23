@@ -14,7 +14,10 @@ public static class TestPaths
     
     public static string JsonResponsesDirectory => Path.Combine(
         TestDataDirectory, "Json", "Responses");
-    
+
+    public static string LiquidResponsesDirectory => Path.Combine(
+        TestDataDirectory, "Liquid");
+
     public static string PostResponsesDirectory => Path.Combine(
         JsonResponsesDirectory, "PostResponse");
 }

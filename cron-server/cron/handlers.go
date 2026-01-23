@@ -38,8 +38,6 @@ func init() {
     })
 
     RegisterHandler("db-dump", func(payload map[string]any) {
-        log.Printf("Received payload: %+v", payload)
-
         outputDir := "./dump.sql"
         if dir, ok := payload["output_dir"].(string); ok && dir != "" {
             outputDir = dir
@@ -74,7 +72,7 @@ func init() {
     })
 }
 
-// # Basic cron registration with dbdump
+// # Basic cron registration with db-dump
 // curl -X POST http://localhost:8090/internal/cron `
 //   -H "Content-Type: application/json" `
 //   -d '{"id":"db-dump","expression":"* * * * *","payload":{}}'

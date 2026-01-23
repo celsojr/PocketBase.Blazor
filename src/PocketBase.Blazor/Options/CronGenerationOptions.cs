@@ -1,5 +1,11 @@
+using System;
+using System.Runtime.InteropServices;
+
 namespace PocketBase.Blazor.Options
 {
+    /// <summary>
+    /// Options for cron generation.
+    /// </summary>
     public sealed class CronGenerationOptions
     {
         /// <summary>
@@ -10,7 +16,7 @@ namespace PocketBase.Blazor.Options
         /// <summary>
         /// Directory where cron files will be generated.
         /// </summary>
-        public string OutputDirectory { get; init; } = "internal/crons";
+        public string OutputDirectory { get; } = "cron";
 
         /// <summary>
         /// Whether to run `go build` after generation.
@@ -26,6 +32,29 @@ namespace PocketBase.Blazor.Options
         /// Clean output directory before generation.
         /// </summary>
         public bool CleanBeforeGenerate { get; init; } = true;
+
+        /// <summary>
+        /// Module name for the building process
+        /// </summary>
+        public string ModuleName { get; } = "cron-server";
+
+        /// <summary>
+        /// Binary file name that will be used to serve
+        /// the Pocketbase web ui and custom crons
+        /// </summary>
+        public string OutputBinary { get; } = GetBinaryName();
+
+        private static string GetBinaryName()
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                return "pb-cron.exe";
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                return "pb-cron-linux";
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                return "pb-cron-macos";
+
+            throw new PlatformNotSupportedException();
+        }
     }
 }
 

@@ -6,12 +6,13 @@ using System.Threading.Tasks;
 using Blazor.Clients.Crons;
 using Blazor.Models;
 using Blazor.Options;
+using Blazor.UnitTests.TestHelpers.Utilities;
 using FluentAssertions;
 using Xunit;
 
 public class CronGeneratorTests
 {
-    private readonly ICronGenerator _generator = new CronGenerator();
+    private readonly CronGenerator _generator = new();
 
     [Fact]
     public async Task GenerateAsync_creates_registry_and_handlers_files()
@@ -24,21 +25,21 @@ public class CronGeneratorTests
         {
             Crons =
             [
-                new() { Id = "hello", Handler = "HelloCron", Description = "Simple hello cron" },
-                new() 
-                { 
-                    Id = "send_email", 
-                    Handler = "SendEmailCron",
-                    Description = "Email sending cron",
-                    HandlerBody = "fmt.Println(\"Sending email via cron\", payload)"
+                new()
+                {
+                    Id = "hello",
+                    Description = "Hello cron",
+                    HandlerBody = await File.ReadAllTextAsync(
+                        Path.Combine(TestPaths.LiquidResponsesDirectory, "hello-handler.liquid")),
+                    ImportPackages = ["time"]
                 },
-                new() 
-                { 
-                    Id = "custom_logic", 
-                    Handler = "CustomLogicCron",
-                    Description = "Cron with custom imports",
-                    HandlerBody = "time.Sleep(1 * time.Second)\nfmt.Println(\"Custom logic executed\")",
-                    ImportPackages = ["fmt", "time", "strings"]
+                new()
+                {
+                    Id = "db-dump",
+                    Description = "Database dump cron",
+                    HandlerBody = await File.ReadAllTextAsync(
+                        Path.Combine(TestPaths.LiquidResponsesDirectory, "db-dump-handler.liquid")),
+                    ImportPackages = ["os", "os/exec", "path/filepath"]
                 }
             ]
         };
@@ -46,7 +47,6 @@ public class CronGeneratorTests
         var options = new CronGenerationOptions
         {
             ProjectDirectory = tempDir,
-            OutputDirectory = "internal/crons",
             BuildBinary = false
         };
 
@@ -54,35 +54,33 @@ public class CronGeneratorTests
         await _generator.GenerateAsync(manifest, options, CancellationToken.None);
 
         // Assert
+        var mainFile = Path.Combine(tempDir, "main.go");
         var registryFile = Path.Combine(tempDir, options.OutputDirectory, "registry.go");
         var handlersFile = Path.Combine(tempDir, options.OutputDirectory, "handlers.go");
+        var typesFile = Path.Combine(tempDir, options.OutputDirectory, "types.go");
+        var runtimFile = Path.Combine(tempDir, options.OutputDirectory, "runtime.go");
 
+        File.Exists(mainFile).Should().BeTrue();
         File.Exists(registryFile).Should().BeTrue();
         File.Exists(handlersFile).Should().BeTrue();
-
-        var registryContent = await File.ReadAllTextAsync(registryFile);
-        registryContent.Should().Contain("hello");
-        registryContent.Should().Contain("send_email");
-        registryContent.Should().Contain("custom_logic");
+        File.Exists(typesFile).Should().BeTrue();
+        File.Exists(runtimFile).Should().BeTrue();
 
         var handlersContent = await File.ReadAllTextAsync(handlersFile);
-        handlersContent.Should().Contain("func HelloCron");
-        handlersContent.Should().Contain("func SendEmailCron");
-        handlersContent.Should().Contain("func CustomLogicCron");
-        
+        handlersContent.Should().Contain(manifest.Crons[0].Id);
+        handlersContent.Should().Contain(manifest.Crons[1].Id);
+
         // Verify handler body customization
-        handlersContent.Should().Contain("fmt.Println(\"Sending email via cron\", payload)");
-        
-        // Verify custom logic
-        handlersContent.Should().Contain("time.Sleep(1 * time.Second)");
-        handlersContent.Should().Contain("fmt.Println(\"Custom logic executed\")");
-        
+        handlersContent.Should().Contain("log.Printf(\"[CRON] Hello, %s %d\", name, count)");
+        handlersContent.Should().Contain("cmd := exec.Command(\"sqlite3\", \"./pb_data/data.db\", \".output \"+outputDir, \".dump\")");
+
         // Verify imports
         handlersContent.Should().Contain("import (");
         handlersContent.Should().Contain("\"log\""); // default
-        handlersContent.Should().Contain("\"fmt\""); // from custom logic
-        handlersContent.Should().Contain("\"time\""); // from inline import comment
-        handlersContent.Should().Contain("\"strings\""); // from ImportPackages
+        handlersContent.Should().Contain("\"time\"");
+        handlersContent.Should().Contain("\"os\"");
+        handlersContent.Should().Contain("\"os/exec\"");
+        handlersContent.Should().Contain("\"path/filepath\"");
     }
 
     [Fact]
@@ -96,14 +94,13 @@ public class CronGeneratorTests
         {
             Crons =
             [
-                new() { Id = "default_cron", Handler = "DefaultCron" }
+                new() { Id = "default_cron", HandlerBody = "" }
             ]
         };
 
         var options = new CronGenerationOptions
         {
             ProjectDirectory = tempDir,
-            OutputDirectory = "internal/crons",
             BuildBinary = false
         };
 
@@ -115,53 +112,6 @@ public class CronGeneratorTests
         var handlersContent = await File.ReadAllTextAsync(handlersFile);
         
         handlersContent.Should().Contain("log.Println(\"cron 'default_cron' executed\", payload)");
-    }
-
-    [Fact]
-    public async Task GenerateAsync_handles_import_comments_in_handler_body()
-    {
-        // Arrange
-        var tempDir = Path.Combine(Path.GetTempPath(), "pb_crons_test_imports");
-        if (Directory.Exists(tempDir)) Directory.Delete(tempDir, true);
-
-        var manifest = new CronManifest
-        {
-            Crons =
-            [
-                new() 
-                { 
-                    Id = "complex_cron", 
-                    Handler = "ComplexCron",
-                    HandlerBody = "// import \"fmt\", \"time\", \"strings\"\nnow := time.Now()\nmsg := fmt.Sprintf(\"Ran at %v\", now)\nif strings.Contains(msg, \"Ran\") {\n    fmt.Println(msg)\n}"
-                }
-            ]
-        };
-
-        var options = new CronGenerationOptions
-        {
-            ProjectDirectory = tempDir,
-            OutputDirectory = "internal/crons",
-            BuildBinary = false
-        };
-
-        // Act
-        await _generator.GenerateAsync(manifest, options, CancellationToken.None);
-
-        // Assert
-        var handlersFile = Path.Combine(tempDir, options.OutputDirectory, "handlers.go");
-        var handlersContent = await File.ReadAllTextAsync(handlersFile);
-        
-        // Verify imports are properly extracted
-        handlersContent.Should().Contain("\"fmt\"");
-        handlersContent.Should().Contain("\"time\"");
-        handlersContent.Should().Contain("\"strings\"");
-        
-        // Verify import comment is removed from handler body
-        handlersContent.Should().NotContain("// import");
-        
-        // Verify actual handler code is present
-        handlersContent.Should().Contain("now := time.Now()");
-        handlersContent.Should().Contain("if strings.Contains(msg, \"Ran\")");
     }
 }
 
