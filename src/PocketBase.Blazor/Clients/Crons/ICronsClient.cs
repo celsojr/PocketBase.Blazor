@@ -35,10 +35,10 @@ namespace PocketBase.Blazor.Clients.Crons
         /// </exception>
         Task<Result> RunAsync(string id, CommonOptions? options = null, CancellationToken cancellationToken = default);
 
-        ///// <summary>
-        ///// Registers or updates a cron job dynamically (custom PocketBase extension).
-        ///// </summary>
-        //Task<Result<CronRegisterResponse>> RegisterAsync(CronRegisterRequest request, CancellationToken cancellationToken = default);
+        /// <summary>
+        /// Registers or updates a cron job dynamically (custom PocketBase extension).
+        /// </summary>
+        Task<Result<CronRegisterResponse>> RegisterAsync(CronRegisterRequest request, CancellationToken cancellationToken = default);
     }
 }
 
