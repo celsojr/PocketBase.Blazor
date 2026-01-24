@@ -1,8 +1,10 @@
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using FluentResults;
 using PocketBase.Blazor.Exceptions;
 using PocketBase.Blazor.Options;
+using PocketBase.Blazor.Requests.Settings;
 using PocketBase.Blazor.Responses.Auth;
 using PocketBase.Blazor.Responses.Settings;
 
@@ -85,21 +87,7 @@ namespace PocketBase.Blazor.Clients.Settings
         /// <summary>
         /// Generates a new Apple OAuth2 client secret.
         /// </summary>
-        /// <param name="clientId">
-        /// The ID of the Apple OAuth2 client.
-        /// </param>
-        /// <param name="teamId">
-        /// The ID of the Apple Developer Team.
-        /// </param>
-        /// <param name="keyId">
-        /// The ID of the Apple Key.
-        /// </param>
-        /// <param name="privateKey">
-        /// The private key for the Apple Key.
-        /// </param>
-        /// <param name="duration">
-        /// The duration for the client secret.
-        /// </param>
+        /// <param name="request">The request containing the client secret configuration.</param>
         /// <param name="options">
         /// Optional parameters for the client secret generation.
         /// </param>
@@ -109,7 +97,16 @@ namespace PocketBase.Blazor.Clients.Settings
         /// <exception cref="ClientResponseError">
         /// Thrown when the client receives an invalid response.
         /// </exception>
-        Task<Result<AppleClientSecretResponse>> GenerateAppleClientSecretAsync(string clientId, string teamId, string keyId, string privateKey, int duration, CommonOptions? options, CancellationToken cancellationToken = default);
+        Task<Result<AppleClientSecretResponse>> GenerateAppleClientSecretAsync(ClientSecretConfigRequest request, CommonOptions? options = null, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Generates a new OAuth2 client secret.
+        /// </summary>
+        /// <param name="config">The configuration for the client secret.</param>
+        /// <exception cref="ArgumentException">
+        /// Thrown when any of the required parameters are invalid.
+        /// </exception>
+        string CreateClientSecret(ClientSecretConfigRequest config);
     }
 }
 

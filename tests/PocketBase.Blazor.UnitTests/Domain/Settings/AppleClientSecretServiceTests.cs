@@ -1,0 +1,151 @@
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Cryptography;
+using System.Text;
+using System.Text.Json;
+using FluentAssertions;
+using PocketBase.Blazor.Clients.Settings;
+using PocketBase.Blazor.Http;
+using PocketBase.Blazor.Requests.Settings;
+
+namespace PocketBase.Blazor.UnitTests.Domain.Settings
+{
+    public class AppleClientSecretServiceTests
+    {
+        private readonly SettingsClient _client;
+
+        public AppleClientSecretServiceTests()
+        {
+            var dummyTransport = new HttpTransport("http://127.0.0.1:8092");
+            _client = new SettingsClient(dummyTransport);
+        }
+
+        [Fact]
+        public void CreateClientSecret_Throws_WhenConfigNull()
+        {
+            Assert.Throws<ArgumentNullException>(
+                () => _client.CreateClientSecret(null!));
+        }
+
+        [Theory]
+        [InlineData(null, "TEAM123", "KEY123", "PRIVATE_KEY", 3600)]
+        [InlineData("", "TEAM123", "KEY123", "PRIVATE_KEY", 3600)]
+        [InlineData("com.example.app", null, "KEY123", "PRIVATE_KEY", 3600)]
+        [InlineData("com.example.app", "", "KEY123", "PRIVATE_KEY", 3600)]
+        [InlineData("com.example.app", "TEAM123", null, "PRIVATE_KEY", 3600)]
+        [InlineData("com.example.app", "TEAM123", "", "PRIVATE_KEY", 3600)]
+        [InlineData("com.example.app", "TEAM123", "KEY123", null, 3600)]
+        [InlineData("com.example.app", "TEAM123", "KEY123", "", 3600)]
+        public void CreateClientSecret_Throws_WhenRequiredFieldMissing(string clientId, string teamId, string keyId, string privateKey, int expiresIn)
+        {
+            var config = new ClientSecretConfigRequest
+            {
+                ClientId = clientId,
+                TeamId = teamId,
+                KeyId = keyId,
+                PrivateKey = privateKey,
+                Duration = expiresIn
+            };
+
+            Assert.Throws<ArgumentException>(
+                () => _client.CreateClientSecret(config));
+        }
+
+        [Fact]
+        public void CreateClientSecret_Throws_WhenExpiresInInvalid()
+        {
+            var config = new ClientSecretConfigRequest
+            {
+                ClientId = "com.example.app",
+                TeamId = "TEAM123",
+                KeyId = "KEY123",
+                PrivateKey = "PRIVATE_KEY",
+                Duration = 0
+            };
+
+            Assert.Throws<ArgumentException>(
+                () => _client.CreateClientSecret(config));
+        }
+
+        [Fact]
+        public void CreateClientSecret_GeneratesValidJwt()
+        {
+            using var ecdsa = ECDsa.Create(ECCurve.NamedCurves.nistP256);
+            var privateKeyBytes = ecdsa.ExportECPrivateKey();
+            var privateKeyBase64 = Convert.ToBase64String(privateKeyBytes);
+
+            var config = new ClientSecretConfigRequest
+            {
+                ClientId = "com.example.app",
+                TeamId = "TEAM123ABC",
+                KeyId = "KEY123ABCX",
+                PrivateKey = privateKeyBase64,
+                Duration = 3600
+            };
+
+            var secret = _client.CreateClientSecret(config);
+
+            secret.Should().NotBeNullOrEmpty();
+    
+            // Verify token structure
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var token = tokenHandler.ReadJwtToken(secret);
+    
+            token.Header["kid"].Should().Be(config.KeyId);
+            token.Header["alg"].Should().Be("ES256");
+    
+            token.Payload["aud"].Should().Be("https://appleid.apple.com");
+            token.Payload["iss"].Should().Be(config.TeamId);
+            token.Payload["sub"].Should().Be(config.ClientId);
+            token.Payload.Should().ContainKey("exp");
+        }
+
+        [Fact]
+        public void CreateClientSecret_ReturnsJwt_WithCorrectClaims()
+        {
+            var config = new ClientSecretConfigRequest
+            {
+                ClientId = "com.example.app",
+                TeamId = "TEAM123ABC",
+                KeyId = "KEY123ABCX",
+                PrivateKey = GenerateTestPrivateKey(),
+                Duration = 3600
+            };
+
+            var secret = _client.CreateClientSecret(config);
+
+            secret.Should().NotBeNullOrEmpty();
+            var tokenParts = secret.Split('.');
+            tokenParts.Length.Should().Be(3);
+
+            // Check header for kid
+            var header = DecodeJwtPart(tokenParts[0]);
+            header.Should().NotBeNullOrEmpty();
+            header["kid"].ToString().Should().Be(config.KeyId);
+            header["alg"].ToString().Should().Be("ES256");
+
+            // Check payload
+            var payload = DecodeJwtPart(tokenParts[1]);
+            payload.Should().NotBeNullOrEmpty();
+            payload["aud"].ToString().Should().Be("https://appleid.apple.com");
+            payload["sub"].ToString().Should().Be(config.ClientId);
+            payload["iss"].ToString().Should().Be(config.TeamId);
+            payload.Should().ContainKey("exp");
+        }
+
+        private static Dictionary<string, object>? DecodeJwtPart(string base64Part)
+        {
+            var bytes = Convert.FromBase64String(
+                base64Part.PadRight(
+                    base64Part.Length + (4 - base64Part.Length % 4) % 4, '='));
+            var json = Encoding.UTF8.GetString(bytes);
+            return JsonSerializer.Deserialize<Dictionary<string, object>>(json);
+        }
+
+        private static string GenerateTestPrivateKey()
+        {
+            using var ecdsa = ECDsa.Create(ECCurve.NamedCurves.nistP256);
+            return Convert.ToBase64String(ecdsa.ExportECPrivateKey());
+        }
+    }
+}
+
