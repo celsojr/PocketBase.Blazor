@@ -1,6 +1,6 @@
 namespace PocketBase.Blazor.IntegrationTests.Clients.Logging;
 
-using Blazor.Responses;
+using Blazor.Responses.Logging;
 
 [Collection("PocketBase.Blazor.Admin")]
 public class GetLogStatsTests

@@ -1,8 +1,8 @@
 namespace PocketBase.Blazor.IntegrationTests.Clients.Logging;
 
-using Blazor.Models;
-using Blazor.Responses;
 using Blazor.Enums;
+using Blazor.Models;
+using Blazor.Responses.Logging;
 
 [Collection("PocketBase.Blazor.Admin")]
 public class ListLogsTests

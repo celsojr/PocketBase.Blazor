@@ -1,6 +1,6 @@
 namespace PocketBase.Blazor.IntegrationTests.Clients.Crons;
 
-using Blazor.Responses;
+using Blazor.Responses.Cron;
 
 [Collection("PocketBase.Blazor.Admin")]
 public class ListCronsTests
