@@ -24,11 +24,11 @@ namespace PocketBase.Blazor.Clients.Files
         /// <inheritdoc />
         public async Task<Result<string>> GetUrl(IDictionary<string, object?> record, string fileName, IDictionary<string, object?>? query, CancellationToken cancellationToken = default)
         {
-            object? collectionId = null, collectionName = null;
+            object? collectionName = null;
 
             if (string.IsNullOrWhiteSpace(fileName) ||
                 !record.TryGetValue("id", out var id) ||
-                !(record.TryGetValue("collectionId", out collectionId) ||
+                !(record.TryGetValue("collectionId", out var collectionId) ||
                 record.TryGetValue("collectionName", out collectionName)))
             {
                 return string.Empty;

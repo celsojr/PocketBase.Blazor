@@ -5,6 +5,7 @@ using FluentResults;
 using PocketBase.Blazor.Exceptions;
 using PocketBase.Blazor.Options;
 using PocketBase.Blazor.Responses;
+using PocketBase.Blazor.Responses.Settings;
 
 namespace PocketBase.Blazor.Clients.Settings
 {
@@ -20,7 +21,7 @@ namespace PocketBase.Blazor.Clients.Settings
         /// <exception cref="ClientResponseError">
         /// Thrown when the client receives an invalid response.
         /// </exception>
-        Task<Result<JsonElement>> GetAllAsync(CancellationToken cancellationToken = default);
+        Task<Result<SettingsResponse>> GetListAsync(CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Bulk updates app settings.

@@ -8,6 +8,7 @@ using PocketBase.Blazor.Extensions;
 using PocketBase.Blazor.Http;
 using PocketBase.Blazor.Options;
 using PocketBase.Blazor.Responses;
+using PocketBase.Blazor.Responses.Settings;
 
 namespace PocketBase.Blazor.Clients.Settings
 {
@@ -23,9 +24,9 @@ namespace PocketBase.Blazor.Clients.Settings
         }
 
         /// <inheritdoc />
-        public Task<Result<JsonElement>> GetAllAsync(CancellationToken cancellationToken = default)
+        public Task<Result<SettingsResponse>> GetListAsync(CancellationToken cancellationToken = default)
         {
-            return _http.SendAsync<JsonElement>(HttpMethod.Get, "api/settings", cancellationToken: cancellationToken);
+            return _http.SendAsync<SettingsResponse>(HttpMethod.Get, "api/settings", cancellationToken: cancellationToken);
         }
 
         /// <inheritdoc />
