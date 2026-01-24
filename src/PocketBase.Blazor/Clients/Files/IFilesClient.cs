@@ -14,11 +14,12 @@ namespace PocketBase.Blazor.Clients.Files
         /// <summary>
         /// Builds and returns an absolute record file url for the provided filename.
         /// </summary>
-        /// <param name="record">The record model.</param>
+        /// <param name="collectionId">The collection ID.</param>
+        /// <param name="recordId">The record ID.</param>
         /// <param name="fileName">The file name.</param>
         /// <param name="query">Optional query parameters.</param>
         /// <param name="cancellationToken"></param>
-        Task<Result<string>> GetUrl(IDictionary<string, object?> record, string fileName, IDictionary<string, object?>? query = null, CancellationToken cancellationToken = default);
+        Task<Result<byte[]>> GetUrl(string collectionId, string recordId, string fileName, IDictionary<string, object?>? query = null, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Requests a new private file access token for the current auth model.

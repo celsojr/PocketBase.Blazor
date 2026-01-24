@@ -164,3 +164,4 @@ public class GenerateAppleClientSecretTests
         result.IsSuccess.Should().BeFalse();
     }
 }
+
