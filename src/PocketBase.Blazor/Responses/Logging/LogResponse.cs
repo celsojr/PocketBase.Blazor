@@ -3,7 +3,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using PocketBase.Blazor.Enums;
 
-namespace PocketBase.Blazor.Responses
+namespace PocketBase.Blazor.Responses.Logging
 {
     public sealed class LogResponse
     {

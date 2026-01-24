@@ -8,7 +8,7 @@ using PocketBase.Blazor.Extensions;
 using PocketBase.Blazor.Http;
 using PocketBase.Blazor.Options;
 using PocketBase.Blazor.Requests;
-using PocketBase.Blazor.Responses;
+using PocketBase.Blazor.Responses.Cron;
 
 namespace PocketBase.Blazor.Clients.Crons
 {

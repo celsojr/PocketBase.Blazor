@@ -8,7 +8,7 @@ using PocketBase.Blazor.Extensions;
 using PocketBase.Blazor.Http;
 using PocketBase.Blazor.Models;
 using PocketBase.Blazor.Options;
-using PocketBase.Blazor.Responses;
+using PocketBase.Blazor.Responses.Logging;
 
 namespace PocketBase.Blazor.Clients.Logging
 {

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using FluentResults;
 using PocketBase.Blazor.Http;
 using PocketBase.Blazor.Options;
-using PocketBase.Blazor.Responses;
+using PocketBase.Blazor.Responses.Auth;
 
 namespace PocketBase.Blazor.Clients.Files
 {

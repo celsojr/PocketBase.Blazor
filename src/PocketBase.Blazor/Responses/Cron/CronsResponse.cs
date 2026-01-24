@@ -1,6 +1,6 @@
 using System.Text.Json;
 
-namespace PocketBase.Blazor.Responses
+namespace PocketBase.Blazor.Responses.Cron
 {
     /// <summary>
     /// Represents a cron job configuration response.

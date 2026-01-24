@@ -1,6 +1,6 @@
 using System.Text.Json;
 
-namespace PocketBase.Blazor.Responses
+namespace PocketBase.Blazor.Responses.Auth
 {
     public sealed class AuthResponse
     {

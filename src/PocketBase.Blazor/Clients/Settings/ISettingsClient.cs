@@ -1,10 +1,9 @@
-using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using FluentResults;
 using PocketBase.Blazor.Exceptions;
 using PocketBase.Blazor.Options;
-using PocketBase.Blazor.Responses;
+using PocketBase.Blazor.Responses.Auth;
 using PocketBase.Blazor.Responses.Settings;
 
 namespace PocketBase.Blazor.Clients.Settings

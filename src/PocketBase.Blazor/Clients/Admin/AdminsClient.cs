@@ -5,7 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using FluentResults;
 using PocketBase.Blazor.Http;
-using PocketBase.Blazor.Responses;
+using PocketBase.Blazor.Responses.Auth;
 using PocketBase.Blazor.Store;
 
 namespace PocketBase.Blazor.Clients.Admin

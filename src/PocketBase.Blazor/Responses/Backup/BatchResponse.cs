@@ -1,11 +1,12 @@
+using System.Collections.Generic;
 using System.Text.Json;
 
-namespace PocketBase.Blazor.Responses
+namespace PocketBase.Blazor.Responses.Backup
 {
-    public class UserResponse
+    public class BatchResponse
     {
-        public string Id { get; set; } = default!;
-        public string Email { get; set; } = default!;
+        public int Status { get; set; }
+        public Dictionary<string, object>? Body { get; set; }
 
         /// <inheritdoc />
         public override string ToString()

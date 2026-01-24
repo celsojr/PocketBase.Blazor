@@ -5,7 +5,7 @@ using FluentResults;
 using PocketBase.Blazor.Exceptions;
 using PocketBase.Blazor.Options;
 using PocketBase.Blazor.Requests;
-using PocketBase.Blazor.Responses;
+using PocketBase.Blazor.Responses.Cron;
 
 namespace PocketBase.Blazor.Clients.Crons
 {

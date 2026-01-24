@@ -5,7 +5,7 @@ using FluentResults;
 using PocketBase.Blazor.Exceptions;
 using PocketBase.Blazor.Models;
 using PocketBase.Blazor.Options;
-using PocketBase.Blazor.Responses;
+using PocketBase.Blazor.Responses.Logging;
 
 namespace PocketBase.Blazor.Clients.Logging
 {

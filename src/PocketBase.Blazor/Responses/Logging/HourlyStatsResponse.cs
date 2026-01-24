@@ -1,7 +1,7 @@
 using System;
 using System.Text.Json;
 
-namespace PocketBase.Blazor.Responses
+namespace PocketBase.Blazor.Responses.Logging
 {
     public sealed class HourlyStatsResponse
     {

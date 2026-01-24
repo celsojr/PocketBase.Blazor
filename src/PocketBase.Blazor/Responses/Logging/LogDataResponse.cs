@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace PocketBase.Blazor.Responses
+namespace PocketBase.Blazor.Responses.Logging
 {
     public sealed class LogDataResponse
     {

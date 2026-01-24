@@ -1,4 +1,4 @@
-namespace PocketBase.Blazor.Responses
+namespace PocketBase.Blazor.Responses.Cron
 {
     public sealed class CronRegisterResponse
     {

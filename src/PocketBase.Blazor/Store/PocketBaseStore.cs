@@ -1,6 +1,6 @@
 using System;
 using PocketBase.Blazor.Clients.Realtime;
-using PocketBase.Blazor.Responses;
+using PocketBase.Blazor.Responses.Auth;
 
 namespace PocketBase.Blazor.Store
 {
