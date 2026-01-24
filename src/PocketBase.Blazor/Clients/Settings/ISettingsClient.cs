@@ -80,7 +80,7 @@ namespace PocketBase.Blazor.Clients.Settings
         /// <exception cref="ClientResponseError">
         /// Thrown when the client receives an invalid response.
         /// </exception>
-        Task<Result<bool>> TestEmailAsync(string collectionIdOrName, string toEmail, string emailTemplate, CommonOptions? options, CancellationToken cancellationToken = default);
+        Task<Result<bool>> TestEmailAsync(string collectionIdOrName, string toEmail, string emailTemplate, CommonOptions? options = null, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Generates a new Apple OAuth2 client secret.

@@ -46,24 +46,23 @@ namespace PocketBase.Blazor.Clients.Settings
         /// <inheritdoc />
         public async Task<Result<bool>> TestEmailAsync(string collectionIdOrName, string toEmail, string emailTemplate, CommonOptions? options, CancellationToken cancellationToken = default)
         {
-            if (string.IsNullOrWhiteSpace(collectionIdOrName)) throw new ArgumentException("Collection id or name is required.", nameof(collectionIdOrName));
             if (string.IsNullOrWhiteSpace(toEmail)) throw new ArgumentException("Recipient email is required.", nameof(toEmail));
             if (string.IsNullOrWhiteSpace(emailTemplate)) throw new ArgumentException("Email template is required.", nameof(emailTemplate));
 
             var body = new
             {
                 collection = collectionIdOrName,
-                to = toEmail,
+                email = toEmail,
                 template = emailTemplate
             };
 
             var query = options?.ToDictionary();
-            await _http.SendAsync(HttpMethod.Post, "api/settings/test-email", body: body, query: query, cancellationToken: cancellationToken);
-            return true;
+            var response = await _http.SendAsync(HttpMethod.Post, "api/settings/test/email", body: body, query: query, cancellationToken: cancellationToken);
+            return response.IsSuccess ? Result.Ok(true) : Result.Fail(response.Errors);
         }
 
         /// <inheritdoc />
-        public Task<Result<AppleClientSecretResponse>> GenerateAppleClientSecretAsync(string clientId, string teamId, string keyId, string privateKey, int duration, CommonOptions? options, CancellationToken cancellationToken = default)
+        public Task<Result<AppleClientSecretResponse>> GenerateAppleClientSecretAsync(string clientId, string teamId, string keyId, string privateKey, int duration, CommonOptions? options = null, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(clientId)) throw new ArgumentException("ClientId is required.", nameof(clientId));
             if (string.IsNullOrWhiteSpace(teamId)) throw new ArgumentException("TeamId is required.", nameof(teamId));
