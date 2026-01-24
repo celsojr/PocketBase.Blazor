@@ -36,7 +36,7 @@ namespace PocketBase.Blazor.Clients.Settings
         }
 
         /// <inheritdoc />
-        public async Task<Result<bool>> TestS3(CommonOptions? options, string fileSystem = "storage", CancellationToken cancellationToken = default)
+        public async Task<Result<bool>> TestS3Async(string fileSystem = "storage", CommonOptions? options = null, CancellationToken cancellationToken = default)
         {
             var query = options?.ToDictionary();
             var response = await _http.SendAsync(HttpMethod.Post, $"api/settings/test-s3/{fileSystem}", query: query, cancellationToken: cancellationToken);

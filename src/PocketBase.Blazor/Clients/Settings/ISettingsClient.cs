@@ -52,7 +52,7 @@ namespace PocketBase.Blazor.Clients.Settings
         /// <exception cref="ClientResponseError">
         /// Thrown when the client receives an invalid response.
         /// </exception>
-        Task<Result<bool>> TestS3(CommonOptions? options, string fileSystem = "storage", CancellationToken cancellationToken = default);
+        Task<Result<bool>> TestS3Async(string fileSystem = "storage", CommonOptions? options = null, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Sends a test email.
