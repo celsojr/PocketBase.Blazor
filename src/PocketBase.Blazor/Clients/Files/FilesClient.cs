@@ -1,13 +1,14 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.IO;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using FluentResults;
 using PocketBase.Blazor.Http;
 using PocketBase.Blazor.Options;
+using PbOptions = PocketBase.Blazor.Options;
 using PocketBase.Blazor.Responses.Auth;
+using System.Linq;
 
 namespace PocketBase.Blazor.Clients.Files
 {
@@ -23,12 +24,12 @@ namespace PocketBase.Blazor.Clients.Files
         }
 
         /// <inheritdoc />
-        public async Task<Result<byte[]>> GetUrl(string collectionId, string recordId, string fileName, IDictionary<string, object?>? query, CancellationToken cancellationToken = default)
+        public async Task<Result<string>> GetUrl(string collectionId, string recordId, string fileName, PbOptions.FileOptions options = null!, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(fileName) ||
                 string.IsNullOrWhiteSpace(recordId))
             {
-                return Array.Empty<byte>();
+                return string.Empty;
             }
 
             var path = string.Join('/', [
@@ -39,22 +40,26 @@ namespace PocketBase.Blazor.Clients.Files
                 Uri.EscapeDataString(fileName)
             ]);
 
-            // normalize the download query param (same as TS)
-            if (query != null &&
-                query.TryGetValue("download", out var download) &&
-                download?.Equals("false") == true)
+            options ??= new PbOptions.FileOptions();
+            var query = options.BuildQuery();
+
+            if (query != null)
             {
-                query.Remove("download");
+                // normalize the download query param (same as TS)
+                if (query.TryGetValue("download", out var download)
+                    && download?.Equals("false") == true)
+                {
+                    query.Remove("download");
+                }
+
+                query.Remove("page");
+                query.Remove("perPage");
             }
 
-            var request = await _http.SendAsync<byte[]>(
-                HttpMethod.Get,
-                path,
-                query: query,
-                cancellationToken: cancellationToken
-            );
+            if (query != null && query.Count > 0)
+                path += "?" + string.Join("&", query.Select(kv => $"{kv.Key}={Uri.EscapeDataString(kv.Value?.ToString() ?? "")}"));
 
-            return request;
+            return path;
         }
 
         /// <inheritdoc />
@@ -73,78 +78,48 @@ namespace PocketBase.Blazor.Clients.Files
             return data?.Value.Token ?? string.Empty;
         }
 
-        // ===
+        /// <inheritdoc />
+        public async Task<Result<Stream>> GetStreamAsync(string collectionId, string recordId, string fileName, PbOptions.FileOptions? options = null, CancellationToken cancellationToken = default)
+        {
+           if (string.IsNullOrWhiteSpace(fileName) || string.IsNullOrWhiteSpace(recordId))
+           {
+               return Result.Fail<Stream>("fileName and recordId are required");
+           }
 
-        //public class FileOptions
-        //{
-        //    public string? Thumb { get; set; }
-        //    public string? Token { get; set; }
-        //    public bool Download { get; set; }
-        //}
+           var path = string.Join('/', [
+               "api",
+               "files",
+               Uri.EscapeDataString(collectionId),
+               Uri.EscapeDataString(recordId),
+               Uri.EscapeDataString(fileName)
+           ]);
 
-        //public async Task<Result<byte[]>> GetFileAsync(string collectionId, string recordId, string fileName, FileOptions? options = null, CancellationToken cancellationToken = default)
-        //{
-        //    if (string.IsNullOrWhiteSpace(fileName) || string.IsNullOrWhiteSpace(recordId))
-        //    {
-        //        return Result.Fail<byte[]>("FileName and RecordId are required");
-        //    }
+           options ??= new PbOptions.FileOptions();
+           var query = options.BuildQuery();
 
-        //    var path = string.Join('/', [
-        //        "api",
-        //        "files",
-        //        Uri.EscapeDataString(collectionId),
-        //        Uri.EscapeDataString(recordId),
-        //        Uri.EscapeDataString(fileName)
-        //    ]);
+           return await _http.SendForStreamAsync(HttpMethod.Get, path, query: query, cancellationToken: cancellationToken);
+        }
 
-        //    var query = new Dictionary<string, object?>();
-    
-        //    if (options != null)
-        //    {
-        //        if (!string.IsNullOrWhiteSpace(options.Thumb))
-        //            query["thumb"] = options.Thumb;
-        
-        //        if (!string.IsNullOrWhiteSpace(options.Token))
-        //            query["token"] = options.Token;
-        
-        //        if (options.Download)
-        //            query["download"] = "1";
-        //    }
+        /// <inheritdoc />
+        public async Task<Result<byte[]>> GetBytesAsync(string collectionId, string recordId, string fileName, PbOptions.FileOptions? options = null!, CancellationToken cancellationToken = default)
+        {
+            if (string.IsNullOrWhiteSpace(fileName) || string.IsNullOrWhiteSpace(recordId))
+           {
+               return Result.Fail<byte[]>("fileName and recordId are required");
+           }
 
-        //    return await _http.SendRawAsync(HttpMethod.Get, path, query: query, cancellationToken: cancellationToken);
-        //}
+           var path = string.Join('/', [
+               "api",
+               "files",
+               Uri.EscapeDataString(collectionId),
+               Uri.EscapeDataString(recordId),
+               Uri.EscapeDataString(fileName)
+           ]);
 
-        //// For URL only (no download):
-        //public string GetFileUrl(string collectionId, string recordId, string fileName, FileOptions? options = null)
-        //{
-        //    var path = string.Join('/', [
-        //        "api",
-        //        "files",
-        //        Uri.EscapeDataString(collectionId),
-        //        Uri.EscapeDataString(recordId),
-        //        Uri.EscapeDataString(fileName)
-        //    ]);
+           options ??= new PbOptions.FileOptions();
+           var query = options.BuildQuery();
 
-        //    var query = new Dictionary<string, object?>();
-    
-        //    if (options != null)
-        //    {
-        //        if (!string.IsNullOrWhiteSpace(options.Thumb))
-        //            query["thumb"] = options.Thumb;
-        
-        //        if (!string.IsNullOrWhiteSpace(options.Token))
-        //            query["token"] = options.Token;
-        
-        //        if (options.Download)
-        //            query["download"] = "1";
-        //    }
-
-        //    var queryString = query.Any() 
-        //        ? "?" + string.Join("&", query.Select(kv => $"{Uri.EscapeDataString(kv.Key)}={Uri.EscapeDataString(kv.Value?.ToString() ?? "")}"))
-        //        : "";
-
-        //    return path + queryString;
-        //}
+           return await _http.SendForBytesAsync(HttpMethod.Get, path, query: query, cancellationToken: cancellationToken);
+        }
     }
 }
-

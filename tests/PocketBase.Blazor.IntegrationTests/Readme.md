@@ -44,6 +44,10 @@ From the repository root (or wherever `pocketbase.exe` is located):
 .\pocketbase.exe --dev serve `
   --dir "PocketBase.Blazor\tests\PocketBase.Blazor.IntegrationTests\Data\pb_data\" `
   --migrationsDir "PocketBase.Blazor\tests\PocketBase.Blazor.IntegrationTests\Data\pb_migrations\"
+
+./pocketbase --dev serve \
+  --dir "../PocketBase.Blazor/tests/PocketBase.Blazor.IntegrationTests/Data/pb_data" \
+  --migrationsDir "../PocketBase.Blazor/tests/PocketBase.Blazor.IntegrationTests/Data/pb_migrations"
 ```
 
 Expected behavior:

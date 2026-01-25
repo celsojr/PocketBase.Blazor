@@ -15,6 +15,7 @@ namespace PocketBase.Blazor.UnitTests.Domain.Settings
 
         public AppleClientSecretServiceTests()
         {
+            // This client won't make HTTP calls in these tests
             var dummyTransport = new HttpTransport("http://127.0.0.1:8092");
             _client = new SettingsClient(dummyTransport);
         }

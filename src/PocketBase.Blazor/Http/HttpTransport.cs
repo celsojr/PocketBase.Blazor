@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
@@ -32,6 +33,7 @@ namespace PocketBase.Blazor.Http
             _pocketBaseOptions = options ?? new PocketBaseOptions();
         }
 
+        /// <inheritdoc />
         public void SetStore(PocketBaseStore store)
         {
             _store = store;
@@ -82,7 +84,7 @@ namespace PocketBase.Blazor.Http
 
         static async Task<Result> HandleResponse(HttpResponseMessage response, CancellationToken cancellationToken)
         {
-            string content = string.Empty;
+            var content = string.Empty;
             try
             {
                 content = await response.Content.ReadAsStringAsync(cancellationToken);
@@ -109,7 +111,7 @@ namespace PocketBase.Blazor.Http
 
         async Task<Result<T>> HandleResponse<T>(HttpResponseMessage response, CancellationToken cancellationToken)
         {
-            string content = string.Empty;
+            var content = string.Empty;
 
             try
             {
@@ -186,6 +188,57 @@ namespace PocketBase.Blazor.Http
             return false;
         }
 
+        /// <inheritdoc />
+        public async Task<Result<Stream>> SendForStreamAsync(HttpMethod method, string path, object? body = null, IDictionary<string, object?>? query = null, CancellationToken cancellationToken = default)
+        {
+            UpdateAuthorizationHeader();
+            var request = BuildRequest(method, path, body, query);
+            var response = await _client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+            if (!response.IsSuccessStatusCode)
+            {
+                var content = await response.Content.ReadAsStringAsync(cancellationToken);
+                var ex = new PocketBaseException(response.StatusCode, content);
+                return Result.Fail<Stream>(ex.Message).WithError(ex.Message);
+            }
+            var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
+            return Result.Ok(stream);
+        }
+
+        /// <inheritdoc />
+        public async Task<Result<byte[]>> SendForBytesAsync(HttpMethod method, string path, object? body = null, IDictionary<string, object?>? query = null, CancellationToken cancellationToken = default)
+        {
+            UpdateAuthorizationHeader();
+            var request = BuildRequest(method, path, body, query);
+            var response = await _client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+            if (!response.IsSuccessStatusCode)
+            {
+                var content = await response.Content.ReadAsStringAsync(cancellationToken);
+                var ex = new PocketBaseException(response.StatusCode, content);
+                return Result.Fail<byte[]>(ex.Message).WithError(ex.Message);
+            }
+            var bytes = await response.Content.ReadAsByteArrayAsync(cancellationToken);
+            return Result.Ok(bytes);
+        }
+
+        /// <inheritdoc />
+        public async IAsyncEnumerable<string> SendForSseAsync(HttpMethod method, string path, object? body = null, IDictionary<string, object?>? query = null, [System.Runtime.CompilerServices.EnumeratorCancellation] CancellationToken cancellationToken = default)
+        {
+            UpdateAuthorizationHeader();
+            var request = BuildRequest(method, path, body, query);
+            request.Headers.Accept.Clear();
+            request.Headers.Accept.ParseAdd("text/event-stream");
+            var response = await _client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+            response.EnsureSuccessStatusCode();
+            using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
+            using var reader = new StreamReader(stream);
+            while (!reader.EndOfStream && !cancellationToken.IsCancellationRequested)
+            {
+                var line = await reader.ReadLineAsync(cancellationToken);
+                if (line != null)
+                {
+                    yield return line;
+                }
+            }
+        }
     }
 }
-
