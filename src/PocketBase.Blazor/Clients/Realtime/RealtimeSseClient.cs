@@ -130,4 +130,3 @@ namespace PocketBase.Blazor.Clients.Realtime
 //  
 //  // Later
 //  realtime.Stop();
-

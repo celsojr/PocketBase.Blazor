@@ -55,16 +55,8 @@ namespace PocketBase.Blazor.Http
         /// </summary>
         public static MultipartFile FromBytes(byte[] bytes, string fileName, string contentType = "application/octet-stream", string name = "file")
         {
-            if (bytes == null)
-            {
-                throw new ArgumentNullException(nameof(bytes));
-            }
-
-            return new MultipartFile(
-                new MemoryStream(bytes),
-                fileName,
-                contentType,
-                name);
+            ArgumentNullException.ThrowIfNull(bytes);
+            return new MultipartFile(new MemoryStream(bytes), fileName, contentType, name);
         }
 
         /// <summary>
@@ -77,11 +69,7 @@ namespace PocketBase.Blazor.Http
                 throw new ArgumentException("File path is required.", nameof(path));
             }
 
-            return new MultipartFile(
-                File.OpenRead(path),
-                Path.GetFileName(path),
-                contentType,
-                name);
+            return new MultipartFile(File.OpenRead(path), Path.GetFileName(path), contentType, name);
         }
     }
 }

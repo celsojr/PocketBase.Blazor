@@ -1,9 +1,10 @@
 namespace PocketBase.Blazor.Events
 {
-    public class RealtimeEvent
+    public sealed class RealtimeEvent
     {
-        public string? Topic { get; set; }
-        public string? Action { get; set; }
-        public string? Data { get; set; }
+        public string? Id { get; init; }
+        public string Event { get; init; } = default!;
+        public string Data { get; init; } = default!;
+        public string? Topic { get; internal set; }
     }
 }

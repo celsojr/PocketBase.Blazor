@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using PocketBase.Blazor.Events;
@@ -53,5 +54,11 @@ namespace PocketBase.Blazor.Clients.Realtime
         /// Hook invoked when the realtime connection is disconnected.
         /// </summary>
         event Action<IReadOnlyList<string>> OnDisconnect;
+
+        IAsyncEnumerable<RealtimeRecordEvent> SubscribeAsync(
+            string collection,
+            string recordId,
+            CommonOptions? options = null,
+            [EnumeratorCancellation] CancellationToken cancellationToken = default);
     }
 }

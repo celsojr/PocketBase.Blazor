@@ -9,8 +9,8 @@ public static class JwtTokenValidator
         var parts = token.Split('.', StringSplitOptions.RemoveEmptyEntries);
         if (parts.Length != 3) return null;
 
-        string rawPayload = parts[1];
-        string payload = Encoding.UTF8.GetString(ParsePayload(rawPayload));
+        var rawPayload = parts[1];
+        var payload = Encoding.UTF8.GetString(ParsePayload(rawPayload));
         var encoded = JsonSerializer.Deserialize<IDictionary<string, object>>(payload)!;
 
         if (encoded["exp"] is JsonElement jsonElement && jsonElement.ValueKind == JsonValueKind.Number)

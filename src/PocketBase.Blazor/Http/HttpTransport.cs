@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
 using System.Threading;
@@ -221,7 +222,7 @@ namespace PocketBase.Blazor.Http
         }
 
         /// <inheritdoc />
-        public async IAsyncEnumerable<string> SendForSseAsync(HttpMethod method, string path, object? body = null, IDictionary<string, object?>? query = null, [System.Runtime.CompilerServices.EnumeratorCancellation] CancellationToken cancellationToken = default)
+        public async IAsyncEnumerable<string> SendForSseAsync(HttpMethod method, string path, object? body = null, IDictionary<string, object?>? query = null, [EnumeratorCancellation] CancellationToken cancellationToken = default)
         {
             UpdateAuthorizationHeader();
             var request = BuildRequest(method, path, body, query);
@@ -231,7 +232,7 @@ namespace PocketBase.Blazor.Http
             response.EnsureSuccessStatusCode();
             using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
             using var reader = new StreamReader(stream);
-            while (!reader.EndOfStream && !cancellationToken.IsCancellationRequested)
+            while (!reader.EndOfStream || !cancellationToken.IsCancellationRequested)
             {
                 var line = await reader.ReadLineAsync(cancellationToken);
                 if (line != null)
