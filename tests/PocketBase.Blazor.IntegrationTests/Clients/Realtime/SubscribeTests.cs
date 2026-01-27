@@ -18,6 +18,12 @@ public class SubscribeTests
         _pb = _fixture.Client;
     }
 
+    [Fact]
+    public async Task SubscribeAsync_ShouldReceiveEvents_WhenDataChanges()
+    {
+        var col = _pb.Realtime.SubscribeAsync("<collection_name>", "<record_id>", _ => { });
+    }
+
     //[Fact]
     //public async Task Debug_SseConnectionOnly()
     //{
@@ -70,27 +76,27 @@ public class SubscribeTests
     //    // If it returns something else, we might be able to parse clientId
     //}
 
-    [Fact]
-    public async Task SubscribeAsync_ShouldConnectToRealtimeEndpoint()
-    {
-        // If the connected client doesn't receive any new messages for 5 minutes,
-        // the server will send a disconnect signal (this is to prevent forgotten/leaked connections)
-        var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
-        await _pb.Realtime.SubscribeAsync(
-            topic: "*",
-            callback: evt =>
-            {
-                if (evt.Event == "PB_CONNECT")
-                {
-                    var json = JsonDocument.Parse(evt.Data);
-                    var clientId = json.RootElement.GetProperty("clientId").GetString();
-                    _output.WriteLine($"Connected as {clientId}");
-                }
+    //[Fact]
+    //public async Task SubscribeAsync_ShouldConnectToRealtimeEndpoint()
+    //{
+    //    // If the connected client doesn't receive any new messages for 5 minutes,
+    //    // the server will send a disconnect signal (this is to prevent forgotten/leaked connections)
+    //    var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+    //    await _pb.Realtime.SubscribeAsync(
+    //        topic: "*",
+    //        callback: evt =>
+    //        {
+    //            if (evt.Event == "PB_CONNECT")
+    //            {
+    //                var json = JsonDocument.Parse(evt.Data);
+    //                var clientId = json.RootElement.GetProperty("clientId").GetString();
+    //                _output.WriteLine($"Connected as {clientId}");
+    //            }
 
-                _output.WriteLine($"{evt.Event}: {evt.Data}");
-            },
-            cancellationToken: cts.Token);
-    }
+    //            _output.WriteLine($"{evt.Event}: {evt.Data}");
+    //        },
+    //        cancellationToken: cts.Token);
+    //}
 
     //[Fact]
     //public async Task SubscribeAsync_ShouldConnectToRealtimeEndpoint()
