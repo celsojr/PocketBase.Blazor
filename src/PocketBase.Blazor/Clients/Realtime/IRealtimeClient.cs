@@ -21,7 +21,7 @@ namespace PocketBase.Blazor.Clients.Realtime
         /// <param name="onEvent">The callback to invoke when the event is received.</param>
         /// <param name="options">Optional common options for the subscription.</param>
         /// <param name="cancellationToken">A cancellation token to cancel the subscription.</param>
-        Task<IDisposable> SubscribeAsync(string collection, string recordId, Action<RealtimeRecordEvent> onEvent, CommonOptions? options = null, CancellationToken cancellationToken = default);
+        Task<IDisposable> SubscribeAsync(string collection, string recordId, Action<RealtimeRecordEvent>? onEvent, CommonOptions? options = null, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Unsubscribe from a realtime event topic. If <paramref name="recordId"/> is null or empty, unsubscribes all.

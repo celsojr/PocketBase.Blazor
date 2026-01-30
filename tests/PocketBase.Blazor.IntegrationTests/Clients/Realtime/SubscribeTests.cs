@@ -22,11 +22,41 @@ public class SubscribeTests
     [Fact]
     public async Task SubscribeAsync_ShouldReceiveEvents_WhenDataChanges()
     {
-        var col = await _pb.Collection("categories").SubscribeAsync("*", _ =>
+        using (var col = await _pb.Collection("categories")
+            .SubscribeAsync("*", _ =>
+            {
+                _output.WriteLine("Received realtime event for record.");
+                _output.WriteLine($"""
+                Action: {_.Action}
+                Collection: {_.Collection}
+                Record ID: {_.Record["id"]}
+                """);
+            }))
         {
-            _output.WriteLine("Received realtime event for record.");
-            _output.WriteLine($"{_.Action}");
-        });
+            var guid = $"{Guid.NewGuid():N}"[..15];
+
+            // // Act - Create a record in the collection
+            var record = await _pb.Collection("categories")
+                .CreateAsync<RecordResponse>(new
+                {
+                    name = $"Test Category {guid}",
+                    slug = $"test-category-{guid}",
+                });
+
+            // Assert
+            record.IsSuccess.Should().BeTrue();
+
+            // Wait a bit to ensure we receive the event
+            // await Task.Delay(10_000);
+        };
+
+        /*
+        DEBUG Realtime connection established.
+        └─ {"clientId":"V5r89VJtHYhbBrQPcQIDl1tqUuR69xzFnTQKutqf"}
+        [2.00ms] SELECT `_superusers`.* FROM `_superusers` WHERE `_superusers`.`id`='apyenyr17ywukhr' LIMIT 1
+        DEBUG Realtime subscriptions updated.
+        └─ {"clientId":"V5r89VJtHYhbBrQPcQIDl1tqUuR69xzFnTQKutqf","subscriptions":["categories/*"]}
+        */
     }
 
     //[Fact]

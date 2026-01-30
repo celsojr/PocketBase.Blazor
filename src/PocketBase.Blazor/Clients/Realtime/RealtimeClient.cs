@@ -17,7 +17,7 @@ using PocketBase.Blazor.Options;
 namespace PocketBase.Blazor.Clients.Realtime
 {
     /// <inheritdoc />
-    public class RealtimeClient : IRealtimeClient
+    public sealed class RealtimeClient : IRealtimeClient
     {
         private readonly object _sync = new();
         private readonly IHttpTransport _http;
@@ -44,13 +44,13 @@ namespace PocketBase.Blazor.Clients.Realtime
         }
 
         /// <inheritdoc />
-        public async Task<IDisposable> SubscribeAsync(string collection, string recordId, Action<RealtimeRecordEvent> onEvent, CommonOptions? options = null, CancellationToken cancellationToken = default)
+        public async Task<IDisposable> SubscribeAsync(string collection, string recordId, Action<RealtimeRecordEvent>? onEvent, CommonOptions? options = null, CancellationToken cancellationToken = default)
         {
             var topic = $"{collection}/{recordId}";
             var key = topic;
 
             await EnsureConnectedAsync(cancellationToken);
-            StartDispatcher(cancellationToken);
+            StartDispatcher(key, cancellationToken);
             await SubscribeInternalAsync(topic, options, cancellationToken);
 
             lock (_sync)
@@ -61,7 +61,7 @@ namespace PocketBase.Blazor.Clients.Realtime
                     _subscriptions[key] = handlers;
                 }
 
-                handlers.Add(onEvent);
+                handlers.Add(onEvent!);
             }
 
             return new Subscription(() =>
@@ -70,7 +70,7 @@ namespace PocketBase.Blazor.Clients.Realtime
                 {
                     if (_subscriptions.TryGetValue(key, out var handlers))
                     {
-                        handlers.Remove(onEvent);
+                        handlers.Remove(onEvent!);
                         if (handlers.Count == 0)
                             _subscriptions.Remove(key);
                     }
@@ -129,48 +129,70 @@ namespace PocketBase.Blazor.Clients.Realtime
             }
         }
 
-        private void StartDispatcher(CancellationToken ct)
+        private void StartDispatcher(string topic, CancellationToken ct)
         {
             Task.Run(async () =>
             {
                 await foreach (var evt in _eventChannel.Reader.ReadAllAsync(ct))
                 {
-                    if (evt.Event != "record")
+                    if (!evt.Event.Contains("\"record\":"))
                         continue;
 
                     var recordEvt = ParseRecordEvent(evt);
 
-                    var topicKey = $"{recordEvt.Collection}/{recordEvt.RecordId ?? "*"}";
+                    List<string> topics =
+                    [
+                        topic,
+                        $"{recordEvt?.Collection}/{recordEvt?.RecordId ?? "*"}",
+                    ];
 
-                    List<Action<RealtimeRecordEvent>> handlers;
+                    List<Action<RealtimeRecordEvent>>? handlers = [];
 
                     lock (_sync)
                     {
-                        if (!_subscriptions.TryGetValue(topicKey, out handlers))
-                            continue;
+                        foreach (var key in topics)
+                        {
+                            if (_subscriptions.TryGetValue(key, out handlers))
+                            {
+                                handlers = [.. handlers]; // snapshot
+                            }
 
-                        handlers = [.. handlers]; // snapshot
+                        }
+
                     }
 
-                    foreach (var h in handlers)
-                        h(recordEvt);
+                    if (handlers != null)
+                        foreach (var h in handlers)
+                            h(recordEvt!);
                 }
             }, ct);
         }
 
-        private static RealtimeRecordEvent ParseRecordEvent(RealtimeEvent evt)
+        private RealtimeRecordEvent? ParseRecordEvent(RealtimeEvent evt)
         {
             var json = JsonDocument.Parse(evt.Data);
             var root = json.RootElement;
+            var @event = default(RealtimeRecordEvent?);
 
-            return new RealtimeRecordEvent
+            try
             {
-                Action = root.GetProperty("action").GetString()!,
-                Collection = root.GetProperty("collection").GetString()!,
-                RecordId = root.GetProperty("record").GetProperty("id").GetString(),
-                Record = JsonSerializer.Deserialize<Dictionary<string, object?>>(
-                    root.GetProperty("record").GetRawText())!
-            };
+                @event = new RealtimeRecordEvent
+                {
+                    // ValueKind = Object : "{"record":{"collectionId":"pbc_3292755704","collectionName":"categories","created":"2026-01-30 18:58:15.571Z","id":"xmngfsfxo6rw8sa","name":"Test Category c16d9307c57642a","slug":"test-category-c16d9307c57642a","updated":"2026-01-30 18:58:15.571Z"},"action":"create"}"
+                    Action = root.GetProperty("action").GetString()!,
+                    Collection = root.GetProperty("record").GetProperty("collectionName").GetString()!,
+                    RecordId = root.GetProperty("record").GetProperty("id").GetString(),
+                    Record = JsonSerializer.Deserialize<Dictionary<string, object?>>(
+                        root.GetProperty("record").GetRawText())!
+                };
+            }
+            catch (System.Exception ex)
+            {
+                // Log or handle parsing error
+                _logger?.LogError(ex, "Failed to parse RealtimeEvent data: {Data}", evt.Data);
+            }
+
+            return @event;
         }
 
         private async Task SubscribeInternalAsync(string topic, CommonOptions? options, CancellationToken ct)
@@ -178,16 +200,13 @@ namespace PocketBase.Blazor.Clients.Realtime
             if (_clientId == null)
                 throw new InvalidOperationException("Realtime not connected.");
 
-            await _http.SendAsync(
-                HttpMethod.Post,
-                "api/realtime",
-                body: new
-                {
-                    clientId = _clientId,
-                    topic
-                },
-                query: options?.ToDictionary(),
-                cancellationToken: ct);
+            var body = new
+            {
+                clientId = _clientId,
+                subscriptions = new[] { topic }
+            };
+
+            await _http.SendAsync(HttpMethod.Post, "api/realtime", body: body, query: options?.ToDictionary(), cancellationToken: ct);
         }
 
         private async IAsyncEnumerable<RealtimeEvent> StreamRawEventsAsync([EnumeratorCancellation] CancellationToken ct)
@@ -265,6 +284,7 @@ namespace PocketBase.Blazor.Clients.Realtime
             OnDisconnect?.Invoke([.. topics]);
         }
 
+        /// <inheritdoc />
         public async ValueTask DisposeAsync()
         {
             _cts.Cancel();

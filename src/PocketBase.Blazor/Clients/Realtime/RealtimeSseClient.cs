@@ -119,7 +119,7 @@ namespace PocketBase.Blazor.Clients.Realtime
         //    }
         //}
 
-        private async IAsyncEnumerable<RealtimeEvent> StreamRawEventsAsync([EnumeratorCancellation] CancellationToken ct)
+        private IAsyncEnumerable<RealtimeEvent> StreamRawEventsAsync([EnumeratorCancellation] CancellationToken ct)
         {
             throw new NotImplementedException();
         }

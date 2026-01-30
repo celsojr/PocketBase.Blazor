@@ -10,7 +10,7 @@ namespace PocketBase.Blazor.Extensions
     public static class PocketbaseExtensions
     {
         public static async Task<IDisposable> SubscribeAsync(this IRecordClient client, string recordId,
-            Action<RealtimeRecordEvent> onEvent, CommonOptions? options = null,
+            Action<RealtimeRecordEvent>? onEvent, CommonOptions? options = null,
             CancellationToken cancellationToken = default)
         {
             ArgumentNullException.ThrowIfNull(client);
