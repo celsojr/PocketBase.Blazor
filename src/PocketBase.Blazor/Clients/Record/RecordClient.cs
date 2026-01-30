@@ -4,6 +4,7 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using FluentResults;
+using PocketBase.Blazor.Clients.Realtime;
 using PocketBase.Blazor.Http;
 using PocketBase.Blazor.Responses.Auth;
 using PocketBase.Blazor.Store;
@@ -20,6 +21,10 @@ namespace PocketBase.Blazor.Clients.Record
         protected override string BasePath => $"api/collections/{CollectionName}/records";
 
         private PocketBaseStore? _authStore;
+
+        /// <inheritdoc />
+        public IRealtimeClient Realtime => _authStore?.Realtime
+            ?? throw new InvalidOperationException("Realtime client is not available because the auth store is not set.");
 
         /// <inheritdoc />
         public RecordClient(string collectionName, IHttpTransport http, PocketBaseStore store)

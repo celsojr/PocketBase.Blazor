@@ -3,6 +3,7 @@ namespace PocketBase.Blazor.IntegrationTests.Clients.Realtime;
 using Blazor.Events;
 using Blazor.Responses;
 using Xunit.Abstractions;
+using Extensions;
 
 [Collection("PocketBase.Blazor.Admin")]
 public class SubscribeTests
@@ -21,7 +22,11 @@ public class SubscribeTests
     [Fact]
     public async Task SubscribeAsync_ShouldReceiveEvents_WhenDataChanges()
     {
-        var col = _pb.Realtime.SubscribeAsync("<collection_name>", "<record_id>", _ => { });
+        var col = await _pb.Collection("categories").SubscribeAsync("*", _ =>
+        {
+            _output.WriteLine("Received realtime event for record.");
+            _output.WriteLine($"{_.Action}");
+        });
     }
 
     //[Fact]

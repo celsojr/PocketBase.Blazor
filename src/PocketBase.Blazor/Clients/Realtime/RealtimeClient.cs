@@ -36,7 +36,7 @@ namespace PocketBase.Blazor.Clients.Realtime
         public bool IsConnected => _isConnected;
 
         /// <inheritdoc />
-        public RealtimeClient(IHttpTransport http)
+        internal RealtimeClient(IHttpTransport http)
         {
             _http = http ?? throw new ArgumentNullException(nameof(http));
             _logger ??= LoggerFactory.Create(builder => builder.AddConsole()).CreateLogger<RealtimeClient>();

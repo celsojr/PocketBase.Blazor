@@ -35,8 +35,8 @@ public class TestEmailTests
     [Fact(Skip = "Requires SMTP configuration")]
     public async Task TestEmailAsync_Succeeds_WhenSmtpConfigured()
     {
-        // docker run -d -p 1025:1025 -p 8025:8025 mailhog/mailhog
-        // MailHog web UI: http://localhost:8025
+        // docker run -d -p 1027:1027 -p 8027:8027 mailhog/mailhog
+        // MailHog web UI: http://localhost:8027
 
         // Configure SMTP first
         await _pb.Settings.UpdateAsync(new
