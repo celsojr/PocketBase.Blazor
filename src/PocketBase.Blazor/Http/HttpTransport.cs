@@ -17,16 +17,30 @@ using PocketBase.Blazor.Store;
 namespace PocketBase.Blazor.Http
 {
     /// <inheritdoc />
-    public class HttpTransport : IHttpTransport
+    public sealed class HttpTransport : IHttpTransport
     {
         readonly HttpClient _client;
         readonly PocketBaseOptions _pocketBaseOptions;
         private PocketBaseStore? _store;
+        private readonly bool _ownsClient;
+        private bool _disposed;
 
         /// <inheritdoc />
         public HttpTransport(string baseUrl, HttpClient? httpClient = null, PocketBaseOptions? options = null)
         {
-            _client = httpClient ?? new HttpClient() { BaseAddress = new Uri(baseUrl) };
+            if (httpClient is null)
+            {
+                _client = new HttpClient
+                {
+                    BaseAddress = new Uri(baseUrl)
+                };
+                _ownsClient = true;
+            }
+            else
+            {
+                _client = httpClient;
+                _ownsClient = false;
+            }
 
             _client.DefaultRequestHeaders.Add("Accept", "application/json");
             _client.DefaultRequestHeaders.Add("User-Agent", "PocketBase.Blazor");
@@ -239,6 +253,20 @@ namespace PocketBase.Blazor.Http
                 {
                     yield return line;
                 }
+            }
+        }
+
+        /// <inheritdoc />
+        public void Dispose()
+        {
+            if (_disposed)
+                return;
+
+            _disposed = true;
+
+            if (_ownsClient)
+            {
+                _client.Dispose();
             }
         }
     }

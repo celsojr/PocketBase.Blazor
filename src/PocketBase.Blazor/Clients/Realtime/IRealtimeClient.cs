@@ -11,7 +11,7 @@ namespace PocketBase.Blazor.Clients.Realtime
     /// Realtime subscription management service.
     /// Mirrors the JS SDK RealtimeService methods.
     /// </summary>
-    public interface IRealtimeClient
+    public interface IRealtimeClient : IAsyncDisposable
     {
         /// <summary>
         /// Subscribe to a realtime event topic.

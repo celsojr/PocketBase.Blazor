@@ -22,6 +22,7 @@ namespace PocketBase.Blazor.Clients.Realtime
         private readonly object _sync = new();
         private readonly IHttpTransport _http;
         private readonly ILogger<RealtimeClient>? _logger;
+        private readonly CancellationTokenSource _cts = new();
         private readonly Dictionary<string, List<Action<RealtimeRecordEvent>>> _subscriptions = new();
         private readonly Channel<RealtimeEvent> _eventChannel = Channel.CreateUnbounded<RealtimeEvent>();
 
@@ -262,6 +263,33 @@ namespace PocketBase.Blazor.Clients.Realtime
             await _http.SendAsync(HttpMethod.Post, "api/realtime", body: body, cancellationToken: ct);
             _isConnected = false;
             OnDisconnect?.Invoke([.. topics]);
+        }
+
+        public async ValueTask DisposeAsync()
+        {
+            _cts.Cancel();
+
+            if (_connectionTask is not null)
+            {
+                try
+                {
+                    await _connectionTask.ConfigureAwait(false);
+                }
+                catch (OperationCanceledException)
+                {
+                    // expected
+                }
+            }
+
+            _eventChannel.Writer.TryComplete();
+
+            lock (_sync)
+            {
+                _subscriptions.Clear();
+            }
+
+            _isConnected = false;
+            OnDisconnect?.Invoke([]);
         }
 
         //var col = pb.Collection("example");

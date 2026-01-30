@@ -1,7 +1,8 @@
-using System.Net.Http;
-using System.Threading.Tasks;
+using System;
 using System.Collections.Generic;
+using System.Net.Http;
 using System.Threading;
+using System.Threading.Tasks;
 using FluentResults;
 
 namespace PocketBase.Blazor.Http
@@ -9,7 +10,7 @@ namespace PocketBase.Blazor.Http
     /// <summary>
     /// Abstraction for HTTP transport layer.
     /// </summary>
-    public interface IHttpTransport
+    public interface IHttpTransport : IDisposable
     {
         /// <summary>
         /// Sends an HTTP request.

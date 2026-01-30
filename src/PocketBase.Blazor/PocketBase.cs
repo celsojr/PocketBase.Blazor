@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
+using System.Threading.Tasks;
 using PocketBase.Blazor.Clients.Admin;
 using PocketBase.Blazor.Clients.Backup;
 using PocketBase.Blazor.Clients.Batch;
@@ -21,7 +22,7 @@ namespace PocketBase.Blazor;
 /// <inheritdoc />
 public sealed class PocketBase : IPocketBase
 {
-    private Dictionary<string, RecordClient> _recordClients = [];
+    private readonly Dictionary<string, RecordClient> _recordClients = [];
 
     public string BaseUrl { get; }
 
@@ -82,6 +83,13 @@ public sealed class PocketBase : IPocketBase
     /// <inheritdoc />
     public void EnableAutoCancellation(bool enabled)
     {
+    }
+
+    /// <inheritdoc />
+    public async ValueTask DisposeAsync()
+    {
+        await Realtime.DisposeAsync();
+        _http.Dispose();
     }
 }
 
