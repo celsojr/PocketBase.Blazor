@@ -26,6 +26,9 @@ namespace PocketBase.Blazor.Clients.Record
         public IRealtimeClient Realtime => _authStore?.Realtime
             ?? throw new InvalidOperationException("Realtime client is not available because the auth store is not set.");
 
+        public IRealtimeStreamClient RealtimeSse => _authStore?.RealtimeSse
+            ?? throw new InvalidOperationException("Realtime stream client is not available because the auth store is not set.");
+
         /// <inheritdoc />
         public RecordClient(string collectionName, IHttpTransport http, PocketBaseStore store)
             : base(http)

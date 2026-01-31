@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
@@ -35,6 +36,7 @@ public sealed class PocketBase : IPocketBase
     public IHealthClient Health { get; }
     public ILogClient Log { get; }
     public IRealtimeClient Realtime { get; }
+    public IRealtimeStreamClient RealtimeSse { get; }
     public ISettingsClient Settings { get; }
     public PocketBaseStore AuthStore { get; }
 
@@ -54,11 +56,12 @@ public sealed class PocketBase : IPocketBase
         Log = new LogClient(_http);
         Files = new FilesClient(_http);
         Realtime = new RealtimeClient(_http);
+        RealtimeSse = new RealtimeSseClient(_http);
         Health = new HealthClient(_http);
         Settings = new SettingsClient(_http);
 
         var authStore = new AuthStore(Admins);
-        AuthStore = new PocketBaseStore(authStore, Realtime);
+        AuthStore = new PocketBaseStore(authStore, Realtime, RealtimeSse);
 
         if (_http is HttpTransport transport)
         {
@@ -88,7 +91,12 @@ public sealed class PocketBase : IPocketBase
     /// <inheritdoc />
     public async ValueTask DisposeAsync()
     {
-        await Realtime.DisposeAsync();
+        if (Realtime is IAsyncDisposable rtDisposable)
+            await rtDisposable.DisposeAsync();
+        
+        if (RealtimeSse is IAsyncDisposable sseDisposable)
+            await sseDisposable.DisposeAsync();
+
         _http.Dispose();
     }
 }

@@ -22,206 +22,153 @@ public class SubscribeTests
     [Fact]
     public async Task SubscribeAsync_ShouldReceiveEvents_WhenDataChanges()
     {
-        using (await _pb.Collection("categories")
-            .SubscribeAsync("*", _ =>
-            {
-                _output.WriteLine("Received realtime event for record.\n");
+        var eventsReceived = new List<RealtimeRecordEvent>();
 
-                _output.WriteLine($"""
-                Action: {_.Action}
-                Collection: {_.Collection}
-                Record ID: {_.Record["id"]}{Environment.NewLine}
-                """);
-            }))
+        using (await _pb.Collection("categories").SubscribeAsync("*", evt =>
         {
-            // Act - Create a record in the collection
-            var record = await _pb.Collection("categories")
-                .CreateAsync<RecordResponse>(new
-                {
-                    name = $"Test Category",
-                    slug = $"test-category",
-                });
+            _output.WriteLine($"Received: {evt.Action} - {evt.RecordId}");
+            eventsReceived.Add(evt);
+        }))
+        {
+            var record = await _pb.Collection("categories").CreateAsync<RecordResponse>(new
+            {
+                name = "Test Category",
+                slug = "test-category",
+            });
 
-            // Assert
             record.IsSuccess.Should().BeTrue();
 
-            // Clean up
-            await _pb.Collection("categories")
-                .DeleteAsync(record.Value.Id);
-
-            // Wait a bit to ensure we receive the event
-            // When debugging, this time should be increased due to breakpoints
+            await _pb.Collection("categories").DeleteAsync(record.Value.Id);
             await Task.Delay(3_000);
         }
 
-        /**
-        == Expected Pocketbase log output example ==
-
-        DEBUG Realtime connection established.
-        └─ {"clientId":"V5r89VJtHYhbBrQPcQIDl1tqUuR69xzFnTQKutqf"}
-        [2.00ms] SELECT `_superusers`.* FROM `_superusers` WHERE `_superusers`.`id`='apyenyr17ywukhr' LIMIT 1
-        DEBUG Realtime subscriptions updated.
-        └─ {"clientId":"V5r89VJtHYhbBrQPcQIDl1tqUuR69xzFnTQKutqf","subscriptions":["categories/*"]}
-        */
+        eventsReceived.Should().NotBeEmpty();
+        eventsReceived.Should().Contain(evt => evt.Action == "create");
+        eventsReceived.Should().Contain(evt => evt.Action == "delete");
     }
 
-    //[Fact]
-    //public async Task Debug_SseConnectionOnly()
-    //{
-    //    // Act - Just try to connect and see what we get
-    //    var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
-    //    var messages = new List<string>();
+    [Fact]
+    public async Task RealtimeSse_ShouldStreamParsedEvents()
+    {
+        var events = new List<RealtimeRecordEvent>();
+        var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
 
-    //    try
-    //    {
-    //        await foreach (var line in _pb.Realtime.SubscribeAsync(
-    //            HttpMethod.Get, 
-    //            "api/realtime",
-    //            cancellationToken: cts.Token))
-    //        {
-    //            _output.WriteLine($"SSE Line: {line}");
-    //            messages.Add(line);
+        // Subscribe and immediately create a record to trigger an event
+        var subscriptionTask = Task.Run(async () =>
+        {
+            await foreach (var evt in _pb.RealtimeSse.SubscribeAsync("categories", "*", cancellationToken: cts.Token))
+            {
+                _output.WriteLine($"Parsed Event: {evt.Action} - {evt.RecordId}");
+                events.Add(evt);
 
-    //            if (messages.Count >= 3) // Get first few messages
-    //            {
-    //                cts.Cancel();
-    //                break;
-    //            }
-    //        }
-    //    }
-    //    catch (OperationCanceledException)
-    //    {
-    //        _output.WriteLine("SSE connection test completed (cancelled)");
-    //    }
+                if (events.Count >= 1) // Wait for at least one real event
+                {
+                    cts.Cancel();
+                    break;
+                }
+            }
+        }, cts.Token);
 
-    //    // Assert
-    //    messages.Should().NotBeEmpty();
-    //    messages.Should().Contain(line => line.Contains("PB_CONNECT"));
-    //    messages.Should().Contain(line => line.Contains("clientId"));
-    //}
+        // Give subscription time to establish
+        await Task.Delay(1000);
 
-    //[Fact]
-    //public async Task Debug_WhatHappensOnRealtimeGet()
-    //{
-    //    await _pb.Realtime.ConnectWebSocketAsync(CancellationToken.None);
-    //    // Let's debug what actually happens
-    //    //var response = await _pb.SendAsync(
-    //    //    HttpMethod.Get, 
-    //    //    "api/realtime");
+        // Trigger an event
+        var record = await _pb.Collection("categories")
+            .CreateAsync<RecordResponse>(new
+            {
+                name = "SSE Test Category",
+                slug = "sse-test-category",
+            });
 
-    //    //_output.WriteLine($"Status: {response.StatusCode}");
-    //    //_output.WriteLine($"Content: {response.Content}");
-    //    //_output.WriteLine($"Headers: {string.Join(", ", response.Headers)}");
+        // Give time for event to propagate
+        await Task.Delay(1000);
 
-    //    // If this returns 101 Switching Protocols, we need WebSocket
-    //    // If it returns something else, we might be able to parse clientId
-    //}
+        try
+        {
+            await subscriptionTask;
+        }
+        catch (OperationCanceledException)
+        {
+            // The cancellation inside the subscriptionTask will throw this exception
+            _output.WriteLine("Stream completed");
+        }
+        finally
+        {
+            // We don't care about cleanup events here
+            await _pb.Collection("categories").DeleteAsync(record.Value.Id);
+        }
 
-    //[Fact]
-    //public async Task SubscribeAsync_ShouldConnectToRealtimeEndpoint()
-    //{
-    //    // If the connected client doesn't receive any new messages for 5 minutes,
-    //    // the server will send a disconnect signal (this is to prevent forgotten/leaked connections)
-    //    var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
-    //    await _pb.Realtime.SubscribeAsync(
-    //        topic: "*",
-    //        callback: evt =>
-    //        {
-    //            if (evt.Event == "PB_CONNECT")
-    //            {
-    //                var json = JsonDocument.Parse(evt.Data);
-    //                var clientId = json.RootElement.GetProperty("clientId").GetString();
-    //                _output.WriteLine($"Connected as {clientId}");
-    //            }
+        events.Should().NotBeEmpty();
+    }
 
-    //            _output.WriteLine($"{evt.Event}: {evt.Data}");
-    //        },
-    //        cancellationToken: cts.Token);
-    //}
+    [Fact]
+    public async Task RealtimeSse_IsConnected_ShouldReflectConnectionState()
+    {
+        // Create a separate instance for this test to avoid affecting other tests
+        await using var pb = new PocketBase(_pb.BaseUrl);
 
-    //[Fact]
-    //public async Task SubscribeAsync_ShouldConnectToRealtimeEndpoint()
-    //{
-    //    // Arrange
-    //    var topic = "_pb_users_auth_";
-    //    var callbackInvoked = false;
-    //    var callback = new Action<RealtimeEvent>(e =>
-    //    {
-    //        _output.WriteLine($"Received event: {e.Action} on {e.Topic} data: {e.Data}");
-    //        callbackInvoked = true;
-    //    });
+        // Authenticate as admin
+        await pb.Admins.AuthWithPasswordAsync(
+            _fixture.Settings.AdminTesterEmail,
+            _fixture.Settings.AdminTesterPassword
+        );
 
-    //    // Act
+        // Initially should be disconnected
+        pb.RealtimeSse.IsConnected.Should().BeFalse();
 
-    //    // First, ensure we're authenticated (important for realtime)
-    //    //await _fixture.AuthenticateAsync();
+        var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+        var eventReceived = false;
 
-    //    // Subscribe to topic
-    //    var result = await _pb.Realtime.SubscribeAsync(topic, callback);
+        // Start streaming (this will trigger connection)
+        var streamingTask = Task.Run(async () =>
+        {
+            await foreach (var evt in pb.RealtimeSse.SubscribeAsync(
+                "categories", "*", cancellationToken: cts.Token))
+            {
+                eventReceived = true;
+                _output.WriteLine($"Received event: {evt.Action} - {evt.RecordId}");
+                cts.Cancel();
+                break;
+            }
+        }, cts.Token);
 
-    //    // Assert
-    //    result.Should().BeTrue();
-    //    _pb.Realtime.IsConnected.Should().BeTrue();
+        // Give connection time to establish
+        await Task.Delay(2000);
 
-    //    // Now trigger an auth event to test
-    //    await Task.Delay(2000); // Give connection time to establish
+        // Should now be connected
+        pb.RealtimeSse.IsConnected.Should().BeTrue();
 
-    //    // Create a new user to trigger auth event
-    //    var userResult = await _pb.Collection("categories")
-    //        .CreateAsync<RecordResponse>(new
-    //        {
-    //            email = "testing-realtime@email.com",
-    //            name = "Testing Realtime",
-    //        });
+        // Create a record to trigger an event
+        var record = await pb.Collection("categories")
+            .CreateAsync<RecordResponse>(new
+            {
+                name = "Connection Test",
+                slug = "connection-test",
+            });
 
-    //    userResult.IsSuccess.Should().BeTrue();
+        try
+        {
+            await streamingTask;
+        }
+        catch (OperationCanceledException)
+        {
+            _output.WriteLine("Streaming cancelled as expected");
+        }
+        finally
+        {
+            // Cleanup record
+            await pb.Collection("categories")
+                .DeleteAsync(record.Value.Id);
+        }
 
-    //    // Wait for potential event
-    //    await Task.Delay(5000);
+        // Verify we received an event
+        eventReceived.Should().BeTrue();
+    
+        // The instance will be disposed via using statement
+        // No need to manually call DisposeAsync
 
-    //    // The test might not receive an event immediately, 
-    //    // but connection should be established
-    //    _output.WriteLine($"Test completed. Callback invoked: {callbackInvoked}");
-    //}
-
-    //[Fact]
-    //public async Task SubscribeAsync_ShouldReceiveEvents_WhenDataChanges()
-    //{
-    //    // Arrange
-    //    var collectionName = $"test_{Guid.NewGuid():N}";
-    //    var topic = collectionName;
-
-    //    // First create a collection via Admin API
-    //    await _fixture.CreateCollectionAsync(collectionName);
-
-    //    var receivedEvents = new List<RealtimeEvent>();
-    //    var eventReceived = new TaskCompletionSource<bool>();
-
-    //    var callback = new Action<RealtimeEvent>(e =>
-    //    {
-    //        _output.WriteLine($"Event received: {e.Action} on {e.Collection}");
-    //        receivedEvents.Add(e);
-    //        if (e.Action == "create")
-    //            eventReceived.TrySetResult(true);
-    //    });
-
-    //    // Subscribe to collection events
-    //    await _client.SubscribeAsync(topic, callback);
-
-    //    // Act - Create a record in the collection
-    //    await Task.Delay(500); // Give subscription time to establish
-    //    await _fixture.CreateRecordAsync(collectionName, new { name = "Test Item" });
-
-    //    // Wait for event with timeout
-    //    var completedTask = await Task.WhenAny(
-    //        eventReceived.Task,
-    //        Task.Delay(5000)
-    //    );
-
-    //    // Assert
-    //    completedTask.Should().Be(eventReceived.Task, "Should have received a realtime event");
-    //    receivedEvents.Should().Contain(e => 
-    //        e.Collection == collectionName && e.Action == "create");
-    //}
-
+        // Cleanup
+        await pb.RealtimeSse.DisposeAsync();
+        pb.RealtimeSse.IsConnected.Should().BeFalse();
+    }
 }

@@ -7,9 +7,9 @@ using PocketBase.Blazor.Options;
 
 namespace PocketBase.Blazor.Clients.Realtime
 {
-    public interface IRealtimeClient : IAsyncDisposable
+    public interface IRealtimeStreamClient : IAsyncDisposable
     {
-        Task<IDisposable> SubscribeAsync(string collection, string recordId, Action<RealtimeRecordEvent> onEvent, CommonOptions? options = null, CancellationToken cancellationToken = default);
+        IAsyncEnumerable<RealtimeRecordEvent> SubscribeAsync(string collection, string recordId, CommonOptions? options = null, CancellationToken cancellationToken = default);
         Task UnsubscribeAsync(string collection, string? recordId = null, CancellationToken cancellationToken = default);
         event Action<IReadOnlyList<string>> OnDisconnect;
         bool IsConnected { get; }

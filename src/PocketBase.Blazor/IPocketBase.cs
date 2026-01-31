@@ -29,6 +29,7 @@ namespace PocketBase.Blazor
         IHealthClient Health { get; }
         ILogClient Log { get; }
         IRealtimeClient Realtime { get; }
+        IRealtimeStreamClient RealtimeSse { get; }
         ISettingsClient Settings { get; }
 
         void EnableAutoCancellation(bool enabled);

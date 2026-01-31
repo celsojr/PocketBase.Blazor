@@ -24,6 +24,11 @@ namespace PocketBase.Blazor.Clients.Record
         IRealtimeClient Realtime { get; }
 
         /// <summary>
+        /// Gets the Realtime Stream Client associated with this record client.
+        /// </summary>
+        IRealtimeStreamClient RealtimeSse { get; }
+
+        /// <summary>
         /// Authenticates an admin using email and password.
         /// </summary>
         /// <param name="email">Admin email or identity.</param>

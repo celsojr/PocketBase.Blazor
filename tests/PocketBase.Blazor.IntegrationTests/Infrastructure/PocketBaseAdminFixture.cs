@@ -26,4 +26,3 @@ public class PocketBaseAdminFixture : IAsyncLifetime
 
     public Task DisposeAsync() => Task.CompletedTask;
 }
-
