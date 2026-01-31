@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Concurrent;
+using System.Collections.Immutable;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
@@ -19,19 +21,21 @@ namespace PocketBase.Blazor.Clients.Realtime
     /// <inheritdoc />
     public sealed class RealtimeClient : IRealtimeClient
     {
-        private readonly object _sync = new();
         private readonly IHttpTransport _http;
         private readonly ILogger<RealtimeClient>? _logger;
         private readonly CancellationTokenSource _cts = new();
-        private readonly Dictionary<string, List<Action<RealtimeRecordEvent>>> _subscriptions = new();
         private readonly Channel<RealtimeEvent> _eventChannel = Channel.CreateUnbounded<RealtimeEvent>();
-
+        
+        // Using ImmutableList for thread-safe operations without locks
+        private readonly ConcurrentDictionary<string, ImmutableList<Action<RealtimeRecordEvent>>> _subscriptions = new();
+        
         private Task? _connectionTask;
+        private Task? _dispatcherTask;
         private volatile bool _isConnected;
         private string? _clientId;
 
         /// <inheritdoc />
-        public event Action<IReadOnlyList<string>>? OnDisconnect = _ => { };
+        public event Action<IReadOnlyList<string>>? OnDisconnect;
 
         /// <inheritdoc />
         public bool IsConnected => _isConnected;
@@ -44,155 +48,139 @@ namespace PocketBase.Blazor.Clients.Realtime
         }
 
         /// <inheritdoc />
-        public async Task<IDisposable> SubscribeAsync(string collection, string recordId, Action<RealtimeRecordEvent>? onEvent, CommonOptions? options = null, CancellationToken cancellationToken = default)
+        public async Task<IDisposable> SubscribeAsync(string collection, string recordId, Action<RealtimeRecordEvent> onEvent, 
+            CommonOptions? options = null, CancellationToken cancellationToken = default)
         {
+            ArgumentNullException.ThrowIfNull(onEvent);
+
             var topic = $"{collection}/{recordId}";
-            var key = topic;
 
             await EnsureConnectedAsync(cancellationToken);
-            StartDispatcher(key, cancellationToken);
             await SubscribeInternalAsync(topic, options, cancellationToken);
 
-            lock (_sync)
-            {
-                if (!_subscriptions.TryGetValue(key, out var handlers))
-                {
-                    handlers = new List<Action<RealtimeRecordEvent>>();
-                    _subscriptions[key] = handlers;
-                }
+            // Atomic update - no locks needed
+            _subscriptions.AddOrUpdate(
+                topic,
+                _ => ImmutableList.Create(onEvent),
+                (_, existing) => existing.Add(onEvent)
+            );
 
-                handlers.Add(onEvent!);
-            }
+            // Ensure dispatcher is running
+            _dispatcherTask ??= StartDispatcher(cancellationToken);
 
             return new Subscription(() =>
             {
-                lock (_sync)
+                _subscriptions.AddOrUpdate(
+                    topic,
+                    _ => ImmutableList<Action<RealtimeRecordEvent>>.Empty,
+                    (_, existing) => existing.Remove(onEvent)
+                );
+                
+                // Clean up empty lists
+                if (_subscriptions.TryGetValue(topic, out var handlers) && handlers.IsEmpty)
                 {
-                    if (_subscriptions.TryGetValue(key, out var handlers))
-                    {
-                        handlers.Remove(onEvent!);
-                        if (handlers.Count == 0)
-                            _subscriptions.Remove(key);
-                    }
+                    _subscriptions.TryRemove(topic, out _);
                 }
             });
         }
 
         /// <inheritdoc />
-        public async Task UnsubscribeAsync(string collection, string? recordId = null, CancellationToken cancellationToken = default)
+        public async Task UnsubscribeAsync(string collection, string? recordId = null, 
+            CancellationToken cancellationToken = default)
         {
             await EnsureConnectedAsync(cancellationToken);
 
-            List<string> topicsToRemove;
+            var topicsToRemove = _subscriptions.Keys
+                .Where(t =>
+                {
+                    if (!t.StartsWith(collection + "/", StringComparison.Ordinal))
+                        return false;
 
-            lock (_sync)
-            {
-                topicsToRemove = _subscriptions.Keys
-                    .Where(t =>
-                    {
-                        if (!t.StartsWith(collection + "/", StringComparison.Ordinal))
-                            return false;
+                    if (recordId == null)
+                        return true;
 
-                        if (recordId == null)
-                            return true;
-
-                        var suffix = t[(collection.Length + 1)..];
-                        return recordId == "*" ? suffix == "*" : suffix == recordId;
-                    })
-                    .ToList();
-
-                foreach (var topic in topicsToRemove)
-                    _subscriptions.Remove(topic);
-            }
+                    var suffix = t[(collection.Length + 1)..];
+                    return recordId == "*" ? suffix == "*" : suffix == recordId;
+                })
+                .ToList();
 
             if (topicsToRemove.Count == 0)
                 return;
 
+            foreach (var topic in topicsToRemove)
+                _subscriptions.TryRemove(topic, out _);
+
             await UnsubscribeInternalAsync(topicsToRemove, cancellationToken);
         }
 
-        private sealed class Subscription : IDisposable
+        private Task StartDispatcher(CancellationToken ct)
         {
-            private readonly Action _dispose;
-            private bool _disposed;
-
-            public Subscription(Action dispose)
-            {
-                _dispose = dispose;
-            }
-
-            public void Dispose()
-            {
-                if (_disposed) return;
-                _disposed = true;
-                _dispose();
-            }
-        }
-
-        private void StartDispatcher(string topic, CancellationToken ct)
-        {
-            Task.Run(async () =>
+            return Task.Run(async () =>
             {
                 await foreach (var evt in _eventChannel.Reader.ReadAllAsync(ct))
                 {
-                    if (!evt.Event.Contains("\"record\":"))
+                    if (!evt.Data.Contains("\"record\":"))
                         continue;
 
                     var recordEvt = ParseRecordEvent(evt);
+                    if (recordEvt == null)
+                        continue;
 
-                    List<string> topics =
-                    [
-                        topic,
-                        $"{recordEvt?.Collection}/{recordEvt?.RecordId ?? "*"}",
-                    ];
+                    // Try exact match first (e.g., "categories/abc123")
+                    var exactTopic = $"{recordEvt.Collection}/{recordEvt.RecordId}";
+                    
+                    // Try wildcard match (e.g., "categories/*")
+                    var wildcardTopic = $"{recordEvt.Collection}/*";
 
-                    List<Action<RealtimeRecordEvent>>? handlers = [];
+                    // Get handlers for both topics
+                    var exactHandlers = GetHandlersForTopic(exactTopic);
+                    var wildcardHandlers = GetHandlersForTopic(wildcardTopic);
 
-                    lock (_sync)
+                    // Combine and deduplicate handlers (in case someone subscribed to both)
+                    var allHandlers = exactHandlers.Concat(wildcardHandlers).Distinct();
+
+                    // Execute all handlers
+                    foreach (var handler in allHandlers)
                     {
-                        foreach (var key in topics)
+                        try
                         {
-                            if (_subscriptions.TryGetValue(key, out handlers))
-                            {
-                                handlers = [.. handlers]; // snapshot
-                            }
-
+                            handler(recordEvt);
                         }
-
+                        catch (Exception ex)
+                        {
+                            _logger?.LogError(ex, "Error executing realtime event handler");
+                        }
                     }
-
-                    if (handlers != null)
-                        foreach (var h in handlers)
-                            h(recordEvt!);
                 }
             }, ct);
         }
 
+        private ImmutableList<Action<RealtimeRecordEvent>> GetHandlersForTopic(string topic)
+        {
+            return _subscriptions.TryGetValue(topic, out var handlers) ? handlers : [];
+        }
+
         private RealtimeRecordEvent? ParseRecordEvent(RealtimeEvent evt)
         {
-            var json = JsonDocument.Parse(evt.Data);
-            var root = json.RootElement;
-            var @event = default(RealtimeRecordEvent?);
-
             try
             {
-                @event = new RealtimeRecordEvent
+                var json = JsonDocument.Parse(evt.Data);
+                var root = json.RootElement;
+
+                return new RealtimeRecordEvent
                 {
-                    // ValueKind = Object : "{"record":{"collectionId":"pbc_3292755704","collectionName":"categories","created":"2026-01-30 18:58:15.571Z","id":"xmngfsfxo6rw8sa","name":"Test Category c16d9307c57642a","slug":"test-category-c16d9307c57642a","updated":"2026-01-30 18:58:15.571Z"},"action":"create"}"
                     Action = root.GetProperty("action").GetString()!,
                     Collection = root.GetProperty("record").GetProperty("collectionName").GetString()!,
-                    RecordId = root.GetProperty("record").GetProperty("id").GetString(),
+                    RecordId = root.GetProperty("record").GetProperty("id").GetString()!,
                     Record = JsonSerializer.Deserialize<Dictionary<string, object?>>(
                         root.GetProperty("record").GetRawText())!
                 };
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
-                // Log or handle parsing error
                 _logger?.LogError(ex, "Failed to parse RealtimeEvent data: {Data}", evt.Data);
+                return null;
             }
-
-            return @event;
         }
 
         private async Task SubscribeInternalAsync(string topic, CommonOptions? options, CancellationToken ct)
@@ -203,7 +191,7 @@ namespace PocketBase.Blazor.Clients.Realtime
             var body = new
             {
                 clientId = _clientId,
-                subscriptions = new[] { topic }
+                subscriptions = (object[])[topic]
             };
 
             await _http.SendAsync(HttpMethod.Post, "api/realtime", body: body, query: options?.ToDictionary(), cancellationToken: ct);
@@ -261,7 +249,7 @@ namespace PocketBase.Blazor.Clients.Realtime
                 }
             }, ct);
 
-            // Wait until PB_CONNECT is received
+            // Wait for initial connection
             while (_clientId == null)
                 await Task.Delay(10, ct);
 
@@ -276,10 +264,11 @@ namespace PocketBase.Blazor.Clients.Realtime
             var body = new
             {
                 clientId = _clientId,
-                unsubscribe = topics.ToArray()
+                unsubscribe = (string[])[.. topics]
             };
 
             await _http.SendAsync(HttpMethod.Post, "api/realtime", body: body, cancellationToken: ct);
+
             _isConnected = false;
             OnDisconnect?.Invoke([.. topics]);
         }
@@ -297,43 +286,32 @@ namespace PocketBase.Blazor.Clients.Realtime
                 }
                 catch (OperationCanceledException)
                 {
-                    // expected
+                    // Expected when cancelled
                 }
             }
 
             _eventChannel.Writer.TryComplete();
-
-            lock (_sync)
-            {
-                _subscriptions.Clear();
-            }
-
+            _subscriptions.Clear();
             _isConnected = false;
-            OnDisconnect?.Invoke([]);
+            OnDisconnect?.Invoke(ImmutableList<string>.Empty);
         }
 
-        //var col = pb.Collection("example");
+        private sealed class Subscription : IDisposable
+        {
+            private readonly Action _unsubscribe;
+            private bool _disposed;
 
-        //// subscribe
-        //await col.SubscribeAsync("*", e => Console.WriteLine(e.Action));
-        //await col.SubscribeAsync("RECORD_ID", e => Console.WriteLine(e.Record));
+            public Subscription(Action unsubscribe)
+            {
+                _unsubscribe = unsubscribe;
+            }
 
-        //// unsubscribe
-        //await col.UnsubscribeAsync("RECORD_ID");
-        //await col.UnsubscribeAsync("*");
-        //await col.UnsubscribeAsync(); // whole collection
-
-        // Usage example:
-        //using var sub = await pb
-        //    .Collection("example")
-        //    .SubscribeAsync(
-        //        "*",
-        //        e =>
-        //        {
-        //            Console.WriteLine(e.Action);
-        //            Console.WriteLine(e.Record["title"]);
-        //        },
-        //        cancellationToken: cts.Token);
+            public void Dispose()
+            {
+                if (_disposed) return;
+                _disposed = true;
+                _unsubscribe();
+            }
+        }
     }
-
 }
