@@ -2,6 +2,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
@@ -41,6 +42,8 @@ namespace PocketBase.Blazor.Clients.Realtime
                 _ => ImmutableList.Create(onEvent),
                 (_, existing) => existing.Add(onEvent));
 
+            await UpdateSubscriptionsAsync(cancellationToken);
+
             return new Subscription(() => UnsubscribeHandler(topic, onEvent));
         }
 
@@ -48,11 +51,33 @@ namespace PocketBase.Blazor.Clients.Realtime
         public async Task UnsubscribeAsync(string collection, string? recordId = null, CancellationToken cancellationToken = default)
         {
             await EnsureConnectedAsync(cancellationToken);
-            var predicate = CreateTopicPredicate(collection, recordId);
-            var topicsToRemove = _subscriptions.Keys.Where(predicate).ToList();
+        
+            var topicsToRemove = _subscriptions.Keys
+                .Where(t => ShouldRemoveTopic(t, collection, recordId))
+                .ToList();
+        
+            if (topicsToRemove.Count == 0)
+                return;
+        
+            foreach (var topic in topicsToRemove)
+            {
+                _subscriptions.TryRemove(topic, out _);
+            }
 
-            foreach (var topic in topicsToRemove) _subscriptions.TryRemove(topic, out _);
-            if (topicsToRemove.Count > 0) await UnsubscribeInternalAsync(topicsToRemove, cancellationToken);
+            await UpdateSubscriptionsAsync(cancellationToken);
+        }
+
+        private static bool ShouldRemoveTopic(string topic, string collection, string? recordId)
+        {
+            if (!topic.StartsWith(collection + "/"))
+                return false;
+            
+            if (recordId == null)
+                return true; // Remove all for this collection
+            
+            var suffix = topic[(collection.Length + 1)..];
+        
+            return recordId == "*" ? suffix == "*" : suffix == recordId;
         }
 
         private Task StartDispatcher(CancellationToken ct)
@@ -81,6 +106,20 @@ namespace PocketBase.Blazor.Clients.Realtime
             }, ct);
         }
 
+        private async Task UpdateSubscriptionsAsync(CancellationToken ct)
+        {
+            if (_clientId == null)
+                throw new InvalidOperationException("Realtime not connected.");
+        
+            var body = new
+            {
+                clientId = _clientId,
+                subscriptions = (string[])[.. _subscriptions.Keys]
+            };
+        
+            await _http.SendAsync(HttpMethod.Post, "api/realtime", body: body, cancellationToken: ct);
+        }
+
         private void UnsubscribeHandler(string topic, Action<RealtimeRecordEvent> handler)
         {
             _subscriptions.AddOrUpdate(topic,
@@ -93,14 +132,6 @@ namespace PocketBase.Blazor.Clients.Realtime
 
         private ImmutableList<Action<RealtimeRecordEvent>> GetHandlers(string topic) =>
             _subscriptions.TryGetValue(topic, out var handlers) ? handlers : [];
-
-        private static Func<string, bool> CreateTopicPredicate(string collection, string? recordId) => t =>
-        {
-            if (!t.StartsWith(collection + "/")) return false;
-            if (recordId == null) return true;
-            var suffix = t[(collection.Length + 1)..];
-            return recordId == "*" ? suffix == "*" : suffix == recordId;
-        };
 
         private static ILogger CreateDefaultLogger<T>() =>
             LoggerFactory.Create(builder => builder.AddConsole()).CreateLogger<T>();

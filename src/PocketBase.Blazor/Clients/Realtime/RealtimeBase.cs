@@ -160,7 +160,7 @@ namespace PocketBase.Blazor.Clients.Realtime
         protected async Task SubscribeInternalAsync(string topic, CommonOptions? options, CancellationToken ct)
         {
             if (_clientId == null) throw new InvalidOperationException("Realtime not connected.");
-            var body = new { clientId = _clientId, subscriptions = new[] { topic } };
+            var body = new { clientId = _clientId, subscriptions = (string[])[topic] };
             await _http.SendAsync(HttpMethod.Post, "api/realtime", body: body, query: options?.ToDictionary(), ct);
         }
 
@@ -172,7 +172,7 @@ namespace PocketBase.Blazor.Clients.Realtime
         protected async Task UnsubscribeInternalAsync(IEnumerable<string> topics, CancellationToken ct)
         {
             if (_clientId == null) throw new InvalidOperationException("Realtime not connected.");
-            var body = new { clientId = _clientId, unsubscribe = topics.ToArray() };
+            var body = new { clientId = _clientId, unsubscribe = (string[])[.. topics] };
             await _http.SendAsync(HttpMethod.Post, "api/realtime", body: body, cancellationToken: ct);
         }
 
