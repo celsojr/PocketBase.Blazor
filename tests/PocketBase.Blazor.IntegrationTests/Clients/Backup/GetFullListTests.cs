@@ -1,5 +1,7 @@
 namespace PocketBase.Blazor.IntegrationTests.Clients.Backup;
 
+using System.Drawing;
+using System.Linq;
 using Xunit.Abstractions;
 
 [Collection("PocketBase.Blazor.Admin")]
@@ -17,34 +19,51 @@ public class GetFullListTests
     [Fact]
     public async Task GetFullListAsync_AsAdmin_ShouldReturnBackupList()
     {
+        // Arrange - Create a backup to ensure we have something to list
+        var backupName = $"test-list-{Guid.NewGuid():N}.zip";
+        await _pb.Backup.CreateAsync(backupName);
+
         // Act
         var result = await _pb.Backup.GetFullListAsync();
 
         // Assert
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().NotBeNull();
+        result.Value.Should().NotBeEmpty();
         
         _output.WriteLine($"Found {result.Value.Count} backup(s)");
         foreach (var backup in result.Value)
         {
             _output.WriteLine($"Backup: {backup.Key} - Size: {backup.Size} - Modified: {backup.Modified}");
         }
+
+        // Cleanup
+        await _pb.Backup.DeleteAsync(backupName);
     }
 
     [Fact]
     public async Task GetFullListAsync_AsAdmin_ShouldReturnBackupList_WithFilteredFields()
     {
+        // Arrange - Create a backup to ensure we have something to list
+        var backupName = $"test-fields-{Guid.NewGuid():N}.zip";
+        await _pb.Backup.CreateAsync(backupName);
+
         // Act
         var result = await _pb.Backup.GetFullListAsync(new CommonOptions { Fields = "key,size" } );
 
         // Assert
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().NotBeNull();
-        
+        result.Value.Should().Contain(b => b.Key.Contains(backupName));
+
         foreach (var backup in result.Value)
         {
+            backup.Size.Should().BeGreaterThan(0);
             _output.WriteLine($"Backup: {backup.Key} - Size: {backup.Size}");
         }
+
+        // Cleanup
+        await _pb.Backup.DeleteAsync(backupName);
     }
 
     [Fact]

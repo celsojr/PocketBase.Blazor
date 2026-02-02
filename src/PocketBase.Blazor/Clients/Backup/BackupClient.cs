@@ -35,51 +35,52 @@ namespace PocketBase.Blazor.Clients.Backup
         }
 
         /// <inheritdoc />
-        public async Task<Result<bool>> CreateAsync(string? basename = null, CancellationToken cancellationToken = default)
+        public async Task<Result> CreateAsync(string? basename = null, CancellationToken cancellationToken = default)
         {
-            object? body = basename != null
-                ? new { name = basename }
-                : null;
+            if (string.IsNullOrWhiteSpace(basename))
+            {
+                return await _transport.SendAsync(HttpMethod.Post, "api/backups", cancellationToken: cancellationToken);
+            }
 
-            await _transport.SendAsync(HttpMethod.Post, "api/backups", body, cancellationToken: cancellationToken);
+            var sanitizedName = SanitizeBackupName(basename);
 
-            return Result.Ok(true);
+            var body = new { name = sanitizedName };
+
+            return await _transport.SendAsync(HttpMethod.Post, "api/backups", body, cancellationToken: cancellationToken);
         }
 
         /// <inheritdoc />
-        public async Task<Result<bool>> UploadAsync(MultipartFile file, CancellationToken cancellationToken = default)
+        public async Task<Result> UploadAsync(MultipartFile file, CancellationToken cancellationToken = default)
         {
             ArgumentNullException.ThrowIfNull(file);
 
-            await _transport.SendAsync(HttpMethod.Post, "api/backups/upload", file, cancellationToken: cancellationToken);
-
-            return Result.Ok(true);
+            return await _transport.SendAsync(HttpMethod.Post, "api/backups/upload", file, cancellationToken: cancellationToken);
         }
 
         /// <inheritdoc />
-        public async Task<Result<bool>> DeleteAsync(string key, CancellationToken cancellationToken = default)
+        public async Task<Result> DeleteAsync(string key, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(key))
             {
                 throw new ArgumentException("Backup key is required.", nameof(key));
             }
 
-            await _transport.SendAsync(HttpMethod.Delete, $"api/backups/{Uri.EscapeDataString(key)}", cancellationToken: cancellationToken);
+            var sanitizedKey = SanitizeBackupName(key);
 
-            return Result.Ok(true);
+            return await _transport.SendAsync(HttpMethod.Delete, $"api/backups/{Uri.EscapeDataString(sanitizedKey)}", cancellationToken: cancellationToken);
         }
 
         /// <inheritdoc />
-        public async Task<Result<bool>> RestoreAsync(string key, CancellationToken cancellationToken = default)
+        public async Task<Result> RestoreAsync(string key, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(key))
             {
                 throw new ArgumentException("Backup key is required.", nameof(key));
             }
 
-            await _transport.SendAsync(HttpMethod.Post, $"api/backups/{Uri.EscapeDataString(key)}/restore", cancellationToken: cancellationToken);
+            var sanitizedKey = SanitizeBackupName(key);
 
-            return Result.Ok(true);
+            return await _transport.SendAsync(HttpMethod.Post, $"api/backups/{Uri.EscapeDataString(sanitizedKey)}/restore", cancellationToken: cancellationToken);
         }
 
         /// <inheritdoc />
@@ -96,6 +97,51 @@ namespace PocketBase.Blazor.Clients.Backup
             }
 
             return $"api/backups/{Uri.EscapeDataString(key)}?token={Uri.EscapeDataString(token)}";
+        }
+
+        private static string SanitizeBackupName(string filename)
+        {
+            // Trim whitespace
+            filename = filename.Trim();
+
+            // Remove .zip extension for sanitization
+            if (filename.EndsWith(".zip", StringComparison.OrdinalIgnoreCase))
+            {
+                filename = filename[..^4];
+            }
+    
+            // Convert to lowercase
+            filename = filename.ToLowerInvariant();
+    
+            // Only keep valid characters
+            var validChars = new List<char>();
+            foreach (char c in filename)
+            {
+                if ((c >= 'a' && c <= 'z') ||
+                    (c >= '0' && c <= '9') ||
+                    c == '_' ||
+                    c == '-')
+                {
+                    validChars.Add(c);
+                }
+                else
+                {
+                    // Replace invalid characters with underscore
+                    validChars.Add('_');
+                }
+            }
+    
+            var sanitized = new string([.. validChars]);
+    
+            // Ensure not empty after sanitization
+            if (string.IsNullOrWhiteSpace(sanitized))
+            {
+                // Generate a default name
+                sanitized = $"backup_{DateTime.Now:yyyy_MM_dd_HH_mm_ss}";
+            }
+
+            // Append .zip extension (required by Pocketbase)
+            return sanitized += ".zip";
         }
     }
 }

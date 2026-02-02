@@ -32,7 +32,7 @@ namespace PocketBase.Blazor.Clients.Backup
         /// <returns>
         /// <c>true</c> if the backup was successfully created.
         /// </returns>
-        Task<Result<bool>> CreateAsync(string? basename = null, CancellationToken cancellationToken = default);
+        Task<Result> CreateAsync(string? basename = null, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Uploads an existing backup archive.
@@ -44,7 +44,7 @@ namespace PocketBase.Blazor.Clients.Backup
         /// <returns>
         /// <c>true</c> if the upload completed successfully.
         /// </returns>
-        Task<Result<bool>> UploadAsync(MultipartFile file, CancellationToken cancellationToken = default);
+        Task<Result> UploadAsync(MultipartFile file, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Deletes a backup by its key.
@@ -54,7 +54,7 @@ namespace PocketBase.Blazor.Clients.Backup
         /// <returns>
         /// <c>true</c> if the backup was deleted successfully.
         /// </returns>
-        Task<Result<bool>> DeleteAsync(string key, CancellationToken cancellationToken = default);
+        Task<Result> DeleteAsync(string key, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Restores the application state from a backup.
@@ -64,7 +64,7 @@ namespace PocketBase.Blazor.Clients.Backup
         /// <returns>
         /// <c>true</c> if the restore operation started successfully.
         /// </returns>
-        Task<Result<bool>> RestoreAsync(string key, CancellationToken cancellationToken = default);
+        Task<Result> RestoreAsync(string key, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Builds a download URL for a backup file.
