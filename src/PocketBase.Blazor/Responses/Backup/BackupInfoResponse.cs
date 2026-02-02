@@ -1,5 +1,6 @@
 using System;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace PocketBase.Blazor.Responses.Backup
 {
@@ -11,23 +12,24 @@ namespace PocketBase.Blazor.Responses.Backup
         /// <summary>
         /// The key (filename) of the backup.
         /// </summary>
-        public string Key { get; set; } = "";
+        public string? Key { get; set; }
 
         /// <summary>
         /// Last modified timestamp (string or ISO-format).
         /// </summary>
-        public DateTime Modified { get; set; }
+        public DateTime? Modified { get; set; }
 
         /// <summary>
         /// Size in bytes.
         /// </summary>
-        public long Size { get; set; }
+        public long? Size { get; set; }
 
         /// <inheritdoc />
         public override string ToString()
         {
             return JsonSerializer.Serialize(this,
-                new JsonSerializerOptions { WriteIndented = true });
+                new JsonSerializerOptions { WriteIndented = true,
+                    DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull });
         }
     }
 }
