@@ -75,4 +75,3 @@ namespace PocketBase.Blazor.Clients.Backup
         string GetDownloadUrl(string key, string token);
     }
 }
-

@@ -42,7 +42,7 @@ public class DeleteTest
     [Fact]
     public async Task Delete_collection_should_fail_when_not_admin()
     {
-        var client = new PocketBase(_fixture.Settings.BaseUrl);
+        await using var client = new PocketBase(_fixture.Settings.BaseUrl);
 
         var authResult = await client.Collection("users")
             .AuthWithPasswordAsync(
@@ -81,4 +81,3 @@ public class DeleteTest
         error.Status.Should().Be((int)HttpStatusCode.Forbidden);
     }
 }
-

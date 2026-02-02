@@ -78,7 +78,7 @@ public class RunCronsTests
     public async Task Running_crons_should_fail_when_not_admin()
     {
         // Arrange - Get the built-in logs cleanup cron
-        var client = new PocketBase(_fixture.Settings.BaseUrl);
+        await using var client = new PocketBase(_fixture.Settings.BaseUrl);
         const string logsCleanupId = "__pbLogsCleanup__";
 
         // Act
@@ -93,4 +93,3 @@ public class RunCronsTests
         result.Errors[0].Message.Should().Contain("401");
     }
 }
-

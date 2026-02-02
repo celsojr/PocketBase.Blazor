@@ -118,7 +118,7 @@ public class TruncateTests
     public async Task Truncate_collection_should_fail_when_not_admin()
     {
         // Arrange - Create regular user client
-        var client = new PocketBase(_fixture.Settings.BaseUrl);
+        await using var client = new PocketBase(_fixture.Settings.BaseUrl);
 
         var authResult = await client.Collection("users")
             .AuthWithPasswordAsync(
@@ -224,4 +224,3 @@ public class TruncateTests
         deletedResult.IsSuccess.Should().BeFalse();
     }
 }
-

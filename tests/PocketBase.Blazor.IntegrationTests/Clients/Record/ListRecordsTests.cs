@@ -76,7 +76,7 @@ public class ListRecordsTests
     [Fact]
     public async Task GetList_requires_auth_when_rules_apply()
     {
-        var unauthenticatedPb = new PocketBase(_pb.BaseUrl);
+        await using var unauthenticatedPb = new PocketBase(_pb.BaseUrl);
 
         var result = await unauthenticatedPb
             .Collection("posts")
@@ -121,4 +121,3 @@ public class ListRecordsTests
 }
 
 record CategoryResponse(string Name, string Slug, DateTime Created);
-

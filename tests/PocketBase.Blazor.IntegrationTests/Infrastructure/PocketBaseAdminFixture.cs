@@ -24,5 +24,5 @@ public class PocketBaseAdminFixture : IAsyncLifetime
         auth.IsSuccess.Should().BeTrue("auth must succeed for integration tests");
     }
 
-    public Task DisposeAsync() => Task.CompletedTask;
+    public async Task DisposeAsync() => await Client.DisposeAsync();
 }

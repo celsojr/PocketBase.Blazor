@@ -60,7 +60,7 @@ public class ListCronsTests
     public async Task List_crons_should_fail_when_not_admin()
     {
         // Arrange
-        var client = new PocketBase(_fixture.Settings.BaseUrl);
+        await using var client = new PocketBase(_fixture.Settings.BaseUrl);
 
         // Act
         var result = await client.Crons.GetFullListAsync();
@@ -73,4 +73,3 @@ public class ListCronsTests
         result.Errors[0].Message.Should().Contain("401");
     }
 }
-

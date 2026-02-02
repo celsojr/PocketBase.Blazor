@@ -100,4 +100,3 @@ public sealed class PocketBase : IPocketBase
         _http.Dispose();
     }
 }
-

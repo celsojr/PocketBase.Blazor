@@ -90,6 +90,11 @@ public class PocketBaseIntegrationTests : IAsyncLifetime
             await _host.DisposeAsync();
         }
 
+        if (_pb != null)
+        {
+            await _pb.DisposeAsync();
+        }
+
         TestPaths.CleanUpDataDir();
     }
 
@@ -123,4 +128,3 @@ public class PocketBaseIntegrationTests : IAsyncLifetime
         result.Value.Token.Should().NotBeNullOrEmpty();
     }
 }
-
