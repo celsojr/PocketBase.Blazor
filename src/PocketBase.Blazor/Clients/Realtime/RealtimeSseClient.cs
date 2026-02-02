@@ -12,14 +12,15 @@ namespace PocketBase.Blazor.Clients.Realtime
 {
     using static RecordHelper;
 
+    /// <inheritdoc />
     public sealed class RealtimeSseClient : RealtimeBase, IRealtimeStreamClient
     {
+        /// <inheritdoc />
         public RealtimeSseClient(IHttpTransport http, ILogger<RealtimeSseClient>? logger = null)
             : base(http, logger ?? CreateDefaultLogger<RealtimeSseClient>()) { }
 
-        public async IAsyncEnumerable<RealtimeRecordEvent> SubscribeAsync(string collection,
-            string recordId, CommonOptions? options = null,
-            [EnumeratorCancellation] CancellationToken cancellationToken = default)
+        /// <inheritdoc />
+        public async IAsyncEnumerable<RealtimeRecordEvent> SubscribeAsync(string collection, string recordId, CommonOptions? options = null, [EnumeratorCancellation] CancellationToken cancellationToken = default)
         {
             var topic = recordId == "*" ? $"{collection}/*" : $"{collection}/{recordId}";
             await EnsureConnectedAsync(cancellationToken);
@@ -40,8 +41,8 @@ namespace PocketBase.Blazor.Clients.Realtime
             }
         }
 
-        public async Task UnsubscribeAsync(string collection, string? recordId = null,
-            CancellationToken cancellationToken = default)
+        /// <inheritdoc />
+        public async Task UnsubscribeAsync(string collection, string? recordId = null, CancellationToken cancellationToken = default)
         {
             await EnsureConnectedAsync(cancellationToken);
             var topic = recordId == null ? collection : $"{collection}/{recordId}";

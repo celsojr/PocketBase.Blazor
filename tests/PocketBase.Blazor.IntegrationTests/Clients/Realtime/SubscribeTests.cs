@@ -53,7 +53,7 @@ public class SubscribeTests
         var events = new List<RealtimeRecordEvent>();
         var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
 
-        // Subscribe and immediately create a record to trigger an event
+        // Subscribe to trigger events
         var subscriptionTask = Task.Run(async () =>
         {
             await foreach (var evt in _pb.RealtimeSse.SubscribeAsync("categories", "*", cancellationToken: cts.Token))
@@ -163,12 +163,14 @@ public class SubscribeTests
 
         // Verify we received an event
         eventReceived.Should().BeTrue();
-    
+
         // The instance will be disposed via using statement
-        // No need to manually call DisposeAsync
 
         // Cleanup
+        // No need to manually call DisposeAsync in a real application since we're using 'await using'
         await pb.RealtimeSse.DisposeAsync();
+
+        // Verify disconnection after disposal
         pb.RealtimeSse.IsConnected.Should().BeFalse();
     }
 }

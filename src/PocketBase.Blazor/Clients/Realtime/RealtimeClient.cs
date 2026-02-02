@@ -15,10 +15,12 @@ namespace PocketBase.Blazor.Clients.Realtime
 {
     using static RecordHelper;
 
+    /// <inheritdoc />
     public sealed class RealtimeClient : RealtimeBase, IRealtimeClient
     {
         private readonly ConcurrentDictionary<string, ImmutableList<Action<RealtimeRecordEvent>>> _subscriptions;
 
+        /// <inheritdoc />
         public RealtimeClient(IHttpTransport http, ILogger<RealtimeClient>? logger = null)
             : base(http, logger ?? CreateDefaultLogger<RealtimeClient>())
         {
@@ -26,9 +28,8 @@ namespace PocketBase.Blazor.Clients.Realtime
             _ = StartDispatcher(_cts.Token);
         }
 
-        public async Task<IDisposable> SubscribeAsync(string collection, string recordId,
-            Action<RealtimeRecordEvent> onEvent, CommonOptions? options = null,
-            CancellationToken cancellationToken = default)
+        /// <inheritdoc />
+        public async Task<IDisposable> SubscribeAsync(string collection, string recordId, Action<RealtimeRecordEvent> onEvent, CommonOptions? options = null, CancellationToken cancellationToken = default)
         {
             ArgumentNullException.ThrowIfNull(onEvent);
             var topic = recordId == "*" ? $"{collection}/*" : $"{collection}/{recordId}";
@@ -43,8 +44,8 @@ namespace PocketBase.Blazor.Clients.Realtime
             return new Subscription(() => UnsubscribeHandler(topic, onEvent));
         }
 
-        public async Task UnsubscribeAsync(string collection, string? recordId = null,
-            CancellationToken cancellationToken = default)
+        /// <inheritdoc />
+        public async Task UnsubscribeAsync(string collection, string? recordId = null, CancellationToken cancellationToken = default)
         {
             await EnsureConnectedAsync(cancellationToken);
             var predicate = CreateTopicPredicate(collection, recordId);
