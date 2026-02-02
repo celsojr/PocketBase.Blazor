@@ -13,6 +13,18 @@ namespace PocketBase.Blazor.Http
     public interface IHttpTransport : IDisposable
     {
         /// <summary>
+        /// Gets the base URL used for API requests.
+        /// </summary>
+        string BaseUrl { get; }
+
+        /// <summary>
+        /// Constructs a fully qualified URL by combining the base service address with the specified endpoint path.
+        /// </summary>
+        /// <param name="endpoint">The relative endpoint path to append to the base service address. Must not be <see langword="null"/> or empty.</param>
+        /// <returns>A string containing the complete URL for the specified endpoint.</returns>
+        string BuildUrl(string endpoint);
+
+        /// <summary>
         /// Sends an HTTP request.
         /// </summary>
         /// <typeparam name="T">The type of the response.</typeparam>

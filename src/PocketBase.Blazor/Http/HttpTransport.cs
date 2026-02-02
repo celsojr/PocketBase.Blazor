@@ -26,6 +26,9 @@ namespace PocketBase.Blazor.Http
         private bool _disposed;
 
         /// <inheritdoc />
+        public string BaseUrl => _client.BaseAddress?.ToString() ?? string.Empty;
+
+        /// <inheritdoc />
         public HttpTransport(string baseUrl, HttpClient? httpClient = null, PocketBaseOptions? options = null)
         {
             if (httpClient is null)
@@ -254,6 +257,13 @@ namespace PocketBase.Blazor.Http
                     yield return line;
                 }
             }
+        }
+
+        /// <inheritdoc />
+        public string BuildUrl(string endpoint)
+        {
+            var baseUrl = _client.BaseAddress?.ToString();
+            return $"{baseUrl?.TrimEnd('/')}/{endpoint.TrimStart('/')}";
         }
 
         /// <inheritdoc />

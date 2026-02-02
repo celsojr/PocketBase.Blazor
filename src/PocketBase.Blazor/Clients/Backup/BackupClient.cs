@@ -96,7 +96,9 @@ namespace PocketBase.Blazor.Clients.Backup
                 throw new ArgumentException("Token is required.", nameof(token));
             }
 
-            return $"api/backups/{Uri.EscapeDataString(key)}?token={Uri.EscapeDataString(token)}";
+            var sanitizedKey = SanitizeBackupName(key);
+
+            return _transport.BuildUrl($"/api/backups/{Uri.EscapeDataString(sanitizedKey)}?token={Uri.EscapeDataString(token)}");
         }
 
         private static string SanitizeBackupName(string filename)
