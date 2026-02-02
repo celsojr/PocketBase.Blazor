@@ -63,7 +63,7 @@ public class SubscribeTests
 
                 if (events.Count >= 1) // Wait for at least one real event
                 {
-                    cts.Cancel();
+                    await cts.CancelAsync();
                     break;
                 }
             }
@@ -95,7 +95,8 @@ public class SubscribeTests
         finally
         {
             // We don't care about cleanup events here
-            await _pb.Collection("categories").DeleteAsync(record.Value.Id);
+            await _pb.Collection("categories")
+                .DeleteAsync(record.Value.Id);
         }
 
         events.Should().NotBeEmpty();
@@ -127,7 +128,7 @@ public class SubscribeTests
             {
                 eventReceived = true;
                 _output.WriteLine($"Received event: {evt.Action} - {evt.RecordId}");
-                cts.Cancel();
+                await cts.CancelAsync();
                 break;
             }
         }, cts.Token);

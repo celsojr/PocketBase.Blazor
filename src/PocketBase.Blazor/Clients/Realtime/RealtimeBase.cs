@@ -181,11 +181,12 @@ namespace PocketBase.Blazor.Clients.Realtime
         /// </summary>
         public async ValueTask DisposeAsync()
         {
-            _cts.Cancel();
+            await _cts.CancelAsync();
             //if (_connectionTask != null) await _connectionTask;
             _eventChannel.Writer.TryComplete();
             _isConnected = false;
             OnDisconnect?.Invoke([]);
+            GC.SuppressFinalize(this);
         }
     }
 }
