@@ -38,6 +38,8 @@ namespace PocketBase.Blazor
         IRealtimeStreamClient RealtimeSse { get; }
         ISettingsClient Settings { get; }
 
+        IBatchClient CreateBatch();
+
         void EnableAutoCancellation(bool enabled);
     }
 }

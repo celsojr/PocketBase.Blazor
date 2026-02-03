@@ -53,12 +53,7 @@ namespace PocketBase.Blazor.Clients.Batch
         /// <inheritdoc />
         public Task<Result<List<BatchResponse>>> SendAsync(CancellationToken cancellationToken = default)
         {
-            return _transport.SendAsync<List<BatchResponse>>(
-                HttpMethod.Post,
-                "api/batch",
-                _requests,
-                cancellationToken: cancellationToken
-            );
+            return _transport.SendAsync<List<BatchResponse>>(HttpMethod.Post, "api/batch", _requests, cancellationToken: cancellationToken);
         }
 
         /// <inheritdoc />

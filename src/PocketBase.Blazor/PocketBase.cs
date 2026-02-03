@@ -84,6 +84,12 @@ public sealed class PocketBase : IPocketBase
     }
 
     /// <inheritdoc />
+    public IBatchClient CreateBatch()
+    {
+        return Batch;
+    }
+
+    /// <inheritdoc />
     public void EnableAutoCancellation(bool enabled)
     {
     }
