@@ -24,7 +24,7 @@ public class DownloadBackupTests
         // Arrange - Create a backup
         var backupName = $"download-test-{Guid.NewGuid():N}.zip";
         await _pb.Backup.CreateAsync(backupName);
-        
+
         // Wait for backup to complete
         await Task.Delay(2000);
 
@@ -42,16 +42,16 @@ public class DownloadBackupTests
 
             // Assert
             response.EnsureSuccessStatusCode();
-            
+
             await using var stream = await response.Content.ReadAsStreamAsync();
-            
+
             // Verify stream has content
             stream.Length.Should().BeGreaterThan(0);
-            
+
             // Check if it's a ZIP file
             var buffer = new byte[2];
             await stream.ReadAsync(buffer);
-            
+
             // ZIP files start with "PK" (0x50 0x4B)
             var isZipFile = buffer[0] == 0x50 && buffer[1] == 0x4B;
             isZipFile.Should().BeTrue("Backup files should be ZIP files");
@@ -72,7 +72,7 @@ public class DownloadBackupTests
 
         // Act - Get URL
         var downloadUrl = _pb.Backup.GetDownloadUrl(nonExistentBackup, token);
-        
+
         // Try to download
         var response = await _httpClient.GetAsync(downloadUrl);
 
@@ -86,7 +86,7 @@ public class DownloadBackupTests
         // Arrange - Create a backup
         var backupName = $"invalid-token-test-{Guid.NewGuid():N}.zip";
         await _pb.Backup.CreateAsync(backupName);
-        
+
         await Task.Delay(2000);
 
         try
@@ -111,12 +111,12 @@ public class DownloadBackupTests
     public async Task GetDownloadUrl_AndDownload_CanSaveToFile()
     {
         // Arrange
-        var backupName = $"save-to-file-{Guid.NewGuid():N}";
+        var backupName = $"save-to-file-{Guid.NewGuid():N}.zip";
         await _pb.Backup.CreateAsync(backupName);
-        
+
         await Task.Delay(2000);
-        
-        var tempFilePath = Path.Combine(Path.GetTempPath(), $"{backupName}.zip");
+
+        var tempFilePath = Path.Combine(Path.GetTempPath(), $"{backupName}");
 
         try
         {
@@ -129,21 +129,23 @@ public class DownloadBackupTests
             // Act - Download and save
             var response = await _httpClient.GetAsync(downloadUrl);
             response.EnsureSuccessStatusCode();
-            
+
             await using var stream = await response.Content.ReadAsStreamAsync();
-            await using var fileStream = File.Create(tempFilePath);
-            await stream.CopyToAsync(fileStream);
+            await using (var fileStream = File.Create(tempFilePath))
+            {
+                await stream.CopyToAsync(fileStream);
+            }
 
             // Assert
             var fileInfo = new FileInfo(tempFilePath);
             fileInfo.Exists.Should().BeTrue();
             fileInfo.Length.Should().BeGreaterThan(0);
-            
+
             // Verify it's a ZIP file
             await using var verifyStream = File.OpenRead(tempFilePath);
             var header = new byte[2];
             await verifyStream.ReadAsync(header);
-            
+
             var isZipFile = header[0] == 0x50 && header[1] == 0x4B;
             isZipFile.Should().BeTrue();
         }
