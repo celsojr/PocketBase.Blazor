@@ -1,6 +1,5 @@
 namespace PocketBase.Blazor.IntegrationTests.Clients.Backup;
 
-using System.Drawing;
 using System.Linq;
 using Xunit.Abstractions;
 
