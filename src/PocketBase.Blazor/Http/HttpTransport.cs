@@ -88,7 +88,7 @@ namespace PocketBase.Blazor.Http
 
         HttpRequestMessage BuildRequest(HttpMethod method, string path, object? body, IDictionary<string, object?>? query)
         {
-            var url = _client.BaseAddress + path;
+            var url = BuildUrl(path);
             if (query != null)
                 url += "?" + string.Join("&", query.Select(kv => $"{kv.Key}={Uri.EscapeDataString(kv.Value?.ToString() ?? "")}"));
 
