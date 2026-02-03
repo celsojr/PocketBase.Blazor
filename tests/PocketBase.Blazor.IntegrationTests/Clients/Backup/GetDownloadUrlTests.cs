@@ -1,5 +1,6 @@
 namespace PocketBase.Blazor.IntegrationTests.Clients.Backup;
 
+using System;
 using System.IO;
 using System.Net;
 using System.Net.Http;
@@ -49,11 +50,13 @@ public class DownloadBackupTests
             stream.Length.Should().BeGreaterThan(0);
 
             // Check if it's a ZIP file
-            var buffer = new byte[2];
-            await stream.ReadAsync(buffer);
+            var header = new byte[2];
+            await stream.ReadAsync(header);
 
             // ZIP files start with "PK" (0x50 0x4B)
-            var isZipFile = buffer[0] == 0x50 && buffer[1] == 0x4B;
+            // ZIP signature is literally the ASCII characters "PK" (Phil Katz, creator of PKZIP)
+            // Might not work on big endian systems, but most modern systems are little-endian
+            var isZipFile = header.AsSpan(0, 2).SequenceEqual("PK"u8);
             isZipFile.Should().BeTrue("Backup files should be ZIP files");
         }
         finally
@@ -146,7 +149,7 @@ public class DownloadBackupTests
             var header = new byte[2];
             await verifyStream.ReadAsync(header);
 
-            var isZipFile = header[0] == 0x50 && header[1] == 0x4B;
+            var isZipFile = header.AsSpan(0, 2).SequenceEqual("PK"u8);
             isZipFile.Should().BeTrue();
         }
         finally

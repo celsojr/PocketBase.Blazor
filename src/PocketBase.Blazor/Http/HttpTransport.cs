@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
@@ -98,6 +99,32 @@ namespace PocketBase.Blazor.Http
                 req.Content = new StringContent(json, Encoding.UTF8, "application/json");
             }
             return req;
+        }
+
+        /// <inheritdoc />
+        public async Task<Result> SendAsync(HttpMethod method, string path, MultipartFile file, IDictionary<string, object?>? query = null, CancellationToken cancellationToken = default)
+        {
+            UpdateAuthorizationHeader();
+            var request = BuildRequest(method, path, file, query);
+            var response = await _client.SendAsync(request, cancellationToken);
+            return await HandleResponse(response, cancellationToken);
+        }
+
+        private HttpRequestMessage BuildRequest(HttpMethod method, string path, MultipartFile file, IDictionary<string, object?>? query)
+        {
+            var url = BuildUrl(path);
+            if (query != null)
+                url += "?" + string.Join("&", query.Select(kv => $"{kv.Key}={Uri.EscapeDataString(kv.Value?.ToString() ?? "")}"));
+
+            var request = new HttpRequestMessage(method, url);
+    
+            var formData = new MultipartFormDataContent();
+            var streamContent = new StreamContent(file.Content);
+            streamContent.Headers.ContentType = new MediaTypeHeaderValue(file.ContentType);
+            formData.Add(streamContent, file.Name, file.FileName);
+    
+            request.Content = formData;
+            return request;
         }
 
         static async Task<Result> HandleResponse(HttpResponseMessage response, CancellationToken cancellationToken)

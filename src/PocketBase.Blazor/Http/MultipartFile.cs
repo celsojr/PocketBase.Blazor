@@ -7,7 +7,7 @@ namespace PocketBase.Blazor.Http
     /// Represents a file to be sent as multipart/form-data.
     /// Mirrors the JS SDK File usage.
     /// </summary>
-    public sealed class MultipartFile
+    public sealed class MultipartFile : IDisposable
     {
         /// <summary>
         /// The form field name.
@@ -70,6 +70,12 @@ namespace PocketBase.Blazor.Http
             }
 
             return new MultipartFile(File.OpenRead(path), Path.GetFileName(path), contentType, name);
+        }
+
+        /// <inheritdoc />
+        public void Dispose()
+        {
+            Content?.Dispose();
         }
     }
 }

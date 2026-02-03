@@ -48,6 +48,17 @@ namespace PocketBase.Blazor.Http
         Task<Result> SendAsync(HttpMethod method, string path, object? body = null, IDictionary<string, object?>? query = null, CancellationToken cancellationToken = default);
 
         /// <summary>
+        /// Sends an HTTP request with the specified method, path, and multipart file content asynchronously.
+        /// </summary>
+        /// <param name="method">The HTTP method to use for the request (for example, <see cref="HttpMethod.Post"/> or <see cref="HttpMethod.Put"/>).</param>
+        /// <param name="path">The relative URI path to which the request is sent. Cannot be <see langword="null"/> or empty.</param>
+        /// <param name="file">The multipart file to include in the request body. Cannot be <see langword="null"/>.</param>
+        /// <param name="query">An optional dictionary of query string parameters to include in the request. May be <see langword="null"/> if no query parameters are needed.</param>
+        /// <param name="cancellationToken">A token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None"/>.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result contains a <see cref="Result"/> object representing the outcome of the request.</returns>
+        Task<Result> SendAsync(HttpMethod method, string path, MultipartFile file, IDictionary<string, object?>? query = null, CancellationToken cancellationToken = default);
+
+        /// <summary>
         /// Sends an HTTP request and returns the response as a stream (for file downloads, etc).
         /// </summary>
         /// <param name="method">The HTTP method.</param>
