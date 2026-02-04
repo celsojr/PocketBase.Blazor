@@ -93,6 +93,11 @@ namespace PocketBase.Blazor.Http
                 url += "?" + string.Join("&", query.Select(kv => $"{kv.Key}={Uri.EscapeDataString(kv.Value?.ToString() ?? "")}"));
 
             var req = new HttpRequestMessage(method, url);
+
+            if (body is HttpContent httpContent)
+            {
+                req.Content = httpContent;
+            }
             if (body != null)
             {
                 var json = JsonSerializer.Serialize(body, _pocketBaseOptions.JsonSerializerOptions);
