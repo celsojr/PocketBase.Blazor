@@ -17,7 +17,7 @@ namespace PocketBase.Blazor.Requests.Batch
         public string Method { get; }
         public string Url { get; }
         public JsonElement? Body { get; }
-        public List<BatchFile>? Files { get; }
+        public List<BatchFile>? Files { get; private set; }
 
         public BatchRequest(string collectionName, BatchMethod method, object? body = null, string? id = null, List<BatchFile>? files = null)
         {
@@ -46,6 +46,16 @@ namespace PocketBase.Blazor.Requests.Batch
                 Body = JsonSerializer.SerializeToElement(body);
 
             Files = files;
+        }
+
+        /// <summary>
+        /// Attach a file to this batch request.
+        /// </summary>
+        public BatchRequest Attach(string field, BatchFile file)
+        {
+            Files ??= new List<BatchFile>();
+            Files.Add(BatchFile.FromStream(file.Content, field, file.FileName, file.ContentType));
+            return this;
         }
     }
 

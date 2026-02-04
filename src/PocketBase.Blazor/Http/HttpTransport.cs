@@ -98,7 +98,7 @@ namespace PocketBase.Blazor.Http
             {
                 req.Content = httpContent;
             }
-            if (body != null)
+            else if (body != null)
             {
                 var json = JsonSerializer.Serialize(body, _pocketBaseOptions.JsonSerializerOptions);
                 req.Content = new StringContent(json, Encoding.UTF8, "application/json");

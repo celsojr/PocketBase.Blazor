@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using FluentResults;
 using PocketBase.Blazor.Exceptions;
+using PocketBase.Blazor.Requests.Batch;
 using PocketBase.Blazor.Responses.Backup;
 
 namespace PocketBase.Blazor.Clients.Batch
@@ -21,10 +22,9 @@ namespace PocketBase.Blazor.Clients.Batch
         /// <summary>
         /// Registers a record create request into the current batch queue.
         /// </summary>
-        /// <param name="body">
-        /// The record data to create.
-        /// </param>
-        IBatchClient Create(object body);
+        /// <param name="body">The record data to create.</param>
+        /// <param name="files">The files to attach to the record.</param>
+        IBatchClient Create(object body, List<BatchFile>? files = null);
 
         /// <summary>
         /// Registers a record update request into the current batch queue.
@@ -32,10 +32,9 @@ namespace PocketBase.Blazor.Clients.Batch
         /// <param name="id">
         /// The unique identifier of the record to update.
         /// </param>
-        /// <param name="body">
-        /// The updated record data.
-        /// </param>
-        IBatchClient Update(string id, object body);
+        /// <param name="body">The updated record data.</param>
+        /// <param name="files">The files to attach to the record.</param>
+        IBatchClient Update(string id, object body, List<BatchFile>? files = null);
 
         /// <summary>
         /// Registers a record delete request into the current batch queue.
@@ -64,4 +63,3 @@ namespace PocketBase.Blazor.Clients.Batch
         Task<Result<List<BatchResponse>>> SendAsync(CancellationToken cancellationToken = default);
     }
 }
-
