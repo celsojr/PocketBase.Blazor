@@ -51,7 +51,6 @@ namespace PocketBase.Blazor.Clients.Batch
             return this;
         }
 
-
         /// <inheritdoc />
         public IBatchClient Delete(string id)
         {
@@ -65,7 +64,7 @@ namespace PocketBase.Blazor.Clients.Batch
         {
             var requests = BuildBatchRequest();
             var body = BuildRequestBody(requests);
-    
+
             return await _transport.SendAsync<List<BatchResponse>>(HttpMethod.Post, "api/batch", body, cancellationToken: cancellationToken);
         }
 

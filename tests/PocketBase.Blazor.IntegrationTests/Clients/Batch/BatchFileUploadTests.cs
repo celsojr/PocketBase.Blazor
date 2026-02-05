@@ -184,7 +184,10 @@ public class BatchFileUploadTests
     [Fact]
     public async Task UpdateBatch_WithFileReplacement_ShouldSucceed()
     {
+        // Arrange
         var collectionName = $"batch_update_file_{Guid.NewGuid():N}";
+        var initialFileContent = "Initial file";
+        var updatedFileContent = "Updated file";
 
         await _pb.Collections.CreateAsync<CollectionModel>(new
         {
@@ -198,35 +201,77 @@ public class BatchFileUploadTests
 
         try
         {
-            // Create initial record
-            var create = await _pb.Collection(collectionName)
-                .CreateAsync<CollectionModel>(new { });
+            // Step 1: Create initial record WITH file using batch
+            var createBatch = _pb.CreateBatch();
+            var initialFile = BatchFile.FromBytes(
+                Encoding.UTF8.GetBytes(initialFileContent),
+                "doc",
+                "initial.txt",
+                "text/plain"
+            );
+        
+            createBatch.Collection(collectionName)
+                .Create(new { }, [initialFile]);
+        
+            var createResult = await createBatch.SendAsync();
+            createResult.IsSuccess.Should().BeTrue();
+            createResult.Value.Should().HaveCount(1);
+            createResult.Value[0].Status.Should().Be(200);
 
-            var recordId = create.Value.Id.ToString();
+            var recordId = createResult.Value[0].Body?["id"]?.ToString();
+            recordId.Should().NotBeNullOrEmpty();
 
-            var batch = _pb.CreateBatch();
+            // Verify initial file via regular GET (not file download)
+            var initialRecord = await _pb.Collection(collectionName)
+                .GetOneAsync<Dictionary<string, object?>>(recordId!);
+        
+            initialRecord.Value.Should().NotBeNull();
+            var initialFileName = initialRecord.Value["doc"]?.ToString();
+            initialFileName.Should().NotBeNullOrEmpty();
 
+            // Step 2: Update with new file using another batch
+            var updateBatch = _pb.CreateBatch();
             var newFile = BatchFile.FromBytes(
-                Encoding.UTF8.GetBytes("Updated file"),
+                Encoding.UTF8.GetBytes(updatedFileContent),
                 "doc",
                 "updated.txt",
                 "text/plain"
             );
 
-            batch.Collection(collectionName)
-                .Update(recordId, new { }, [newFile]);
+            updateBatch.Collection(collectionName)
+                .Update(recordId, null!, [newFile]);
 
-            var result = await batch.SendAsync();
+            var result = await updateBatch.SendAsync();
 
+            // Assert update batch response
             result.IsSuccess.Should().BeTrue();
             result.Value.Should().HaveCount(1);
             result.Value[0].Status.Should().Be(200);
+
+            // Verify the record after update
+            var updatedRecord = await _pb.Collection(collectionName)
+                .GetOneAsync<Dictionary<string, object?>>(recordId);
+        
+            updatedRecord.Value.Should().NotBeNull();
+        
+            // Check that the file field is populated with new filename
+            var updatedFileName = updatedRecord.Value["doc"]?.ToString();
+            updatedFileName.Should().NotBeNullOrEmpty();
+        
+            // File name should be different from initial (updated)
+            updatedFileName.Should().NotBe(initialFileName);
+        
+            // Download and verify the updated file content
+            var updatedDownloadedBytes = await _pb.Files
+                .GetBytesAsync(collectionName, recordId, updatedFileName);
+            updatedDownloadedBytes.Should().NotBeNull();
+        
+            var updatedDownloadedContent = Encoding.UTF8.GetString(updatedDownloadedBytes!.Value);
+            updatedDownloadedContent.Should().Be(updatedFileContent);
         }
         finally
         {
             await _pb.Collections.DeleteAsync(collectionName);
         }
     }
-
-
 }

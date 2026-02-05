@@ -86,7 +86,8 @@ public sealed class PocketBase : IPocketBase
     /// <inheritdoc />
     public IBatchClient CreateBatch()
     {
-        return Batch;
+        // We return a new instance every time to ensure a fresh batch
+        return new BatchClient(_http);
     }
 
     /// <inheritdoc />
