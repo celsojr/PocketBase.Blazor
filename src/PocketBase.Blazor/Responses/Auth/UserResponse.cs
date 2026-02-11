@@ -2,10 +2,11 @@ using System.Text.Json;
 
 namespace PocketBase.Blazor.Responses.Auth
 {
-    public class UserResponse
+    public sealed class UserResponse : RecordResponse
     {
-        public string Id { get; set; } = default!;
-        public string Email { get; set; } = default!;
+        public string Email { get; init; } = null!;
+        public bool Verified { get; init; }
+        public bool EmailVisibility { get; init; }
 
         /// <inheritdoc />
         public override string ToString()
@@ -15,4 +16,3 @@ namespace PocketBase.Blazor.Responses.Auth
         }
     }
 }
-

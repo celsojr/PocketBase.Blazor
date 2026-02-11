@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using FluentResults;
 using PocketBase.Blazor.Clients.Realtime;
 using PocketBase.Blazor.Http;
+using PocketBase.Blazor.Options;
+using PocketBase.Blazor.Requests.Auth;
 using PocketBase.Blazor.Responses.Auth;
 using PocketBase.Blazor.Store;
 
@@ -38,8 +40,15 @@ namespace PocketBase.Blazor.Clients.Record
         }
 
         /// <inheritdoc />
-        public async Task<Result<AuthResponse>> AuthWithPasswordAsync(string email, string password, CancellationToken cancellationToken = default)
+        public Task<Result<AuthMethodsResponse>> ListAuthMethodsAsync(CommonOptions? options = null, CancellationToken cancellationToken = default)
         {
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc />
+        public async Task<Result<AuthResponse>> AuthWithPasswordAsync(string email, string password, string? identityField = null, CommonOptions? options = null, CancellationToken cancellationToken = default)
+        {
+            // TODO: identityField and options usage not implemented yet
             if (string.IsNullOrWhiteSpace(email))
                 throw new ArgumentException("Email must be provided.", nameof(email));
 
@@ -71,6 +80,12 @@ namespace PocketBase.Blazor.Clients.Record
         }
 
         /// <inheritdoc />
+        public Task<Result<AuthRecordResponse>> AuthWithOAuth2CodeAsync(AuthWithOAuth2Request request, CommonOptions? options = null, CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc />
         public async Task<Result<AuthResponse>> RefreshAsync(CancellationToken cancellationToken = default)
         {
             return await Http.SendAsync<AuthResponse>(
@@ -79,6 +94,60 @@ namespace PocketBase.Blazor.Clients.Record
                 body: null,
                 cancellationToken: cancellationToken
             );
+        }
+
+        /// <inheritdoc />
+        public Task<Result<string>> RequestOtpAsync(string email, CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc />
+        public Task<Result<UserResponse>> AuthWithOtpAsync(string otpId, string otpCode, CommonOptions? options = null, CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc />
+        public Task<Result<AuthResponse>> AuthRefreshAsync(CommonOptions? options = null, CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc />
+        public Task<Result> RequestVerificationAsync(string email, CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc />
+        public Task<Result> ConfirmVerificationAsync(string token, CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc />
+        public Task<Result> RequestPasswordResetAsync(string email, CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc />
+        public Task<Result> ConfirmPasswordResetAsync(string token, string password, string passwordConfirm, CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc />
+        public Task<Result> RequestEmailChangeAsync(string newEmail, CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc />
+        public Task<Result> ConfirmEmailChangeAsync(string token, string password, CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
         }
 
         /// <inheritdoc />
@@ -100,4 +169,3 @@ namespace PocketBase.Blazor.Clients.Record
         }
     }
 }
-

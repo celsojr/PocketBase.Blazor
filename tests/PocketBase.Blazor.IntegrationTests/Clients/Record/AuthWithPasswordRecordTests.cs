@@ -76,7 +76,7 @@ public class AuthWithPasswordRecordTests
             .AuthWithPasswordAsync(
                 _fixture.Settings.UserTesterEmail,
                 _fixture.Settings.UserTesterPassword,
-                cts.Token
+                cancellationToken: cts.Token
             );
 
         await act.Should().ThrowAsync<TaskCanceledException>();

@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using FluentResults;
 using PocketBase.Blazor.Http;
+using PocketBase.Blazor.Options;
 using PocketBase.Blazor.Responses.Auth;
 using PocketBase.Blazor.Store;
 
@@ -56,7 +57,7 @@ namespace PocketBase.Blazor.Clients.Admin
         }
 
         /// <inheritdoc />
-        public async Task<Result<AuthResponse>> RefreshAsync(CancellationToken cancellationToken = default)
+        public async Task<Result<AuthResponse>> AuthRefreshAsync(CancellationToken cancellationToken = default)
         {
             return await _http.SendAsync<AuthResponse>(
                 HttpMethod.Post,
@@ -64,6 +65,12 @@ namespace PocketBase.Blazor.Clients.Admin
                 body: null,
                 cancellationToken: cancellationToken
             );
+        }
+
+        /// <inheritdoc />
+        public Task<Result<UserResponse>> ImpersonateAsync(string recordId, int duration, CommonOptions? options = null, CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
         }
 
         /// <inheritdoc />
@@ -85,4 +92,3 @@ namespace PocketBase.Blazor.Clients.Admin
         }
     }
 }
-

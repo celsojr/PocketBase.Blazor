@@ -39,7 +39,5 @@ namespace PocketBase.Blazor
         ISettingsClient Settings { get; }
 
         IBatchClient CreateBatch();
-
-        void EnableAutoCancellation(bool enabled);
     }
 }

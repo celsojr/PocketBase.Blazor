@@ -91,11 +91,6 @@ public sealed class PocketBase : IPocketBase
     }
 
     /// <inheritdoc />
-    public void EnableAutoCancellation(bool enabled)
-    {
-    }
-
-    /// <inheritdoc />
     public async ValueTask DisposeAsync()
     {
         if (Realtime is IAsyncDisposable rtDisposable)

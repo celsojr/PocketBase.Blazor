@@ -31,9 +31,9 @@ public class CreateTests
         // Assert
         result.IsSuccess.Should().BeFalse();
         result.Errors.Should().NotBeEmpty();
-        
+
         // Should contain batch not allowed error
-        result.Errors.Should().Contain(e => 
+        result.Errors.Should().Contain(e =>
             e.Message.Contains("Batch requests are not allowed", StringComparison.OrdinalIgnoreCase) ||
             e.Message.Contains("\"status\":403", StringComparison.OrdinalIgnoreCase));
     }
@@ -42,30 +42,30 @@ public class CreateTests
     public async Task CreateBatch_WithSingleCreate_ShouldSucceed()
     {
         // Arrange - Enable batch requests
-        var batchSettings = new 
-        { 
-            batch = new 
-            { 
+        var batchSettings = new
+        {
+            batch = new
+            {
                 enabled = true,
                 maxRequests = 50,
                 timeout = 3,
                 maxBodySize = 0
             }
         };
-        
+
         var enableResult = await _pb.Settings.UpdateAsync(batchSettings);
         enableResult.IsSuccess.Should().BeTrue();
 
         // Arrange - Create a test collection
         var collectionName = $"batch_test_{Guid.NewGuid():N}";
-        
+
         // Create a test collection
         await _pb.Collections.CreateAsync<CollectionModel>(new
         {
             name = collectionName,
             type = "base",
-            fields = new[] 
-            { 
+            fields = new[]
+            {
                 new { name = "title", type = "text" },
                 new { name = "content", type = "text" }
             }
@@ -106,7 +106,7 @@ public class CreateTests
     {
         // Arrange
         var collectionName = $"batch_multi_{Guid.NewGuid():N}";
-        
+
         await _pb.Collections.CreateAsync<CollectionModel>(new
         {
             name = collectionName,
@@ -117,7 +117,7 @@ public class CreateTests
         try
         {
             var batch = _pb.CreateBatch();
-            
+
             // Create two records
             batch.Collection(collectionName).Create(new { name = "First" });
             batch.Collection(collectionName).Create(new { name = "Second" });
@@ -141,7 +141,7 @@ public class CreateTests
     {
         // Arrange
         var collectionName = $"batch_crud_{Guid.NewGuid():N}";
-        
+
         await _pb.Collections.CreateAsync<CollectionModel>(new
         {
             name = collectionName,
@@ -158,10 +158,10 @@ public class CreateTests
             var recordId = createResult.Value.Id.ToString();
 
             var batch = _pb.CreateBatch();
-            
+
             // Update the record
             batch.Collection(collectionName).Update(recordId, new { value = 200 });
-            
+
             // Delete the record
             batch.Collection(collectionName).Delete(recordId);
 
@@ -185,7 +185,7 @@ public class CreateTests
     {
         // Arrange
         var collectionName = $"batch_upsert_{Guid.NewGuid():N}";
-        
+
         await _pb.Collections.CreateAsync<CollectionModel>(new
         {
             name = collectionName,
@@ -234,7 +234,7 @@ public class CreateTests
     {
         // Arrange
         var collectionName = $"batch_cancel_{Guid.NewGuid():N}";
-        
+
         await _pb.Collections.CreateAsync<CollectionModel>(new
         {
             name = collectionName,
@@ -248,7 +248,7 @@ public class CreateTests
 
             batch.Collection(collectionName)
                 .Create(new { data = "test" });
-            
+
             var cts = new CancellationTokenSource();
             await cts.CancelAsync();
 
@@ -286,14 +286,14 @@ public class CreateTests
         // Arrange - Create two collections
         var collection1 = $"batch_mix1_{Guid.NewGuid():N}";
         var collection2 = $"batch_mix2_{Guid.NewGuid():N}";
-        
+
         await _pb.Collections.CreateAsync<CollectionModel>(new
         {
             name = collection1,
             type = "base",
             fields = new[] { new { name = "field1", type = "text" } }
         });
-        
+
         await _pb.Collections.CreateAsync<CollectionModel>(new
         {
             name = collection2,
@@ -304,7 +304,7 @@ public class CreateTests
         try
         {
             var batch = _pb.CreateBatch();
-            
+
             // Add operations to different collections
             batch.Collection(collection1).Create(new { field1 = "Text value" });
             batch.Collection(collection2).Create(new { field2 = 42 });
