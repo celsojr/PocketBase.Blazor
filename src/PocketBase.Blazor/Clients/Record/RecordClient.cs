@@ -57,8 +57,8 @@ namespace PocketBase.Blazor.Clients.Record
 
             var body = new Dictionary<string, object?>
             {
-                { "identity", email },
-                { "password", password }
+                ["identity"] = email,
+                ["password"] = password
             };
 
             if (!string.IsNullOrWhiteSpace(identityField))
@@ -69,13 +69,7 @@ namespace PocketBase.Blazor.Clients.Record
             options ??= new CommonOptions();
             options.Query = options.BuildQuery();
 
-            var result = await Http.SendAsync<AuthResponse>(
-                HttpMethod.Post,
-                "api/collections/users/auth-with-password",
-                body,
-                options.Query,
-                cancellationToken: cancellationToken
-            );
+            var result = await Http.SendAsync<AuthResponse>(HttpMethod.Post, "api/collections/users/auth-with-password", body, options.Query, cancellationToken: cancellationToken);
 
             if (result.IsSuccess)
             {
@@ -97,12 +91,7 @@ namespace PocketBase.Blazor.Clients.Record
         /// <inheritdoc />
         public async Task<Result<AuthResponse>> RefreshAsync(CancellationToken cancellationToken = default)
         {
-            return await Http.SendAsync<AuthResponse>(
-                HttpMethod.Post,
-                "api/collections/users/auth-refresh",
-                body: null,
-                cancellationToken: cancellationToken
-            );
+            return await Http.SendAsync<AuthResponse>(HttpMethod.Post, "api/collections/users/auth-refresh", body: null, cancellationToken: cancellationToken);
         }
 
         /// <inheritdoc />
@@ -162,12 +151,7 @@ namespace PocketBase.Blazor.Clients.Record
         /// <inheritdoc />
         public async Task<Result> LogoutAsync(CancellationToken cancellationToken = default)
         {
-            await Http.SendAsync(
-                HttpMethod.Post,
-                "api/collections/users/logout",
-                body: null,
-                cancellationToken: cancellationToken
-            );
+            await Http.SendAsync(HttpMethod.Post, "api/collections/users/logout", body: null, cancellationToken: cancellationToken);
             return Result.Ok();
         }
 

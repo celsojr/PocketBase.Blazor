@@ -1,5 +1,6 @@
 namespace PocketBase.Blazor.IntegrationTests.Clients.Admin;
 
+using Blazor.Responses;
 using static IntegrationTests.Helpers.JwtTokenValidator;
 
 [Collection("PocketBase.Blazor.Admin")]
@@ -81,5 +82,67 @@ public class AuthWithPasswordTests
 
         await act.Should().ThrowAsync<TaskCanceledException>();
     }
-}
 
+    [Fact]
+    public async Task Impersonate_with_valid_admin_and_record_id_returns_impersonation_token()
+    {
+        // Arrange - Get a user record to impersonate
+        var usersResult = await _pb.Collection("users")
+            .GetListAsync<RecordResponse>();
+        usersResult.IsSuccess.Should().BeTrue();
+        var userRecord = usersResult.Value.Items.First();
+
+        // Act - Impersonate for 1 hour (3600 seconds)
+        var result = await _pb.Admins
+            .ImpersonateAsync("users", userRecord.Id, 3600);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Token.Should().NotBeNullOrEmpty();
+        result.Value.Record.Should().NotBeNull();
+        result.Value.Record.Id.Should().Be(userRecord.Id);
+        result.Value.Record.CollectionName.Should().Be("users");
+
+        var tokenParts = result.Value.Token.Split('.');
+        tokenParts.Should().HaveCount(3, "JWT tokens should have 3 parts");
+
+        var expiry = GetTokenExpiry(result.Value.Token);
+        expiry.Should().BeAfter(DateTimeOffset.Now, "Token should not be expired");
+    }
+
+    [Fact]
+    public async Task Impersonate_with_non_admin_user_returns_unauthorized_error()
+    {
+        // Arrange - First authenticate as regular user (not admin)
+        var userAuth = await _pb.Collection("users")
+            .AuthWithPasswordAsync(
+                _fixture.Settings.UserTesterEmail,
+                _fixture.Settings.UserTesterPassword
+            );
+
+        userAuth.IsSuccess.Should().BeTrue();
+        userAuth.Value.Record.Should().NotBeNull();
+
+        // Get another user record to impersonate
+        var usersResult = await _pb.Collection("users")
+            .GetListAsync<RecordResponse>();
+        usersResult.IsSuccess.Should().BeTrue();
+
+        var userRecord = usersResult.Value.Items
+            .FirstOrDefault(u => u.Id != userAuth.Value.Record.Id);
+        userRecord.Should().NotBeNull();
+
+        // Act - Impersonate for 1 hour (3600 seconds)
+        var result = await _pb.Admins
+            .ImpersonateAsync("users", userRecord.Id, 3600);
+
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        result.Errors.Should().NotBeEmpty();
+        result.Errors.Should().Contain(e =>
+            e.Message.Contains("403") ||
+            e.Message.Contains("not allowed", StringComparison.OrdinalIgnoreCase) ||
+            e.Message.Contains("authorized", StringComparison.OrdinalIgnoreCase)
+        );
+    }
+}

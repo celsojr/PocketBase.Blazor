@@ -31,13 +31,14 @@ namespace PocketBase.Blazor.Clients.Admin
         /// <summary>
         /// Impersonate allows you to authenticate as a different user by generating a nonrefreshable auth token. Only superusers can perform this action.
         /// </summary>
+        /// <param name="collectionName">Name of the auth collection to impersonate.</param>
         /// <param name="recordId">ID of the auth record to impersonate.</param>
         /// <param name="duration">Optional custom JWT duration for the exp claim (in seconds). If not set or 0, it fallbacks to the default collection auth token duration option.</param>
         /// <param name="options">Optional common request options such as Fields and Expand</param>
         /// <param name="cancellationToken">Optional cancellation token.</param>
         /// <returns>A task that represents the asynchronous operation. The task result contains a <see cref="Result{T}"/> with
         /// the outcome of the authentication attempt, including the authentication response if successful.</returns>
-        Task<Result<UserResponse>> ImpersonateAsync(string recordId, int duration, CommonOptions? options = null, CancellationToken cancellationToken = default);
+        Task<Result<AuthResponse>> ImpersonateAsync(string collectionName, string recordId, int duration, CommonOptions? options = null, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Logs out the currently authenticated admin.

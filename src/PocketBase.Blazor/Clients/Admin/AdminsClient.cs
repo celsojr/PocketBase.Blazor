@@ -34,16 +34,11 @@ namespace PocketBase.Blazor.Clients.Admin
 
             var body = new Dictionary<string, object>
             {
-                { "identity", email },
-                { "password", password }
+                ["identity"] = email,
+                ["password"] = password
             };
 
-            var result = await _http.SendAsync<AuthResponse>(
-                HttpMethod.Post,
-                "api/collections/_superusers/auth-with-password",
-                body,
-                cancellationToken: cancellationToken
-            );
+            var result = await _http.SendAsync<AuthResponse>(HttpMethod.Post, "api/collections/_superusers/auth-with-password", body, cancellationToken: cancellationToken);
 
             if (result.IsSuccess)
             {
@@ -59,29 +54,40 @@ namespace PocketBase.Blazor.Clients.Admin
         /// <inheritdoc />
         public async Task<Result<AuthResponse>> AuthRefreshAsync(CancellationToken cancellationToken = default)
         {
-            return await _http.SendAsync<AuthResponse>(
-                HttpMethod.Post,
-                "api/_superusers/auth-refresh",
-                body: null,
-                cancellationToken: cancellationToken
-            );
+            return await _http.SendAsync<AuthResponse>(HttpMethod.Post, "api/_superusers/auth-refresh", body: null, cancellationToken: cancellationToken);
         }
 
         /// <inheritdoc />
-        public Task<Result<UserResponse>> ImpersonateAsync(string recordId, int duration, CommonOptions? options = null, CancellationToken cancellationToken = default)
+        public async Task<Result<AuthResponse>> ImpersonateAsync(string collectionName, string recordId, int duration, CommonOptions? options = null, CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            ArgumentException.ThrowIfNullOrWhiteSpace(collectionName, nameof(collectionName));
+            ArgumentException.ThrowIfNullOrWhiteSpace(recordId, nameof(recordId));
+
+            var body = new Dictionary<string, object>()
+            {
+                ["duration"] = duration,
+            };
+
+            options ??= new CommonOptions();
+            options.Query = options.BuildQuery();
+
+            var result = await _http.SendAsync<AuthResponse>(HttpMethod.Post, $"api/collections/{collectionName}/impersonate/{recordId}", body, options.Query, cancellationToken: cancellationToken);
+
+            if (result.IsSuccess)
+            {
+                _authStore?.Save(result.Value);
+                return Result.Ok(result.Value);
+            }
+            else
+            {
+                return Result.Fail(result.Errors);
+            }
         }
 
         /// <inheritdoc />
         public async Task<Result> LogoutAsync(CancellationToken cancellationToken = default)
         {
-            await _http.SendAsync(
-                HttpMethod.Post,
-                "api/_superusers/logout",
-                body: null,
-                cancellationToken: cancellationToken
-            );
+            await _http.SendAsync(HttpMethod.Post, "api/_superusers/logout", body: null, cancellationToken: cancellationToken);
             return Result.Ok();
         }
 
