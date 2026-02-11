@@ -28,6 +28,7 @@ namespace PocketBase.Blazor.Clients.Record
         public IRealtimeClient Realtime => _authStore?.Realtime
             ?? throw new InvalidOperationException("Realtime client is not available because the auth store is not set.");
 
+        /// <inheritdoc />
         public IRealtimeStreamClient RealtimeSse => _authStore?.RealtimeSse
             ?? throw new InvalidOperationException("Realtime stream client is not available because the auth store is not set.");
 
@@ -48,23 +49,31 @@ namespace PocketBase.Blazor.Clients.Record
         /// <inheritdoc />
         public async Task<Result<AuthResponse>> AuthWithPasswordAsync(string email, string password, string? identityField = null, CommonOptions? options = null, CancellationToken cancellationToken = default)
         {
-            // TODO: identityField and options usage not implemented yet
             if (string.IsNullOrWhiteSpace(email))
                 throw new ArgumentException("Email must be provided.", nameof(email));
 
             if (string.IsNullOrWhiteSpace(password))
                 throw new ArgumentException("Password must be provided.", nameof(password));
 
-            var body = new Dictionary<string, object>
+            var body = new Dictionary<string, object?>
             {
                 { "identity", email },
                 { "password", password }
             };
 
+            if (!string.IsNullOrWhiteSpace(identityField))
+            {
+                body["identityField"] = identityField;
+            }
+
+            options ??= new CommonOptions();
+            options.Query = options.BuildQuery();
+
             var result = await Http.SendAsync<AuthResponse>(
                 HttpMethod.Post,
                 "api/collections/users/auth-with-password",
                 body,
+                options.Query,
                 cancellationToken: cancellationToken
             );
 
