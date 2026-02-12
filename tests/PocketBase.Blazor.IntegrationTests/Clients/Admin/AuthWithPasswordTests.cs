@@ -123,36 +123,36 @@ public class AuthWithPasswordTests
         userAuth.IsSuccess.Should().BeTrue();
         userAuth.Value.Record.Should().NotBeNull();
         userAuth.Value.Record.Email.Should().Be(_fixture.Settings.UserTesterEmail);
-    
+
         // Store user session for later verification
         var userSession = _pb.AuthStore.CurrentSession;
         userSession.Should().NotBeNull();
-    
+
         // We need to temporarily switch to admin to be able to list the all users
         await _pb.Admins.AuthWithPasswordAsync(
             _fixture.Settings.AdminTesterEmail,
             _fixture.Settings.AdminTesterPassword
         );
-    
+
         var usersResult = await _pb.Collection("users")
             .GetListAsync<RecordResponse>();
         usersResult.IsSuccess.Should().BeTrue();
-    
+
         // Get a known user ID to attempt impersonation
         var targetUser = usersResult.Value.Items
             .FirstOrDefault(u => u.Id != userAuth.Value.Record.Id);
         targetUser.Should().NotBeNull();
-    
+
         // Step 2: Switch back to regular user session for the actual test
         _pb.AuthStore.Save(userSession);
         _pb.AuthStore.CurrentSession.Should().NotBeNull();
         _pb.AuthStore.CurrentSession.Record.Should().NotBeNull();
         _pb.AuthStore.CurrentSession.Record.Email.Should().Be(_fixture.Settings.UserTesterEmail);
-    
+
         // Act - Attempt to impersonate as regular user (should be forbidden)
         var result = await _pb.Admins
             .ImpersonateAsync("users", targetUser.Id, 3600);
-    
+
         // Assert
         result.IsSuccess.Should().BeFalse();
         result.Errors.Should().NotBeEmpty();
@@ -173,7 +173,7 @@ public class AuthWithPasswordTests
             );
 
         userAuth.IsSuccess.Should().BeTrue();
-    
+
         // Act
         var result = await _pb.Admins
             .ImpersonateAsync("users", "any-id-will-fail", 3600);

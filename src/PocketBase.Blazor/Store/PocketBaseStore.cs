@@ -35,4 +35,3 @@ namespace PocketBase.Blazor.Store
         }
     }
 }
-
