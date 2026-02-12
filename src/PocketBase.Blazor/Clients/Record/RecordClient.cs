@@ -91,7 +91,17 @@ namespace PocketBase.Blazor.Clients.Record
         /// <inheritdoc />
         public async Task<Result<AuthResponse>> RefreshAsync(CancellationToken cancellationToken = default)
         {
-            return await Http.SendAsync<AuthResponse>(HttpMethod.Post, "api/collections/users/auth-refresh", body: null, cancellationToken: cancellationToken);
+            var result = await Http.SendAsync<AuthResponse>(HttpMethod.Post, "api/collections/users/auth-refresh", body: null, cancellationToken: cancellationToken);
+
+            if (result.IsSuccess)
+            {
+                _authStore?.Save(result.Value);
+                return Result.Ok(result.Value);
+            }
+            else
+            {
+                return Result.Fail(result.Errors);
+            }
         }
 
         /// <inheritdoc />
