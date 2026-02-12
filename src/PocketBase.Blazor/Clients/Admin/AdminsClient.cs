@@ -54,7 +54,17 @@ namespace PocketBase.Blazor.Clients.Admin
         /// <inheritdoc />
         public async Task<Result<AuthResponse>> AuthRefreshAsync(CancellationToken cancellationToken = default)
         {
-            return await _http.SendAsync<AuthResponse>(HttpMethod.Post, "api/_superusers/auth-refresh", body: null, cancellationToken: cancellationToken);
+            var result = await _http.SendAsync<AuthResponse>(HttpMethod.Post, "api/_superusers/auth-refresh", body: null, cancellationToken: cancellationToken);
+
+            if (result.IsSuccess)
+            {
+                _authStore?.Save(result.Value);
+                return Result.Ok(result.Value);
+            }
+            else
+            {
+                return Result.Fail(result.Errors);
+            }
         }
 
         /// <inheritdoc />
@@ -88,6 +98,7 @@ namespace PocketBase.Blazor.Clients.Admin
         public async Task<Result> LogoutAsync(CancellationToken cancellationToken = default)
         {
             await _http.SendAsync(HttpMethod.Post, "api/_superusers/logout", body: null, cancellationToken: cancellationToken);
+            _authStore?.Clear();
             return Result.Ok();
         }
 
