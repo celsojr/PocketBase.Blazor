@@ -113,7 +113,7 @@ public class AuthWithPasswordTests
     [Fact]
     public async Task Impersonate_with_non_admin_user_returns_unauthorized_error()
     {
-        // Arrange - First authenticate as regular user (not admin)
+        // Arrange - Step 1: Authenticate as regular user
         var userAuth = await _pb.Collection("users")
             .AuthWithPasswordAsync(
                 _fixture.Settings.UserTesterEmail,
@@ -122,27 +122,68 @@ public class AuthWithPasswordTests
 
         userAuth.IsSuccess.Should().BeTrue();
         userAuth.Value.Record.Should().NotBeNull();
-
-        // Get another user record to impersonate
+        userAuth.Value.Record.Email.Should().Be(_fixture.Settings.UserTesterEmail);
+    
+        // Store user session for later verification
+        var userSession = _pb.AuthStore.CurrentSession;
+        userSession.Should().NotBeNull();
+    
+        // We need to temporarily switch to admin to be able to list the all users
+        await _pb.Admins.AuthWithPasswordAsync(
+            _fixture.Settings.AdminTesterEmail,
+            _fixture.Settings.AdminTesterPassword
+        );
+    
         var usersResult = await _pb.Collection("users")
             .GetListAsync<RecordResponse>();
         usersResult.IsSuccess.Should().BeTrue();
-
-        var userRecord = usersResult.Value.Items
+    
+        // Get a known user ID to attempt impersonation
+        var targetUser = usersResult.Value.Items
             .FirstOrDefault(u => u.Id != userAuth.Value.Record.Id);
-        userRecord.Should().NotBeNull();
-
-        // Act - Impersonate for 1 hour (3600 seconds)
+        targetUser.Should().NotBeNull();
+    
+        // Step 2: Switch back to regular user session for the actual test
+        _pb.AuthStore.Save(userSession);
+        _pb.AuthStore.CurrentSession.Should().NotBeNull();
+        _pb.AuthStore.CurrentSession.Record.Should().NotBeNull();
+        _pb.AuthStore.CurrentSession.Record.Email.Should().Be(_fixture.Settings.UserTesterEmail);
+    
+        // Act - Attempt to impersonate as regular user (should be forbidden)
         var result = await _pb.Admins
-            .ImpersonateAsync("users", userRecord.Id, 3600);
+            .ImpersonateAsync("users", targetUser.Id, 3600);
+    
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        result.Errors.Should().NotBeEmpty();
+        result.Errors.Should().Contain(e =>
+            e.Message.Contains("403") ||
+            e.Message.Contains("not allowed", StringComparison.OrdinalIgnoreCase)
+        );
+    }
+
+    [Fact]
+    public async Task Impersonate_any_non_admin_user_returns_unauthorized_error()
+    {
+        // Arrange - Authenticate as regular user
+        var userAuth = await _pb.Collection("users")
+            .AuthWithPasswordAsync(
+                _fixture.Settings.UserTesterEmail,
+                _fixture.Settings.UserTesterPassword
+            );
+
+        userAuth.IsSuccess.Should().BeTrue();
+    
+        // Act
+        var result = await _pb.Admins
+            .ImpersonateAsync("users", "any-id-will-fail", 3600);
 
         // Assert
         result.IsSuccess.Should().BeFalse();
         result.Errors.Should().NotBeEmpty();
         result.Errors.Should().Contain(e =>
             e.Message.Contains("403") ||
-            e.Message.Contains("not allowed", StringComparison.OrdinalIgnoreCase) ||
-            e.Message.Contains("authorized", StringComparison.OrdinalIgnoreCase)
+            e.Message.Contains("not allowed", StringComparison.OrdinalIgnoreCase)
         );
     }
 }

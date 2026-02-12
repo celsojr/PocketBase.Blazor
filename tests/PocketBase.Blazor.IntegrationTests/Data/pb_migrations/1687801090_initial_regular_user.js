@@ -3,14 +3,15 @@
 migrate((app) => {
     let users = app.findCollectionByNameOrId("users")
 
-    let record = new Record(users)
-    record.set("email", "user_tester@email.com")
-    record.set("password", "Nyp9wiGaAC4qGWz")
-    app.save(record)
+    const testUsers = [
+        { email: "user_tester@email.com", password: "Nyp9wiGaAC4qGWz" },
+        { email: "user_tester2@email.com", password: "Xk7mL9pQrS2tUvW" }
+    ]
 
-    let newRecord = new Record(users)
-    newRecord.set("email", "user_tester2@email.com")
-    newRecord.set("password", "Xk7mL9pQrS2tUvW")
-    app.save(newRecord)
+    testUsers.forEach(userData => {
+        let record = new Record(users)
+        record.set("email", userData.email)
+        record.set("password", userData.password)
+        app.save(record)
+    })
 })
-

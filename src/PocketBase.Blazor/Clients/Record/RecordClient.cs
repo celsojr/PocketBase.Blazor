@@ -152,6 +152,7 @@ namespace PocketBase.Blazor.Clients.Record
         public async Task<Result> LogoutAsync(CancellationToken cancellationToken = default)
         {
             await Http.SendAsync(HttpMethod.Post, "api/collections/users/logout", body: null, cancellationToken: cancellationToken);
+            _authStore?.Clear();
             return Result.Ok();
         }
 

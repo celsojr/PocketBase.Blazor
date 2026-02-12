@@ -10,6 +10,7 @@ using PocketBase.Blazor.Clients.Logging;
 using PocketBase.Blazor.Clients.Realtime;
 using PocketBase.Blazor.Clients.Record;
 using PocketBase.Blazor.Clients.Settings;
+using PocketBase.Blazor.Store;
 
 namespace PocketBase.Blazor
 {
@@ -37,6 +38,7 @@ namespace PocketBase.Blazor
         IRealtimeClient Realtime { get; }
         IRealtimeStreamClient RealtimeSse { get; }
         ISettingsClient Settings { get; }
+        public PocketBaseStore AuthStore { get; }
 
         IBatchClient CreateBatch();
     }

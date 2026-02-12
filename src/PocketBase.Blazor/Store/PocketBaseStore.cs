@@ -22,7 +22,7 @@ namespace PocketBase.Blazor.Store
             RealtimeSse = realtimeSse ?? throw new ArgumentNullException(nameof(realtimeSse));
         }
 
-        internal void Save(AuthResponse auth)
+        public void Save(AuthResponse auth)
         {
             _currentSession = auth;
             Auth.Save(auth);
