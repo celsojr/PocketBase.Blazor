@@ -89,22 +89,6 @@ namespace PocketBase.Blazor.Clients.Record
         }
 
         /// <inheritdoc />
-        public async Task<Result<AuthResponse>> RefreshAsync(CancellationToken cancellationToken = default)
-        {
-            var result = await Http.SendAsync<AuthResponse>(HttpMethod.Post, "api/collections/users/auth-refresh", body: null, cancellationToken: cancellationToken);
-
-            if (result.IsSuccess)
-            {
-                _authStore?.Save(result.Value);
-                return Result.Ok(result.Value);
-            }
-            else
-            {
-                return Result.Fail(result.Errors);
-            }
-        }
-
-        /// <inheritdoc />
         public Task<Result<string>> RequestOtpAsync(string email, CancellationToken cancellationToken = default)
         {
             throw new NotImplementedException();
@@ -117,9 +101,22 @@ namespace PocketBase.Blazor.Clients.Record
         }
 
         /// <inheritdoc />
-        public Task<Result<AuthResponse>> AuthRefreshAsync(CommonOptions? options = null, CancellationToken cancellationToken = default)
+        public async Task<Result<AuthResponse>> AuthRefreshAsync(CommonOptions? options = null, CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            options = options ?? new CommonOptions();
+            options.Query = options.BuildQuery();
+
+            var result = await Http.SendAsync<AuthResponse>(HttpMethod.Post, "api/collections/users/auth-refresh", query: options.Query, cancellationToken: cancellationToken);
+
+            if (result.IsSuccess)
+            {
+                _authStore?.Save(result.Value);
+                return Result.Ok(result.Value);
+            }
+            else
+            {
+                return Result.Fail(result.Errors);
+            }
         }
 
         /// <inheritdoc />

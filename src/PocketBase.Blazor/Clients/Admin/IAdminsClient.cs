@@ -24,9 +24,10 @@ namespace PocketBase.Blazor.Clients.Admin
         /// <summary>
         /// Refreshes the currently authenticated admin session.
         /// </summary>
+        /// <param name="options">An optional <see cref="CommonOptions"/> object that specifies request parameters such as Fields and Expand</param>
         /// <param name="cancellationToken">Optional cancellation token.</param>
         /// <returns>The updated authentication response.</returns>
-        Task<Result<AuthResponse>> AuthRefreshAsync(CancellationToken cancellationToken = default);
+        Task<Result<AuthResponse>> AuthRefreshAsync(CommonOptions? options = null, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Impersonate allows you to authenticate as a different user by generating a nonrefreshable auth token. Only superusers can perform this action.
@@ -34,7 +35,7 @@ namespace PocketBase.Blazor.Clients.Admin
         /// <param name="collectionName">Name of the auth collection to impersonate.</param>
         /// <param name="recordId">ID of the auth record to impersonate.</param>
         /// <param name="duration">Optional custom JWT duration for the exp claim (in seconds). If not set or 0, it fallbacks to the default collection auth token duration option.</param>
-        /// <param name="options">Optional common request options such as Fields and Expand</param>
+        /// <param name="options">An optional <see cref="CommonOptions"/> object that specifies request parameters such as Fields and Expand</param>
         /// <param name="cancellationToken">Optional cancellation token.</param>
         /// <returns>A task that represents the asynchronous operation. The task result contains a <see cref="Result{T}"/> with
         /// the outcome of the authentication attempt, including the authentication response if successful.</returns>

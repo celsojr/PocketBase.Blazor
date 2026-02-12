@@ -52,9 +52,12 @@ namespace PocketBase.Blazor.Clients.Admin
         }
 
         /// <inheritdoc />
-        public async Task<Result<AuthResponse>> AuthRefreshAsync(CancellationToken cancellationToken = default)
+        public async Task<Result<AuthResponse>> AuthRefreshAsync(CommonOptions? options = null, CancellationToken cancellationToken = default)
         {
-            var result = await _http.SendAsync<AuthResponse>(HttpMethod.Post, "api/_superusers/auth-refresh", body: null, cancellationToken: cancellationToken);
+            options ??= new CommonOptions();
+            options.Query = options.BuildQuery();
+
+            var result = await _http.SendAsync<AuthResponse>(HttpMethod.Post, "api/_superusers/auth-refresh", query: options.Query, cancellationToken: cancellationToken);
 
             if (result.IsSuccess)
             {
