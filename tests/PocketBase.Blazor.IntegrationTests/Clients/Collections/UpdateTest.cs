@@ -32,7 +32,7 @@ public class UpdateTest
             });
 
         createResult.IsSuccess.Should().BeTrue();
- 
+
         var updateResult = await _pb.Collections.UpdateAsync(
             createResult.Value.Id,
             new BaseCollectionUpdateModel

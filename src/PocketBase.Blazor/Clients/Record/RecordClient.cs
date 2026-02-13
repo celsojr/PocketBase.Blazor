@@ -4,8 +4,8 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using FluentResults;
-using Parlot.Fluent;
 using PocketBase.Blazor.Clients.Realtime;
+using PocketBase.Blazor.Extensions;
 using PocketBase.Blazor.Http;
 using PocketBase.Blazor.Options;
 using PocketBase.Blazor.Requests.Auth;
@@ -103,16 +103,14 @@ namespace PocketBase.Blazor.Clients.Record
             ArgumentException.ThrowIfNullOrWhiteSpace(otpId, nameof(otpId));
             ArgumentException.ThrowIfNullOrWhiteSpace(otpCode, nameof(otpCode));
 
-            var body = new Dictionary<string, object>
+            options = options ?? new CommonOptions();
+            options.Body = new Dictionary<string, object>
             {
                 ["otpId"] = otpId,
                 ["otpCode"] = otpCode,
             };
 
-            options = options ?? new CommonOptions();
-            options.Query = options.BuildQuery();
-
-            var result = await Http.SendAsync<AuthResponse>(HttpMethod.Post, $"api/collections/{CollectionName}/auth-with-otp", body, query: options.Query, cancellationToken: cancellationToken);
+            var result = await Http.SendAsync<AuthResponse>(HttpMethod.Post, $"api/collections/{CollectionName}/auth-with-otp", options.Body, options.ToDictionary(), cancellationToken: cancellationToken);
 
             if (result.IsSuccess)
             {

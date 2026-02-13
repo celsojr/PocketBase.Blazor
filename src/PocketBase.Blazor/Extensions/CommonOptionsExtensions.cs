@@ -19,7 +19,12 @@ namespace PocketBase.Blazor.Extensions
 
             if (options != null && !string.IsNullOrWhiteSpace(options.Fields))
             {
-                dict["fields"] = options.Fields!;
+                dict["fields"] = options.Fields;
+            }
+
+            if (options != null && !string.IsNullOrWhiteSpace(options.Expand))
+            {
+                dict["expand"] = options.Expand;
             }
 
             return dict;
