@@ -75,7 +75,7 @@ namespace PocketBase.Blazor.Clients.Record
         /// <param name="email">E-mail for sending the OTP code.</param>
         /// <param name="cancellationToken">Optional cancellation token.</param>
         /// <returns>The requested OTP id.</returns>
-        Task<Result<string>> RequestOtpAsync(string email, CancellationToken cancellationToken = default);
+        Task<Result<RequestOtpResponse>> RequestOtpAsync(string email, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Authenticates a user using a one-time password (OTP) code.
@@ -86,7 +86,7 @@ namespace PocketBase.Blazor.Clients.Record
         /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
         /// <returns>A task that represents the asynchronous operation. The task result contains a <see cref="Result{T}"/> with
         /// the outcome of the authentication attempt, including the authentication response if successful.</returns>
-        Task<Result<UserResponse>> AuthWithOtpAsync(string otpId, string otpCode, CommonOptions? options = null, CancellationToken cancellationToken = default);
+        Task<Result<AuthResponse>> AuthWithOtpAsync(string otpId, string otpCode, CommonOptions? options = null, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Refreshes the currently authenticated admin session.

@@ -4,6 +4,7 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using FluentResults;
+using Parlot.Fluent;
 using PocketBase.Blazor.Clients.Realtime;
 using PocketBase.Blazor.Http;
 using PocketBase.Blazor.Options;
@@ -89,15 +90,39 @@ namespace PocketBase.Blazor.Clients.Record
         }
 
         /// <inheritdoc />
-        public Task<Result<string>> RequestOtpAsync(string email, CancellationToken cancellationToken = default)
+        public async Task<Result<RequestOtpResponse>> RequestOtpAsync(string email, CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            ArgumentException.ThrowIfNullOrWhiteSpace(email, nameof(email));
+            var body = new Dictionary<string, object> { ["email"] = email };
+            return await Http.SendAsync<RequestOtpResponse>(HttpMethod.Post, $"api/collections/{CollectionName}/request-otp", body, cancellationToken: cancellationToken);
         }
 
         /// <inheritdoc />
-        public Task<Result<UserResponse>> AuthWithOtpAsync(string otpId, string otpCode, CommonOptions? options = null, CancellationToken cancellationToken = default)
+        public async Task<Result<AuthResponse>> AuthWithOtpAsync(string otpId, string otpCode, CommonOptions? options = null, CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            ArgumentException.ThrowIfNullOrWhiteSpace(otpId, nameof(otpId));
+            ArgumentException.ThrowIfNullOrWhiteSpace(otpCode, nameof(otpCode));
+
+            var body = new Dictionary<string, object>
+            {
+                ["otpId"] = otpId,
+                ["otpCode"] = otpCode,
+            };
+
+            options = options ?? new CommonOptions();
+            options.Query = options.BuildQuery();
+
+            var result = await Http.SendAsync<AuthResponse>(HttpMethod.Post, $"api/collections/{CollectionName}/auth-with-otp", body, query: options.Query, cancellationToken: cancellationToken);
+
+            if (result.IsSuccess)
+            {
+                _authStore?.Save(result.Value);
+                return Result.Ok(result.Value);
+            }
+            else
+            {
+                return Result.Fail(result.Errors);
+            }
         }
 
         /// <inheritdoc />

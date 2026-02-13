@@ -60,7 +60,7 @@ public sealed class PocketBase : IPocketBase
         Health = new HealthClient(_http);
         Settings = new SettingsClient(_http);
 
-        var authStore = new AuthStore(Admins);
+        var authStore = new AuthStore();
         AuthStore = new PocketBaseStore(authStore, Realtime, RealtimeSse);
 
         if (_http is HttpTransport transport)
