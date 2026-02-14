@@ -19,8 +19,6 @@ public class RequestOtpRecordTests
     [Fact]
     public async Task RequestOtpAsync_Fails_WhenCollectionNotConfiguredForOtp()
     {
-        // Arrange
-        var collection = default(Result<CollectionModel>);
         var adminSession = default(AuthResponse);
 
         var id = $"{Guid.NewGuid():N}"[..6];
@@ -28,7 +26,7 @@ public class RequestOtpRecordTests
 
         try
         {
-            // Create a custom collection without OTP enabled
+            // Arrange - store the current user session for later
             var userSession = _pb.AuthStore.CurrentSession;
             userSession.Should().NotBeNull();
 
@@ -39,12 +37,12 @@ public class RequestOtpRecordTests
                     _fixture.Settings.AdminTesterPassword
                 );
 
-            // Save this for later clean up
+            // Save this admin session for cleaning up later
             adminSession = _pb.AuthStore.CurrentSession;
             adminSession.Should().NotBeNull();
 
             // Create a collection with OTP disabled (assuming default is disabled)
-            collection = await _pb.Collections.CreateAsync<CollectionModel>(new
+            var collection = await _pb.Collections.CreateAsync<CollectionModel>(new
             {
                 name = collectionName,
                 type = "auth",
@@ -52,35 +50,30 @@ public class RequestOtpRecordTests
                 {
                     new { name = "email", type = "email", required = true }
                 },
-            },
-            new CommonOptions()
-            {
-                Body = new
-                {
-                    // Explicitly disable OTP if your PocketBase version supports it
-                    otp = new
-                    {
-                        enabled = false
-                    }
-                }
             });
 
-            // Ensure created
+            // Ensure the collection is created
             collection.IsSuccess.Should().BeTrue();
             collection.Value.Should().NotBeNull();
 
             // Create a test user in this collection
             var email = $"user_{id}@example.com";
-            await _pb.Collection(collectionName)
+            var testUserResult = await _pb.Collection(collectionName)
                 .CreateAsync<RecordResponse>(new
                 {
-                    email
+                    email,
+                    password = "Np9wym_aAC4q8GWz",
+                    passwordConfirm = "Np9wym_aAC4q8GWz"
                 });
 
-            // Switch back as a user
+            // Ensure test user is created
+            testUserResult.IsSuccess.Should().BeTrue();
+            testUserResult.Value.Should().NotBeNull();
+
+            // Switch back to the non-admin user
             _pb.AuthStore.Save(userSession);
 
-            // Act
+            // Act - Should fail
             var result = await _pb.Collection(collectionName)
                 .RequestOtpAsync(email);
 
@@ -105,14 +98,60 @@ public class RequestOtpRecordTests
     [Fact]
     public async Task RequestOtpAsync_Succeeds_WhenEmailExists()
     {
-        var record = default(Result<RecordResponse>);
+        var adminSession = default(AuthResponse);
+        var id = $"{Guid.NewGuid():N}"[..6];
+        var collectionName = $"otp_enabled_{id}";
         try
         {
-            // Arrange
-            var id = $"{Guid.NewGuid():N}"[..6];
-            var email = $"user_{id}@example.com";
+            // Arrange - Admin credentials needed for creating and updating collections
+            await _pb.Admins
+                .AuthWithPasswordAsync(
+                    _fixture.Settings.AdminTesterEmail,
+                    _fixture.Settings.AdminTesterPassword
+                );
 
-            record = await _pb.Collection("users")
+            // Save this admin session for cleaning up later
+            adminSession = _pb.AuthStore.CurrentSession;
+            adminSession.Should().NotBeNull();
+
+            // Create a collection (no OTP option details for now)
+            var collection = await _pb.Collections.CreateAsync<CollectionModel>(new
+            {
+                name = collectionName,
+                type = "auth",
+                schema = new[]
+                {
+                    new { name = "email", type = "email", required = true, unique = true }
+                },
+            });
+
+            // Ensure the collection is created
+            collection.IsSuccess.Should().BeTrue();
+            collection.Value.Should().NotBeNull();
+
+            // Update the collection to enable OTP (just an update example)
+            var updateResult = await _pb.Collections.UpdateAsync<CollectionModel>(
+                collectionName,
+                options: new CommonOptions()
+                {
+                    Body = new
+                    {
+                        // Explicitly enable OTP with default values
+                        otp = new
+                        {
+                            enabled = true
+                        }
+                    }
+                }
+            );
+
+            // Ensure a successful response
+            updateResult.IsSuccess.Should().BeTrue();
+
+            // Create a test user in this collection
+            var email = $"user_{id}@example.com";
+            var record = default(Result<RecordResponse>);
+            record = await _pb.Collection(collectionName)
                 .CreateAsync<RecordResponse>(new
                 {
                     email,
@@ -120,8 +159,12 @@ public class RequestOtpRecordTests
                     passwordConfirm = "password123"
                 });
 
-            // Act
-            var result = await _pb.Collection("users")
+            // Ensure test user is created
+            record.IsSuccess.Should().BeTrue();
+            record.Value.Should().NotBeNull();
+
+            // Act - Request OTP for the user
+            var result = await _pb.Collection(collectionName)
                 .RequestOtpAsync(email);
 
             // Assert
@@ -130,14 +173,12 @@ public class RequestOtpRecordTests
         }
         finally
         {
-            await _pb.Admins
-                .AuthWithPasswordAsync(
-                    _fixture.Settings.AdminTesterEmail,
-                    _fixture.Settings.AdminTesterPassword
-                );
-
-            // Clean up - Doesn't work for non-admins
-            await _pb.Collection("users").DeleteAsync(record?.Value.Id);
+            // Clean up
+            if (adminSession != null)
+            {
+                _pb.AuthStore.Save(adminSession);
+                await _pb.Collections.DeleteAsync(collectionName);
+            }
         }
     }
 
