@@ -93,7 +93,7 @@ public class EmailVerificationRecordTests : IAsyncLifetime
         result.IsSuccess.Should().BeTrue();
     }
 
-    [Fact]
+    [Fact(Skip = "Requires SMTP server + configuration")]
     public async Task ConfirmVerificationAsync_WithValidToken_ReturnsSuccess()
     {
         await _pb.Collection(CollectionName)
