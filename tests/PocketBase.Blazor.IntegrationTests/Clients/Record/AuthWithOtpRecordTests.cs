@@ -1,10 +1,10 @@
 namespace PocketBase.Blazor.IntegrationTests.Clients.Record;
 
-using System.Text.Json.Serialization;
-using System.Text.RegularExpressions;
 using Blazor.Models;
 using Blazor.Responses;
 using Blazor.Responses.Auth;
+
+using static Blazor.IntegrationTests.Helpers.MailHogHelper;
 
 [Collection("PocketBase.Blazor.User")]
 public class AuthWithOtpRecordTests
@@ -315,67 +315,4 @@ public class AuthWithOtpRecordTests
             }
         }
     }
-
-    #region MailHog Helpers
-
-    private static async Task<string> GetOtpCodeFromMailHog(string recipientEmail)
-    {
-        using var httpClient = new HttpClient();
-
-        // Get messages from MailHog API
-        var response = await httpClient.GetAsync("http://localhost:8027/api/v2/messages");
-        response.EnsureSuccessStatusCode();
-
-        var content = await response.Content.ReadAsStringAsync();
-        var messages = JsonSerializer.Deserialize<MailHogMessages>(content);
-
-        // Find the latest message for the recipient
-        var message = messages?.Items?
-            .FirstOrDefault(m => m.Content?.Headers?.To?.Contains(recipientEmail) == true);
-
-        if (message?.Content?.Body == null)
-            return null!;
-
-        // Extract OTP code from email body
-        var body = message.Content.Body;
-        var otpPattern = @"\b\d{8}\b"; // Assuming 8-digit OTP (configurable)
-        var match = Regex.Match(body, otpPattern);
-
-        return match.Success ? match.Value : null!;
-    }
-
-    private static async Task ClearMailHogMessages()
-    {
-        using var httpClient = new HttpClient();
-        await httpClient.DeleteAsync("http://localhost:8027/api/v1/messages");
-    }
-
-    private class MailHogMessages
-    {
-        [JsonPropertyName("items")]
-        public List<MailHogMessage>? Items { get; init; }
-    }
-
-    private class MailHogMessage
-    {
-        [JsonPropertyName("Content")]
-        public MailHogContent? Content { get; init; }
-    }
-
-    private class MailHogContent
-    {
-        [JsonPropertyName("Headers")]
-        public MailHogHeaders? Headers { get; init; }
-
-        [JsonPropertyName("Body")]
-        public string? Body { get; init; }
-    }
-
-    private class MailHogHeaders
-    {
-        [JsonPropertyName("To")]
-        public List<string>? To { get; init; }
-    }
-
-    #endregion
 }

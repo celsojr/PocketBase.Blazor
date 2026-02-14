@@ -146,15 +146,17 @@ namespace PocketBase.Blazor.Clients.Record
         }
 
         /// <inheritdoc />
-        public Task<Result> RequestVerificationAsync(string email, CancellationToken cancellationToken = default)
+        public async Task<Result> RequestVerificationAsync(string email, CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            await Http.SendAsync(HttpMethod.Post, $"api/collections/{CollectionName}/request-verification", body: new { email }, cancellationToken: cancellationToken);
+            return Result.Ok();
         }
 
         /// <inheritdoc />
-        public Task<Result> ConfirmVerificationAsync(string token, CancellationToken cancellationToken = default)
+        public async Task<Result> ConfirmVerificationAsync(string token, CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            await Http.SendAsync(HttpMethod.Post, $"api/collections/{CollectionName}/confirm-verification", body: new { token }, cancellationToken: cancellationToken);
+            return Result.Ok();
         }
 
         /// <inheritdoc />
