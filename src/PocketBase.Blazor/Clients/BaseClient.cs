@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -123,24 +124,27 @@ namespace PocketBase.Blazor.Clients
         public virtual async Task<Result<T>> CreateAsync<T>(object? body = null, CommonOptions? options = null, CancellationToken cancellationToken = default)
             where T : BaseModel
         {
+            var mergedBody = MergeBodies(body, options?.Body as Dictionary<string, object?>);
             return await Http.SendAsync<T>(
                 HttpMethod.Post,
                 BasePath,
-                body: body ?? options?.Body,
-                query: options?.Query,
+                mergedBody,
+                options?.Query,
                 cancellationToken: cancellationToken);
         }
 
         /// <inheritdoc />
-        public virtual async Task<Result<T>> UpdateAsync<T>(string? id, object? body = null, CommonOptions? options = null, CancellationToken cancellationToken = default) where T : BaseModel
+        public virtual async Task<Result<T>> UpdateAsync<T>(string? id, object? body = null, CommonOptions? options = null, CancellationToken cancellationToken = default)
+            where T : BaseModel
         {
             if (string.IsNullOrWhiteSpace(id))
                 throw new ArgumentException("Collection id or name is required.", nameof(id));
 
+            var mergedBody = MergeBodies(body, options?.Body as Dictionary<string, object?>);
             return await Http.SendAsync<T>(
                 HttpMethod.Patch,
                 $"{BasePath}/{UrlEncode(id)}",
-                body: body ?? options?.Body,
+                mergedBody,
                 query: options?.Query,
                 cancellationToken: cancellationToken
             );
@@ -160,6 +164,33 @@ namespace PocketBase.Blazor.Clients
             }
 
             return await Http.SendAsync(HttpMethod.Delete, $"{BasePath}/{UrlEncode(id)}", cancellationToken: cancellationToken);
+        }
+
+        private static Dictionary<string, object?> ToDictionary(object obj)
+        {
+            return obj.GetType()
+                      .GetProperties()
+                      .Where(p => p.CanRead)
+                      .ToDictionary(
+                          p => p.Name,
+                          p => (object?)p.GetValue(obj)
+                      );
+        }
+
+        private static object? MergeBodies(object? body, Dictionary<string, object?>? optionsBody)
+        {
+            if (body == null) return optionsBody;
+            if (optionsBody == null && body is not IDictionary<string, object?>) return body;
+
+            // convert main body to dictionary if needed
+            var mainDict = body is IDictionary<string, object?> d ? d : ToDictionary(body);
+            var result = new Dictionary<string, object?>(optionsBody ?? new Dictionary<string, object?>());
+
+            // main body overrides options.Body
+            foreach (var kv in mainDict)
+                result[kv.Key] = kv.Value;
+
+            return result;
         }
 
     }

@@ -32,10 +32,10 @@ public class TestEmailTests
         result.IsSuccess.Should().BeFalse();
     }
 
-    [Fact(Skip = "Requires SMTP configuration")]
+    [Fact(Skip = "Requires SMTP server + configuration")]
     public async Task TestEmailAsync_Succeeds_WhenSmtpConfigured()
     {
-        // docker run -d -p 1027:1027 -p 8027:8027 mailhog/mailhog
+        // docker run -d -p 1027:1025 -p 8027:8025 mailhog/mailhog
         // MailHog web UI: http://localhost:8027
 
         // Configure SMTP first
@@ -45,7 +45,7 @@ public class TestEmailTests
             {
                 enabled = true,
                 host = "localhost",
-                port = 1025, // MailHog SMTP port (8025 is for web UI)
+                port = 1027, // MailHog SMTP port (8027 is for web UI)
                 tls = false
             }
         });

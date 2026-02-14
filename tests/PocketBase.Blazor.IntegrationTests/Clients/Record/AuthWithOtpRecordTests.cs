@@ -1,5 +1,11 @@
 namespace PocketBase.Blazor.IntegrationTests.Clients.Record;
 
+using System.Text.Json.Serialization;
+using System.Text.RegularExpressions;
+using Blazor.Models;
+using Blazor.Responses;
+using Blazor.Responses.Auth;
+
 [Collection("PocketBase.Blazor.User")]
 public class AuthWithOtpRecordTests
 {
@@ -11,4 +17,363 @@ public class AuthWithOtpRecordTests
         _fixture = fixture;
         _pb = fixture.Client;
     }
+
+    [Fact(Skip = "Requires SMTP server + configuration")]
+    public async Task AuthWithOtpAsync_Succeeds_WithValidOtp()
+    {
+        var adminSession = default(AuthResponse);
+        var id = $"{Guid.NewGuid():N}"[..6];
+        var collectionName = $"otp_auth_{id}";
+
+        try
+        {
+            // Arrange - Configure SMTP with MailHog
+            await _pb.Admins.AuthWithPasswordAsync(
+                _fixture.Settings.AdminTesterEmail,
+                _fixture.Settings.AdminTesterPassword
+            );
+
+            // Store the admin session for cleaning up later
+            adminSession = _pb.AuthStore.CurrentSession;
+
+            // Configure SMTP to use MailHog
+            var smtpResult = await _pb.Settings.UpdateAsync(new
+            {
+                smtp = new
+                {
+                    enabled = true,
+                    host = "localhost",
+                    port = 1027, // MailHog SMTP port
+                    tls = false
+                }
+            });
+            smtpResult.IsSuccess.Should().BeTrue();
+
+            // Create collection with OTP enabled
+            var collection = await _pb.Collections.CreateAsync<CollectionModel>(new
+            {
+                name = collectionName,
+                type = "auth",
+                schema = new[]
+                {
+                    new { name = "email", type = "email", required = true, unique = true }
+                },
+            },
+            new CommonOptions()
+            {
+                Body = new Dictionary<string, object?>
+                {
+                    // Use the Pocketbase default values
+                    ["otp"] = new Dictionary<string, object?>
+                    {
+                        ["enabled"] = true
+                    }
+                }
+            });
+            collection.IsSuccess.Should().BeTrue();
+
+            // Create a test user for this collection
+            var email = $"user_{id}@example.com";
+            var userResult = await _pb.Collection(collectionName)
+                .CreateAsync<RecordResponse>(new
+                {
+                    email,
+                    password = "password123",
+                    passwordConfirm = "password123",
+                    verified = true // Ensure email is verified for OTP
+                });
+            userResult.IsSuccess.Should().BeTrue();
+
+            // Request OTP first
+            var otpRequest = await _pb.Collection(collectionName)
+                .RequestOtpAsync(email);
+            otpRequest.IsSuccess.Should().BeTrue();
+            otpRequest.Value.OtpId.Should().NotBeNullOrEmpty();
+
+            // Get the OTP code from MailHog
+            // Note: Wait a moment for the email to be delivered
+            await Task.Delay(1000);
+
+            var otpCode = await GetOtpCodeFromMailHog(email);
+            otpCode.Should().NotBeNullOrEmpty();
+
+            // Act - Authenticate with OTP
+            // Note: If the first authentication attempt fails, the OTP may become invalid
+            var authResult = await _pb.Collection(collectionName)
+                .AuthWithOtpAsync(otpRequest.Value.OtpId, otpCode);
+
+            // Assert
+            authResult.IsSuccess.Should().BeTrue();
+            authResult.Value.Should().NotBeNull();
+            authResult.Value.Record.Should().NotBeNull();
+            authResult.Value.Record.Email.Should().Be(email);
+            authResult.Value.Token.Should().NotBeNullOrEmpty();
+        }
+        finally
+        {
+            // Clean up
+            if (adminSession != null)
+            {
+                _pb.AuthStore.Save(adminSession);
+                await _pb.Collections.DeleteAsync(collectionName);
+
+                // Clear MailHog messages
+                await ClearMailHogMessages();
+            }
+        }
+    }
+
+    [Fact(Skip = "Requires SMTP server + configuration")]
+    public async Task AuthWithOtpAsync_Fails_WithInvalidOtpCode()
+    {
+        var adminSession = default(AuthResponse);
+        var id = $"{Guid.NewGuid():N}"[..6];
+        var collectionName = $"otp_auth_{id}";
+
+        try
+        {
+            // Arrange - Configure SMTP with MailHog
+            await _pb.Admins.AuthWithPasswordAsync(
+                _fixture.Settings.AdminTesterEmail,
+                _fixture.Settings.AdminTesterPassword
+            );
+
+            // Store the admin session for cleaning up later
+            adminSession = _pb.AuthStore.CurrentSession;
+
+            // Configure SMTP
+            var smtpResult = await _pb.Settings.UpdateAsync(new
+            {
+                smtp = new
+                {
+                    enabled = true,
+                    host = "localhost",
+                    port = 1027,
+                    tls = false
+                }
+            });
+            smtpResult.IsSuccess.Should().BeTrue();
+
+            // Create collection with OTP enabled
+            var collection = await _pb.Collections.CreateAsync<CollectionModel>(new
+            {
+                name = collectionName,
+                type = "auth",
+                schema = new[]
+                {
+                    new { name = "email", type = "email", required = true, unique = true }
+                },
+            },
+            new CommonOptions()
+            {
+                Body = new Dictionary<string, object?>
+                {
+                    // Use the Pocketbase default values
+                    ["otp"] = new Dictionary<string, object?>
+                    {
+                        ["enabled"] = true
+                    }
+                }
+            });
+            collection.IsSuccess.Should().BeTrue();
+
+            // Create test user for this collection
+            var email = $"user_{id}@example.com";
+            var userResult = await _pb.Collection(collectionName)
+                .CreateAsync<RecordResponse>(new
+                {
+                    email,
+                    password = "password123",
+                    passwordConfirm = "password123",
+                    verified = true
+                });
+            userResult.IsSuccess.Should().BeTrue();
+
+            // Request OTP - SMTP server is not needed at this point
+            var otpRequest = await _pb.Collection(collectionName)
+                .RequestOtpAsync(email);
+            otpRequest.IsSuccess.Should().BeTrue();
+
+            // Act - Try with invalid OTP code
+            var authResult = await _pb.Collection(collectionName)
+                .AuthWithOtpAsync(otpRequest.Value.OtpId, "invalid_code_123");
+
+            // Assert
+            authResult.IsSuccess.Should().BeFalse();
+            authResult.Errors.Should().NotBeNull();
+            authResult.Errors[0].Message.Should().Contain("400");
+            authResult.Errors[0].Message.Should().Contain("Invalid or expired OTP");
+        }
+        finally
+        {
+            // Clean up
+            if (adminSession != null)
+            {
+                _pb.AuthStore.Save(adminSession);
+                await _pb.Collections.DeleteAsync(collectionName);
+                await ClearMailHogMessages();
+            }
+        }
+    }
+
+    [Fact]
+    public async Task AuthWithOtpAsync_Fails_WithExpiredOtp()
+    {
+        var adminSession = default(AuthResponse);
+        var id = $"{Guid.NewGuid():N}"[..6];
+        var collectionName = $"otp_auth_{id}";
+
+        try
+        {
+            // Arrange - Configure SMTP
+            await _pb.Admins.AuthWithPasswordAsync(
+                _fixture.Settings.AdminTesterEmail,
+                _fixture.Settings.AdminTesterPassword
+            );
+
+            adminSession = _pb.AuthStore.CurrentSession;
+
+            var smtpResult = await _pb.Settings.UpdateAsync(new
+            {
+                smtp = new
+                {
+                    enabled = true,
+                    host = "localhost",
+                    port = 1027,
+                    tls = false
+                }
+            });
+            smtpResult.IsSuccess.Should().BeTrue();
+
+            // Create collection with OTP enabled and short expiration
+            var collection = await _pb.Collections.CreateAsync<CollectionModel>(new
+            {
+                name = collectionName,
+                type = "auth",
+                schema = new[]
+                {
+                    new { name = "email", type = "email", required = true, unique = true }
+                },
+            },
+            new CommonOptions()
+            {
+                Body = new Dictionary<string, object?>
+                {
+                    // Use the Pocketbase default values
+                    ["otp"] = new Dictionary<string, object?>
+                    {
+                        ["enabled"] = true,
+                        ["duration"] = 10 // Must be no less than 10
+                    }
+                }
+            });
+            collection.IsSuccess.Should().BeTrue();
+
+            // Create test user
+            var email = $"user_{id}@example.com";
+            var userResult = await _pb.Collection(collectionName)
+                .CreateAsync<RecordResponse>(new
+                {
+                    email,
+                    password = "password123",
+                    passwordConfirm = "password123",
+                    verified = true // Ensure email is verified for OTP
+                });
+            userResult.IsSuccess.Should().BeTrue();
+
+            // Request OTP
+            var otpRequest = await _pb.Collection(collectionName)
+                .RequestOtpAsync(email);
+            otpRequest.IsSuccess.Should().BeTrue();
+
+            // Wait for OTP to expire
+            await Task.Delay(TimeSpan.FromSeconds(20));
+
+            // Get the OTP code from MailHog (though it should be expired)
+            var otpCode = await GetOtpCodeFromMailHog(email);
+
+            // Act - Try with expired OTP
+            var authResult = await _pb.Collection(collectionName)
+                .AuthWithOtpAsync(otpRequest.Value.OtpId, otpCode);
+
+            // Assert
+            authResult.IsSuccess.Should().BeFalse();
+            authResult.Errors.Should().NotBeNull();
+            authResult.Errors[0].Message.Should().Contain("400");
+            authResult.Errors[0].Message.Should().Contain("Invalid or expired OTP");
+        }
+        finally
+        {
+            // Clean up
+            if (adminSession != null)
+            {
+                _pb.AuthStore.Save(adminSession);
+                await _pb.Collections.DeleteAsync(collectionName);
+                await ClearMailHogMessages();
+            }
+        }
+    }
+
+    #region MailHog Helpers
+
+    private static async Task<string> GetOtpCodeFromMailHog(string recipientEmail)
+    {
+        using var httpClient = new HttpClient();
+
+        // Get messages from MailHog API
+        var response = await httpClient.GetAsync("http://localhost:8027/api/v2/messages");
+        response.EnsureSuccessStatusCode();
+
+        var content = await response.Content.ReadAsStringAsync();
+        var messages = JsonSerializer.Deserialize<MailHogMessages>(content);
+
+        // Find the latest message for the recipient
+        var message = messages?.Items?
+            .FirstOrDefault(m => m.Content?.Headers?.To?.Contains(recipientEmail) == true);
+
+        if (message?.Content?.Body == null)
+            return null!;
+
+        // Extract OTP code from email body
+        var body = message.Content.Body;
+        var otpPattern = @"\b\d{8}\b"; // Assuming 8-digit OTP (configurable)
+        var match = Regex.Match(body, otpPattern);
+
+        return match.Success ? match.Value : null!;
+    }
+
+    private static async Task ClearMailHogMessages()
+    {
+        using var httpClient = new HttpClient();
+        await httpClient.DeleteAsync("http://localhost:8027/api/v1/messages");
+    }
+
+    private class MailHogMessages
+    {
+        [JsonPropertyName("items")]
+        public List<MailHogMessage>? Items { get; init; }
+    }
+
+    private class MailHogMessage
+    {
+        [JsonPropertyName("Content")]
+        public MailHogContent? Content { get; init; }
+    }
+
+    private class MailHogContent
+    {
+        [JsonPropertyName("Headers")]
+        public MailHogHeaders? Headers { get; init; }
+
+        [JsonPropertyName("Body")]
+        public string? Body { get; init; }
+    }
+
+    private class MailHogHeaders
+    {
+        [JsonPropertyName("To")]
+        public List<string>? To { get; init; }
+    }
+
+    #endregion
 }

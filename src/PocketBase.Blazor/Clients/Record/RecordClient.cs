@@ -107,7 +107,7 @@ namespace PocketBase.Blazor.Clients.Record
             options.Body = new Dictionary<string, object>
             {
                 ["otpId"] = otpId,
-                ["otpCode"] = otpCode,
+                ["password"] = otpCode,
             };
 
             var result = await Http.SendAsync<AuthResponse>(HttpMethod.Post, $"api/collections/{CollectionName}/auth-with-otp", options.Body, options.ToDictionary(), cancellationToken: cancellationToken);
