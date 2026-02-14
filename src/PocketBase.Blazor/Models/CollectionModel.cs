@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Text.Json;
 using PocketBase.Blazor.Options;
 
 namespace PocketBase.Blazor.Models
@@ -6,7 +7,7 @@ namespace PocketBase.Blazor.Models
     /// <summary>
     /// Represents a PocketBase collection model.
     /// </summary>
-    public class CollectionModel : BaseModel
+    public sealed class CollectionModel : BaseModel
     {
         /// <summary>
         /// Gets or sets the name of the collection.
@@ -62,6 +63,14 @@ namespace PocketBase.Blazor.Models
         /// Gets or sets the schema fields of the collection.
         /// </summary>
         public IEnumerable<SchemaFieldModel>? Schema { get; set; } = [];
+
+        /// <inheritdoc />
+        public override string ToString()
+        {
+            base.ToString();
+            return JsonSerializer.Serialize(this,
+                new JsonSerializerOptions { WriteIndented = true });
+        }
     }
 }
 

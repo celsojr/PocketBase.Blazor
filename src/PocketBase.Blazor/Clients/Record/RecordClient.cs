@@ -42,9 +42,12 @@ namespace PocketBase.Blazor.Clients.Record
         }
 
         /// <inheritdoc />
-        public Task<Result<AuthMethodsResponse>> ListAuthMethodsAsync(CommonOptions? options = null, CancellationToken cancellationToken = default)
+        public async Task<Result<AuthMethodsResponse>> ListAuthMethodsAsync(CommonOptions? options = null, CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            options ??= new CommonOptions();
+            options.Query = (Dictionary<string, object?>)options.ToDictionary();
+
+            return await Http.SendAsync<AuthMethodsResponse>(HttpMethod.Get, $"api/collections/{CollectionName}/auth-methods", query: options.Query, cancellationToken: cancellationToken);
         }
 
         /// <inheritdoc />

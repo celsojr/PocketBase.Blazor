@@ -216,7 +216,7 @@ public class AuthWithOtpRecordTests
         }
     }
 
-    [Fact]
+    [Fact(Skip = "Requires SMTP server + configuration")]
     public async Task AuthWithOtpAsync_Fails_WithExpiredOtp()
     {
         var adminSession = default(AuthResponse);
@@ -225,14 +225,16 @@ public class AuthWithOtpRecordTests
 
         try
         {
-            // Arrange - Configure SMTP
+            // Arrange
             await _pb.Admins.AuthWithPasswordAsync(
                 _fixture.Settings.AdminTesterEmail,
                 _fixture.Settings.AdminTesterPassword
             );
 
+            // Store the admin session for cleaning up later
             adminSession = _pb.AuthStore.CurrentSession;
 
+            // Configure SMTP
             var smtpResult = await _pb.Settings.UpdateAsync(new
             {
                 smtp = new
