@@ -3,19 +3,25 @@ namespace PocketBase.Blazor.IntegrationTests.Clients.Record;
 using Blazor.Models;
 using Blazor.Responses;
 using Blazor.Responses.Auth;
-
-using static Blazor.IntegrationTests.Helpers.MailHogHelper;
+using Helpers.MailHog;
 
 [Collection("PocketBase.Blazor.User")]
 public class AuthWithOtpRecordTests
 {
     private readonly IPocketBase _pb;
+    private readonly MailHogService _mailHogService;
     private readonly PocketBaseUserFixture _fixture;
 
     public AuthWithOtpRecordTests(PocketBaseUserFixture fixture)
     {
         _fixture = fixture;
         _pb = fixture.Client;
+
+        var options = new MailHogOptions
+        { 
+            BaseUrl = "http://localhost:8027"
+        };
+        _mailHogService = new MailHogService(new HttpClient(), options);
     }
 
     [Fact(Skip = "Requires SMTP server + configuration")]
@@ -94,7 +100,7 @@ public class AuthWithOtpRecordTests
             // Note: Wait a moment for the email to be delivered
             await Task.Delay(1000);
 
-            var otpCode = await GetOtpCodeFromMailHog(email);
+            var otpCode = await _mailHogService.GetLatestOtpCodeAsync(email);
             otpCode.Should().NotBeNullOrEmpty();
 
             // Act - Authenticate with OTP
@@ -116,10 +122,10 @@ public class AuthWithOtpRecordTests
             {
                 _pb.AuthStore.Save(adminSession);
                 await _pb.Collections.DeleteAsync(collectionName);
-
-                // Clear MailHog messages
-                await ClearMailHogMessages();
             }
+
+            // Attempt to clear MailHog messages, but don't fail if it doesn't work
+            try { await _mailHogService.ClearAllMessagesAsync(); } catch(Exception) { };
         }
     }
 
@@ -211,8 +217,10 @@ public class AuthWithOtpRecordTests
             {
                 _pb.AuthStore.Save(adminSession);
                 await _pb.Collections.DeleteAsync(collectionName);
-                await ClearMailHogMessages();
             }
+
+            // Attempt to clear MailHog messages, but don't fail if it doesn't work
+            try { await _mailHogService.ClearAllMessagesAsync(); } catch(Exception) { };
         }
     }
 
@@ -292,7 +300,8 @@ public class AuthWithOtpRecordTests
             await Task.Delay(TimeSpan.FromSeconds(20));
 
             // Get the OTP code from MailHog (though it should be expired)
-            var otpCode = await GetOtpCodeFromMailHog(email);
+            var otpCode = await _mailHogService.GetLatestOtpCodeAsync(email);
+            otpCode.Should().NotBeNull();
 
             // Act - Try with expired OTP
             var authResult = await _pb.Collection(collectionName)
@@ -311,8 +320,10 @@ public class AuthWithOtpRecordTests
             {
                 _pb.AuthStore.Save(adminSession);
                 await _pb.Collections.DeleteAsync(collectionName);
-                await ClearMailHogMessages();
             }
+
+            // Attempt to clear MailHog messages, but don't fail if it doesn't work
+            try { await _mailHogService.ClearAllMessagesAsync(); } catch(Exception) { };
         }
     }
 }
