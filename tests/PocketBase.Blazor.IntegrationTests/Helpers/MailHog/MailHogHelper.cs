@@ -43,6 +43,20 @@ public class MailHogService : IMailHogService
         return ExtractPattern(cleanedBody, tokenPattern, 1);
     }
 
+    public async Task<string?> GetLatestPasswordResetTokenAsync(string recipientEmail)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(recipientEmail);
+
+        var message = await GetLatestMessageForRecipientAsync(recipientEmail);
+        if (message?.Content?.Body == null)
+            return null;
+
+        var cleanedBody = CleanQuotedPrintableBody(message.Content.Body);
+        var tokenPattern = @"confirm-password-reset/([a-zA-Z0-9\-_=]+(?:\.[a-zA-Z0-9\-_=]+)*)";
+        
+        return ExtractPattern(cleanedBody, tokenPattern, 1);
+    }
+
     public async Task ClearAllMessagesAsync()
     {
         var response = await _httpClient.DeleteAsync(_options.MessagesEndpoint);

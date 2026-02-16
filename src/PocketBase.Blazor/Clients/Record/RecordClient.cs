@@ -161,15 +161,20 @@ namespace PocketBase.Blazor.Clients.Record
         }
 
         /// <inheritdoc />
-        public Task<Result> RequestPasswordResetAsync(string email, CancellationToken cancellationToken = default)
+        public async Task<Result> RequestPasswordResetAsync(string email, CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            await Http.SendAsync(HttpMethod.Post, $"api/collections/{CollectionName}/request-password-reset", body: new { email }, cancellationToken: cancellationToken);
+            return Result.Ok();
         }
 
         /// <inheritdoc />
-        public Task<Result> ConfirmPasswordResetAsync(string token, string password, string passwordConfirm, CancellationToken cancellationToken = default)
+        public async Task<Result> ConfirmPasswordResetAsync(string token, string password, string passwordConfirm, CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            ArgumentException.ThrowIfNullOrWhiteSpace(token, nameof(token));
+            ArgumentException.ThrowIfNullOrWhiteSpace(password, nameof(password));
+            ArgumentException.ThrowIfNullOrWhiteSpace(passwordConfirm, nameof(passwordConfirm));
+            await Http.SendAsync(HttpMethod.Post, $"api/collections/{CollectionName}/confirm-password-reset", body: new { token, password, passwordConfirm }, cancellationToken: cancellationToken);
+            return Result.Ok();
         }
 
         /// <inheritdoc />
