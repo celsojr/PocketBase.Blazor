@@ -54,17 +54,17 @@ public class RunCronsTests
     }
 
     [Fact]
-    public void RunAsync_with_null_id_should_throw()
+    public async Task RunAsync_with_null_id_should_throw()
     {
         // Act & Assert
-        Assert.ThrowsAsync<ArgumentException>(() => _pb.Crons.RunAsync(null!));
+        await Assert.ThrowsAsync<ArgumentException>(() => _pb.Crons.RunAsync(null!));
     }
 
     [Fact]
-    public void RunAsync_with_empty_id_should_throw()
+    public async Task RunAsync_with_empty_id_should_throw()
     {
         // Act & Assert
-        Assert.ThrowsAsync<ArgumentException>(() => _pb.Crons.RunAsync(""));
+        await Assert.ThrowsAsync<ArgumentException>(() => _pb.Crons.RunAsync(""));
     }
 
     [Fact]

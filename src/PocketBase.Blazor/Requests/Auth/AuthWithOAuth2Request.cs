@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace PocketBase.Blazor.Requests.Auth
 {
     public class AuthWithOAuth2Request
@@ -5,7 +7,8 @@ namespace PocketBase.Blazor.Requests.Auth
         public required string Provider { get; init; }
         public required string Code { get; init; }
         public required string CodeVerifier { get; init; }
+        [JsonPropertyName("RedirectURL")]
         public required string RedirectUrl { get; init; }
-        public object CreateData { get; init; }
+        public object? CreateData { get; init; }
     }
 }

@@ -87,9 +87,10 @@ namespace PocketBase.Blazor.Clients.Record
         }
 
         /// <inheritdoc />
-        public Task<Result<AuthRecordResponse>> AuthWithOAuth2CodeAsync(AuthWithOAuth2Request request, CommonOptions? options = null, CancellationToken cancellationToken = default)
+        public async Task<Result<AuthRecordResponse>> AuthWithOAuth2CodeAsync(AuthWithOAuth2Request request, CommonOptions? options = null, CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            ArgumentNullException.ThrowIfNull(request, nameof(request));
+            return await Http.SendAsync<AuthRecordResponse>(HttpMethod.Post, "api/collections/users/auth-with-oauth2", request, options?.ToDictionary(), cancellationToken);
         }
 
         /// <inheritdoc />
