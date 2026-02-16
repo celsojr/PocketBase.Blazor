@@ -100,7 +100,7 @@ public class AuthWithOAuth2RecordTests : IAsyncLifetime
         _playwright.Dispose();
     }
 
-    [Fact]
+    [Fact(Skip = "Requires OAuth2 server + configuration")]
     public async Task AuthWithOAuth2CodeAsync_WithValidRequest_ReturnsSuccess()
     {
         // Step 1: First get auth methods to get OAuth2 provider info
