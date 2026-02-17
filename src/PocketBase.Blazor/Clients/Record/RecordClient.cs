@@ -190,14 +190,6 @@ namespace PocketBase.Blazor.Clients.Record
         }
 
         /// <inheritdoc />
-        public async Task<Result> LogoutAsync(CancellationToken cancellationToken = default)
-        {
-            await Http.SendAsync(HttpMethod.Post, "api/collections/users/logout", body: null, cancellationToken: cancellationToken);
-            _authStore?.Clear();
-            return Result.Ok();
-        }
-
-        /// <inheritdoc />
         public void SetStore(PocketBaseStore store)
         {
             _authStore = store ?? throw new ArgumentNullException(nameof(store));

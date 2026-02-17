@@ -142,12 +142,6 @@ namespace PocketBase.Blazor.Clients.Record
         Task<Result> ConfirmEmailChangeAsync(string token, string password, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Logs out the currently authenticated admin.
-        /// </summary>
-        /// <param name="cancellationToken">Optional cancellation token.</param>
-        Task<Result> LogoutAsync(CancellationToken cancellationToken = default);
-
-        /// <summary>
         /// Sets the PocketBase store for managing authentication state.
         /// </summary>
         /// <param name="store">The PocketBase store instance.</param>
