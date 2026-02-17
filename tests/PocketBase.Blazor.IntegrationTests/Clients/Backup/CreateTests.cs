@@ -18,7 +18,7 @@ public class CreateTests
     public async Task CreateAsync_WithName_ShouldCreateBackup()
     {
         // Arrange - Must be in the format [a-z0-9_-].zip
-        var backupName = $"test-backup-{Guid.NewGuid():N}";
+        var backupName = $"test-backup-{Guid.NewGuid():N}.zip";
 
         // Act
         var result = await _pb.Backup.CreateAsync(backupName);
@@ -28,7 +28,7 @@ public class CreateTests
 
         // Verify backup exists in list
         var listResult = await _pb.Backup.GetFullListAsync();
-        listResult.Value.Should().Contain(b => b.Key.Contains(backupName));
+        listResult.Value.Should().Contain(b => b.Key!.Contains(backupName));
 
         // Cleanup
         await _pb.Backup.DeleteAsync(backupName);
@@ -119,7 +119,7 @@ public class CreateTests
 
         // Verify backup exists in list with sanitized name
         var listResult = await _pb.Backup.GetFullListAsync();
-        listResult.Value.Should().Contain(b => b.Key.Contains("invalid_name_with_chars"));
+        listResult.Value.Should().Contain(b => b.Key!.Contains("invalid_name_with_chars"));
 
         // Cleanup
         await _pb.Backup.DeleteAsync("invalid_name_with_chars.zip");
@@ -129,7 +129,7 @@ public class CreateTests
     public async Task CreateAsync_ThenDelete_ShouldWork()
     {
         // Arrange
-        var backupName = $"create-delete-test-{Guid.NewGuid():N}";
+        var backupName = $"create-delete-test-{Guid.NewGuid():N}.zip";
 
         // Act - Create
         var createResult = await _pb.Backup.CreateAsync(backupName);
@@ -137,7 +137,7 @@ public class CreateTests
 
         // Verify exists
         var listBefore = await _pb.Backup.GetFullListAsync();
-        listBefore.Value.Should().Contain(b => b.Key.Contains(backupName));
+        listBefore.Value.Should().Contain(b => b.Key!.Contains(backupName));
 
         // Act - Delete
         var deleteResult = await _pb.Backup.DeleteAsync(backupName);
@@ -145,6 +145,6 @@ public class CreateTests
 
         // Verify removed
         var listAfter = await _pb.Backup.GetFullListAsync();
-        listAfter.Value.Should().NotContain(b => b.Key.Contains(backupName));
+        listAfter.Value.Should().NotContain(b => b.Key!.Contains(backupName));
     }
 }

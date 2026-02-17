@@ -73,17 +73,17 @@ namespace PocketBase.Blazor.Clients.Backup
         /// <inheritdoc />
         public async Task<Result> RestoreAsync(string key, CancellationToken cancellationToken = default)
         {
+            if (string.IsNullOrWhiteSpace(key))
+            {
+                throw new ArgumentException("Backup key is required.", nameof(key));
+            }
+
             // PocketBase doesn't support restore on Windows
             // It returns 204 but logs an error, which is confusing
             // I'm gonna investigate further later
             if (OperatingSystem.IsWindows())
             {
                 return Result.Fail("Backup restore is not supported on Windows. PocketBase requires Linux or macOS for restore operations.");
-            }
-
-            if (string.IsNullOrWhiteSpace(key))
-            {
-                throw new ArgumentException("Backup key is required.", nameof(key));
             }
 
             var sanitizedKey = SanitizeBackupName(key);
