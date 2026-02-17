@@ -111,25 +111,29 @@ public class PasswordResetRecordTests : IAsyncLifetime
     [Fact(Skip = "Requires SMTP server + configuration")]
     public async Task ConfirmPasswordResetAsync_WithValidToken_ReturnsSuccess()
     {
-        // Request password reset to trigger email
+        // Arrange - Preserve current admin session for post-test cleanup
+        var adminSession = _pb.AuthStore.CurrentSession;
+
+        // Trigger password reset email for the target user
         await _pb.Collection(CollectionName)
             .RequestPasswordResetAsync(TestEmail);
 
-        // Extract token from email
+        // Retrieve reset token from MailHog
         var token = await _mailHogService
             .GetLatestPasswordResetTokenAsync(TestEmail);
         token.Should().NotBeNull();
 
-        // Confirm password reset with new password
+        // Confirm password reset using the retrieved token
         var result = await _pb.Collection(CollectionName)
             .ConfirmPasswordResetAsync(token, NewPassword, NewPassword);
 
         result.IsSuccess.Should().BeTrue();
 
-        await _pb.Collection(CollectionName).LogoutAsync();
+        // Clear auth state to ensure authentication is validated from a clean context
+        _pb.AuthStore.Clear();
+        _pb.AuthStore.CurrentSession.Should().BeNull();
 
         // Verify we can authenticate with the new password
-        // TODO: Still not able to authenticated
         var authResult = await _pb.Collection(CollectionName)
             .AuthWithPasswordAsync(TestEmail, NewPassword);
 
@@ -137,6 +141,10 @@ public class PasswordResetRecordTests : IAsyncLifetime
         authResult.Value.Should().NotBeNull();
         authResult.Value.Record.Should().NotBeNull();
         authResult.Value.Record.Email.Should().Be(TestEmail);
+
+        // Restore admin session for subsequent cleanup operations
+        adminSession.Should().NotBeNull();
+        _pb.AuthStore.Save(adminSession);
     }
 
     [Fact]

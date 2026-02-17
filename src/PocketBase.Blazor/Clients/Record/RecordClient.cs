@@ -59,6 +59,19 @@ namespace PocketBase.Blazor.Clients.Record
             if (string.IsNullOrWhiteSpace(password))
                 throw new ArgumentException("Password must be provided.", nameof(password));
 
+            // Architectural guard:
+            // The Records endpoint must never be used to authenticate administrator accounts.
+            // In PocketBase, "_superusers" represents a separate auth domain (Admins).
+            // We enforce this boundary here to prevent accidental cross-authentication and
+            // to keep admin and record authentication flows explicitly separated at the SDK level.
+            if (string.Equals(CollectionName, "_superusers", StringComparison.Ordinal))
+            {
+                throw new InvalidOperationException(
+                    "Authentication for the '_superusers' collection is not allowed through the Records endpoint. " +
+                    "Use the Admins endpoint (pb.Admins.AuthWithPasswordAsync) to authenticate administrator accounts."
+                );
+            }
+
             var body = new Dictionary<string, object?>
             {
                 ["identity"] = email,
@@ -73,7 +86,7 @@ namespace PocketBase.Blazor.Clients.Record
             options ??= new CommonOptions();
             options.Query = options.BuildQuery();
 
-            var result = await Http.SendAsync<AuthResponse>(HttpMethod.Post, "api/collections/users/auth-with-password", body, options.Query, cancellationToken: cancellationToken);
+            var result = await Http.SendAsync<AuthResponse>(HttpMethod.Post, $"api/collections/{CollectionName}/auth-with-password", body, options.Query, cancellationToken: cancellationToken);
 
             if (result.IsSuccess)
             {
