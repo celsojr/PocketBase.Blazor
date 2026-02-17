@@ -59,7 +59,7 @@ public class MailHogService : IMailHogService
 
     public async Task ClearAllMessagesAsync()
     {
-        var response = await _httpClient.DeleteAsync(_options.MessagesEndpoint);
+        var response = await _httpClient.DeleteAsync(_options.DeleteEndpoint);
         response.EnsureSuccessStatusCode();
     }
 
