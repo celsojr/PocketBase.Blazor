@@ -191,15 +191,20 @@ namespace PocketBase.Blazor.Clients.Record
         }
 
         /// <inheritdoc />
-        public Task<Result> RequestEmailChangeAsync(string newEmail, CancellationToken cancellationToken = default)
+        public async Task<Result> RequestEmailChangeAsync(string newEmail, CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            ArgumentException.ThrowIfNullOrWhiteSpace(newEmail, nameof(newEmail));
+            await Http.SendAsync(HttpMethod.Post, $"api/collections/{CollectionName}/request-email-change", body: new { newEmail }, cancellationToken: cancellationToken);
+            return Result.Ok();
         }
 
         /// <inheritdoc />
-        public Task<Result> ConfirmEmailChangeAsync(string token, string password, CancellationToken cancellationToken = default)
+        public async Task<Result> ConfirmEmailChangeAsync(string token, string password, CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            ArgumentException.ThrowIfNullOrWhiteSpace(token, nameof(token));
+            ArgumentException.ThrowIfNullOrWhiteSpace(password, nameof(password));
+            await Http.SendAsync(HttpMethod.Post, $"api/collections/{CollectionName}/confirm-email-change", body: new { token, password }, cancellationToken: cancellationToken);
+            return Result.Ok();
         }
 
         /// <inheritdoc />

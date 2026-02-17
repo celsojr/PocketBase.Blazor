@@ -1,6 +1,7 @@
 namespace PocketBase.Blazor.IntegrationTests.Helpers.MailHog;
 
 using System.Text.RegularExpressions;
+using static VerificationType;
 
 public class MailHogService : IMailHogService
 {
@@ -29,7 +30,7 @@ public class MailHogService : IMailHogService
         return ExtractPattern(message.Content.Body, otpPattern);
     }
 
-    public async Task<string?> GetLatestVerificationTokenAsync(string recipientEmail)
+    public async Task<string?> GetLatestTokenAsync(string recipientEmail, VerificationType type)
     {
         ArgumentException.ThrowIfNullOrEmpty(recipientEmail);
 
@@ -38,23 +39,17 @@ public class MailHogService : IMailHogService
             return null;
 
         var cleanedBody = CleanQuotedPrintableBody(message.Content.Body);
-        var tokenPattern = @"confirm-verification/([a-zA-Z0-9\-_=]+(?:\.[a-zA-Z0-9\-_=]+)*)";
-        
-        return ExtractPattern(cleanedBody, tokenPattern, 1);
-    }
 
-    public async Task<string?> GetLatestPasswordResetTokenAsync(string recipientEmail)
-    {
-        ArgumentException.ThrowIfNullOrEmpty(recipientEmail);
+        // Determine token URL fragment based on type
+        var tokenPattern = type switch
+        {
+            PasswordReset => "password-reset",
+            EmailChange => "email-change",
+            EmailVerification => "verification",
+            _ => throw new ArgumentOutOfRangeException(nameof(type), "Unsupported verification type")
+        };
 
-        var message = await GetLatestMessageForRecipientAsync(recipientEmail);
-        if (message?.Content?.Body == null)
-            return null;
-
-        var cleanedBody = CleanQuotedPrintableBody(message.Content.Body);
-        var tokenPattern = @"confirm-password-reset/([a-zA-Z0-9\-_=]+(?:\.[a-zA-Z0-9\-_=]+)*)";
-        
-        return ExtractPattern(cleanedBody, tokenPattern, 1);
+        return ExtractPattern(cleanedBody, $@"confirm-{tokenPattern}/([a-zA-Z0-9\-_=]+(?:\.[a-zA-Z0-9\-_=]+)*)", 1);
     }
 
     public async Task ClearAllMessagesAsync()

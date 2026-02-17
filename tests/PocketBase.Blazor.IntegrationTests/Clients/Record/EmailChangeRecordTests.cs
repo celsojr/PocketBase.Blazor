@@ -5,22 +5,25 @@ using Blazor.Responses;
 using Helpers.MailHog;
 
 [Collection("PocketBase.Blazor.Admin")]
-public class EmailVerificationRecordTests : IAsyncLifetime
+public class EmailChangeRecordTests : IAsyncLifetime
 {
     private readonly IPocketBase _pb;
     private readonly MailHogService _mailHogService;
-    private const string CollectionName = "test_email_verification";
-    private const string TestEmail = "test_verification@example.com";
-    private const string TestPassword = "Test123456!";
 
-    public EmailVerificationRecordTests(PocketBaseAdminFixture fixture)
+    private const string CollectionName = "test_email_change";
+    private const string OriginalEmail = "email_change@example.com";
+    private const string NewEmail = "updated_email@example.com";
+    private const string Password = "EmailChange123!";
+
+    public EmailChangeRecordTests(PocketBaseAdminFixture fixture)
     {
         _pb = fixture.Client;
-        
+
         var options = new MailHogOptions
-        { 
+        {
             BaseUrl = "http://localhost:8027"
         };
+
         _mailHogService = new MailHogService(new HttpClient(), options);
     }
 
@@ -37,6 +40,7 @@ public class EmailVerificationRecordTests : IAsyncLifetime
                 tls = false
             }
         });
+
         smtpResult.IsSuccess.Should().BeTrue();
 
         // Create auth collection
@@ -50,26 +54,24 @@ public class EmailVerificationRecordTests : IAsyncLifetime
             }
         });
 
-        // Create test user for this collection
+        // Create user
         await _pb.Collection(CollectionName)
             .CreateAsync<RecordResponse>(new
             {
-                email = TestEmail,
-                password = TestPassword,
-                passwordConfirm = TestPassword
+                email = OriginalEmail,
+                password = Password,
+                passwordConfirm = Password
             });
     }
 
     public async Task DisposeAsync()
     {
-        // Clean up PocketBase collection
+        // Delete test collection
         var listResult = await _pb.Collections
             .GetListAsync<CollectionModel>(options: new ListOptions { SkipTotal = true });
 
-        listResult.IsSuccess.Should().BeTrue();
-
         var collection = listResult.Value.Items
-            .FirstOrDefault(c => c.Name?.Equals(CollectionName) == true);
+            .FirstOrDefault(c => c.Name == CollectionName);
 
         if (collection?.Id != null)
         {
@@ -83,54 +85,81 @@ public class EmailVerificationRecordTests : IAsyncLifetime
         }
         catch (Exception ex)
         {
-            // Log the exception but don't fail the test
             Console.WriteLine($"Failed to clear MailHog messages: {ex.Message}");
         }
     }
 
     [Fact]
-    public async Task RequestVerificationAsync_WithValidEmail_ReturnsSuccess()
+    public async Task RequestEmailChangeAsync_WithAuthenticatedUser_ReturnsSuccess()
     {
+        // Arrange - reserve current admin session for post-test cleanup
+        var adminSession = _pb.AuthStore.CurrentSession;
+
+        // Authenticate user first
+        var auth = await _pb.Collection(CollectionName)
+            .AuthWithPasswordAsync(OriginalEmail, Password);
+
+        auth.IsSuccess.Should().BeTrue();
+
         var result = await _pb.Collection(CollectionName)
-            .RequestVerificationAsync(TestEmail);
+            .RequestEmailChangeAsync(NewEmail);
 
-        // API returns success even if email is not sent (security feature)
         result.IsSuccess.Should().BeTrue();
-    }
 
-    [Fact]
-    public async Task RequestVerificationAsync_WithInvalidEmail_ReturnsSuccess()
-    {
-        var result = await _pb.Collection(CollectionName)
-            .RequestVerificationAsync("nonexistent@example.com");
-
-        // API returns success even for non-existent emails (security feature)
-        result.IsSuccess.Should().BeTrue();
+        // Restore admin session for subsequent cleanup operations
+        adminSession.Should().NotBeNull();
+        _pb.AuthStore.Save(adminSession);
     }
 
     [Fact(Skip = "Requires SMTP server + configuration")]
-    public async Task ConfirmVerificationAsync_WithValidToken_ReturnsSuccess()
+    public async Task ConfirmEmailChangeAsync_WithValidToken_UpdatesEmail()
     {
-        await _pb.Collection(CollectionName)
-            .RequestVerificationAsync(TestEmail);
+        // Preserve admin session
+        var adminSession = _pb.AuthStore.CurrentSession;
 
+        // Authenticate user
+        await _pb.Collection(CollectionName)
+            .AuthWithPasswordAsync(OriginalEmail, Password);
+
+        // Request change
+        await _pb.Collection(CollectionName)
+            .RequestEmailChangeAsync(NewEmail);
+
+        // Extract confirmation token from MailHog
         var token = await _mailHogService
-            .GetLatestTokenAsync(TestEmail, VerificationType.EmailVerification);
+            .GetLatestTokenAsync(NewEmail, VerificationType.EmailChange);
+
         token.Should().NotBeNull();
 
+        // Confirm change
         var result = await _pb.Collection(CollectionName)
-            .ConfirmVerificationAsync(token!);
+            .ConfirmEmailChangeAsync(token, Password);
 
         result.IsSuccess.Should().BeTrue();
+
+        // Clear session
+        _pb.AuthStore.Clear();
+
+        // Authenticate using new email
+        var auth = await _pb.Collection(CollectionName)
+            .AuthWithPasswordAsync(NewEmail, Password);
+
+        auth.IsSuccess.Should().BeTrue();
+        auth.Value.Record.Should().NotBeNull();
+        auth.Value.Record.Email.Should().Be(NewEmail);
+
+        // Restore admin session
+        adminSession.Should().NotBeNull();
+        _pb.AuthStore.Save(adminSession);
     }
 
     [Fact]
-    public async Task ConfirmVerificationAsync_WithInvalidToken_ReturnsSuccess()
+    public async Task ConfirmEmailChangeAsync_WithInvalidToken_ReturnsSuccess()
     {
         var result = await _pb.Collection(CollectionName)
-            .ConfirmVerificationAsync("invalid-token");
+            .ConfirmEmailChangeAsync("invalid-token", Password);
 
-        // API returns success even for missing email token claim (security feature)
+        // PocketBase security model: still returns success
         result.IsSuccess.Should().BeTrue();
     }
 }

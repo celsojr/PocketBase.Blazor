@@ -120,7 +120,7 @@ public class PasswordResetRecordTests : IAsyncLifetime
 
         // Retrieve reset token from MailHog
         var token = await _mailHogService
-            .GetLatestPasswordResetTokenAsync(TestEmail);
+            .GetLatestTokenAsync(TestEmail, VerificationType.PasswordReset);
         token.Should().NotBeNull();
 
         // Confirm password reset using the retrieved token
@@ -165,7 +165,7 @@ public class PasswordResetRecordTests : IAsyncLifetime
             .RequestPasswordResetAsync(TestEmail);
 
         var token = await _mailHogService
-            .GetLatestPasswordResetTokenAsync(TestEmail);
+            .GetLatestTokenAsync(TestEmail, VerificationType.PasswordReset);
 
         token.Should().NotBeNull();
 
@@ -185,7 +185,7 @@ public class PasswordResetRecordTests : IAsyncLifetime
             .RequestPasswordResetAsync(TestEmail);
 
         var token = await _mailHogService
-            .GetLatestPasswordResetTokenAsync(TestEmail);
+            .GetLatestTokenAsync(TestEmail, VerificationType.PasswordReset);
 
         token.Should().NotBeNull();
 
