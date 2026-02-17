@@ -19,6 +19,15 @@ public class CreateTests
     public async Task CreateBatch_WhenBatchDisabled_ShouldThrowException()
     {
         // Arrange
+        var smtpResult = await _pb.Settings.UpdateAsync(new
+        {
+            batch = new
+            {
+                enabled = false
+            }
+        });
+        smtpResult.IsSuccess.Should().BeTrue();
+
         var batch = _pb.CreateBatch();
 
         // Dummy collection
@@ -184,6 +193,15 @@ public class CreateTests
     public async Task CreateBatch_WithUpsert_ShouldSucceed()
     {
         // Arrange
+        var smtpResult = await _pb.Settings.UpdateAsync(new
+        {
+            batch = new
+            {
+                enabled = true
+            }
+        });
+        smtpResult.IsSuccess.Should().BeTrue();
+
         var collectionName = $"batch_upsert_{Guid.NewGuid():N}";
 
         await _pb.Collections.CreateAsync<CollectionModel>(new

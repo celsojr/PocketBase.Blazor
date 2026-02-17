@@ -6,7 +6,6 @@ using FluentAssertions;
 using Blazor.Requests.Batch;
 using Xunit;
 
-//[Trait("Category", "FileUpload")]
 [Collection("PocketBase.Blazor.Admin")]
 public class BatchFileUploadTests
 {
@@ -91,7 +90,16 @@ public class BatchFileUploadTests
     [Fact]
     public async Task CreateBatch_WithMixedFileAndNonFileRequests_ShouldSucceed()
     {
-        // Arrange
+        // Arrange - Configure batch
+        var smtpResult = await _pb.Settings.UpdateAsync(new
+        {
+            batch = new
+            {
+                enabled = true
+            }
+        });
+        smtpResult.IsSuccess.Should().BeTrue();
+
         var collectionName = $"batch_mixed_{Guid.NewGuid():N}";
         var fileContent = "Batch file content";
 
@@ -185,6 +193,15 @@ public class BatchFileUploadTests
     public async Task UpdateBatch_WithFileReplacement_ShouldSucceed()
     {
         // Arrange
+        var smtpResult = await _pb.Settings.UpdateAsync(new
+        {
+            batch = new
+            {
+                enabled = true
+            }
+        });
+        smtpResult.IsSuccess.Should().BeTrue();
+
         var collectionName = $"batch_update_file_{Guid.NewGuid():N}";
         var initialFileContent = "Initial file";
         var updatedFileContent = "Updated file";
