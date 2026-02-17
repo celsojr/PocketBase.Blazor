@@ -86,14 +86,22 @@ public class AuthWithPasswordTests
     [Fact]
     public async Task Impersonate_with_valid_admin_and_record_id_returns_impersonation_token()
     {
-        // Arrange - Get a user record to impersonate
-        var usersResult = await _pb.Collection("users")
+        // Arrange - avoid shared state here with a fresh instance
+        var pb = new PocketBase(_fixture.Settings.BaseUrl);
+
+        await pb.Admins.AuthWithPasswordAsync(
+            _fixture.Settings.AdminTesterEmail,
+            _fixture.Settings.AdminTesterPassword
+        );
+
+        // Get a user record to impersonate
+        var usersResult = await pb.Collection("users")
             .GetListAsync<RecordResponse>();
         usersResult.IsSuccess.Should().BeTrue();
         var userRecord = usersResult.Value.Items.First();
 
-        // Act - Impersonate for 1 hour (3600 seconds)
-        var result = await _pb.Admins
+        // Act - Impersonate the fresh instance user up to 1 hour (3600 seconds)
+        var result = await pb.Admins
             .ImpersonateAsync("users", userRecord.Id, 3600);
 
         // Assert
