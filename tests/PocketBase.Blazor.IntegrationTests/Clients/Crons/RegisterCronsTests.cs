@@ -11,7 +11,7 @@ public class RegisterCronsTests
         _pb = fixture.Client;
     }
 
-    [Fact]
+    [Fact(Skip = "Custom self-hosted Pocketbase client is requires for this test")]
     public async Task Register_and_run_cron_successfully()
     {
         // Arrange

@@ -26,10 +26,7 @@ namespace PocketBase.Blazor.Clients.Logging
         /// <inheritdoc />
         public async Task<Result<ListResult<LogResponse>>> GetListAsync(int page = 1, int perPage = 30, ListOptions? options = null, CancellationToken cancellationToken = default)
         {
-            var query = options?.BuildQuery() ?? new Dictionary<string, object?>();
-            query["page"] = page.ToString();
-            query["perPage"] = perPage.ToString();
-
+            var query = options?.BuildQuery(page, perPage) ?? new Dictionary<string, object?>();
             return await _http.SendAsync<ListResult<LogResponse>>(HttpMethod.Get, "api/logs", query: query, cancellationToken: cancellationToken);
         }
 

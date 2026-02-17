@@ -12,7 +12,7 @@ public class DonwloadTests
         _pb = fixture.Client;
     }
 
-    [Fact]
+    [Fact(Skip = "Manual file upload required for this test")]
     public async Task GetFileAsync_SavesStreamToFile()
     {
         var options = new FileOptions { Thumb = "100x100" };
@@ -35,7 +35,7 @@ public class DonwloadTests
         File.Delete(filePath);
     }
 
-    [Fact]
+    [Fact(Skip = "Manual file upload required for this test")]
     public async Task GetFileAsync_SavesBytesToFile()
     {
         var options = new FileOptions { Thumb = "100x100" };

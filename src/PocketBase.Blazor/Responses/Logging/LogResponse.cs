@@ -44,9 +44,13 @@ namespace PocketBase.Blazor.Responses.Logging
                 UserAgent = TryGetString(root, "userAgent"),
                 UserIP = TryGetString(root, "userIP"),
                 Error = TryGetString(root, "error"),
-                Details = TryGetString(root, "details")
+                //Details = TryGetString(root, "details")
+                Details = TryGetObject(root, "details")
             };
         }
+
+        private static string? TryGetObject(JsonElement element, string propertyName)
+            => element.TryGetProperty(propertyName, out var prop) ? prop.GetRawText() : null;
 
         private static string? TryGetString(JsonElement element, string propertyName)
             => element.TryGetProperty(propertyName, out var prop) ? prop.GetString() : null;
