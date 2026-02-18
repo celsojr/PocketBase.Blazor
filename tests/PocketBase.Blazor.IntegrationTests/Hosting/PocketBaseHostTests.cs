@@ -52,7 +52,8 @@ public class PocketBaseHostTests : IAsyncLifetime
     [Fact]
     public async Task StartAsync_ShouldLaunchProcess()
     {
-        // Act
+        // Act - Make sure there is no other active
+        // instance being served through the same port
         _host.Should().NotBeNull();
         await _host.StartAsync();
 
@@ -125,7 +126,8 @@ public class PocketBaseHostTests : IAsyncLifetime
         _host.Process.Should().NotBeNull();
         var originalProcessId = _host.Process.Id;
 
-        // Act
+        // Act - Make sure there is no other active
+        // instance being served through the same port
         await _host.RestartAsync();
 
         // Assert

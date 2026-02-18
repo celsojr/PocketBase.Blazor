@@ -1,5 +1,6 @@
 namespace PocketBase.Blazor.IntegrationTests.Hosting;
 
+using System;
 using System.Text.Json.Serialization;
 using Blazor.Hosting;
 using Blazor.Hosting.Interfaces;
@@ -40,6 +41,9 @@ public class PocketBaseIntegrationTests : IAsyncLifetime
             .BuildAsync();
 
         _host = await builder.BuildAsync();
+
+        // Note: Make sure there is no other active
+        // instance being served through the same port
         await _host.StartAsync();
 
         _httpClient = new HttpClient() { BaseAddress = new Uri("http://127.0.0.1:8090") };
