@@ -8,6 +8,7 @@ using Blazor.Responses;
 using Microsoft.Playwright;
 
 [Trait("Category", "Integration")]
+[Trait("Requires", "Playwright")]
 [Collection("PocketBase.Blazor.Admin")]
 public class AuthWithOAuth2RecordTests : IAsyncLifetime
 {
@@ -108,7 +109,8 @@ public class AuthWithOAuth2RecordTests : IAsyncLifetime
         _playwright.Dispose();
     }
 
-    [Fact(Skip = "Requires OAuth2 server + configuration")]
+    [Fact]
+    [Trait("Requires", "OAuth2")]
     public async Task AuthWithOAuth2CodeAsync_WithValidRequest_ReturnsSuccess()
     {
         // Step 1: First get auth methods to get OAuth2 provider info
@@ -217,6 +219,7 @@ public class AuthWithOAuth2RecordTests : IAsyncLifetime
     }
 
     [Fact]
+    [Trait("Requires", "OAuth2")]
     public async Task AuthWithOAuth2CodeAsync_WithInvalidCode_ReturnsFailure()
     {
         var authMethods = await _pb.Collection(CollectionName)

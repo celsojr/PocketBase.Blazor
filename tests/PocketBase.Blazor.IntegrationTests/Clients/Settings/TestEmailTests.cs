@@ -33,7 +33,8 @@ public class TestEmailTests
         result.IsSuccess.Should().BeFalse();
     }
 
-    [Fact(Skip = "Requires SMTP server + configuration")]
+    [Fact]
+    [Trait("Requires", "SMTP")]
     public async Task TestEmailAsync_Succeeds_WhenSmtpConfigured()
     {
         // docker run -d -p 1027:1025 -p 8027:8025 mailhog/mailhog

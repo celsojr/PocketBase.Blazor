@@ -91,6 +91,7 @@ public class EmailChangeRecordTests : IAsyncLifetime
     }
 
     [Fact]
+    [Trait("Requires", "SMTP")]
     public async Task RequestEmailChangeAsync_WithAuthenticatedUser_ReturnsSuccess()
     {
         // Arrange - reserve current admin session for post-test cleanup
@@ -112,7 +113,8 @@ public class EmailChangeRecordTests : IAsyncLifetime
         _pb.AuthStore.Save(adminSession);
     }
 
-    [Fact(Skip = "Requires SMTP server + configuration")]
+    [Fact]
+    [Trait("Requires", "SMTP")]
     public async Task ConfirmEmailChangeAsync_WithValidToken_UpdatesEmail()
     {
         // Preserve admin session

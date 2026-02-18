@@ -5,6 +5,9 @@ using Blazor.Hosting;
 using Blazor.Hosting.Interfaces;
 using Microsoft.Extensions.Logging;
 
+[Trait("Category", "Integration")]
+[Trait("Requires", "FileSystem")]
+[Trait("Requires", "GoRuntime")]
 public class PocketBaseHostTests : IAsyncLifetime
 {
     private IPocketBaseHost? _host;

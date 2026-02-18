@@ -7,7 +7,9 @@ using Blazor.Hosting.Interfaces;
 using Blazor.IntegrationTests.Helpers;
 using Microsoft.Extensions.Logging;
 
-[Collection("PocketBase.Blazor Integration")]
+[Trait("Category", "Integration")]
+[Trait("Requires", "FileSystem")]
+[Trait("Requires", "GoRuntime")]
 public class PocketBaseIntegrationTests : IAsyncLifetime
 {
     private IPocketBase? _pb;

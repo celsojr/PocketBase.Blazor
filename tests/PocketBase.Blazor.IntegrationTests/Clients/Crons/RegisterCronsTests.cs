@@ -49,4 +49,3 @@ public class RegisterCronsTests
         listResult.Value.Should().Contain(c => c.Id == cronId);
     }
 }
-

@@ -138,7 +138,18 @@ From the integration tests folder:
 
 ```
 cd PocketBase.Blazor\tests\PocketBase.Blazor.IntegrationTests
-dotnet test
+
+# To run tests that must match all:
+dotnet test --filter "Category=Integration&Requires!=SMTP&Requires!=Playwright"
+```
+
+From the unit tests folder:
+
+```
+cd PocketBase.Blazor\tests\PocketBase.Blazor.UnitTests
+
+# To run tests that match any:
+dotnet test --filter "Category=Unit|Requires!=Pocketbase"
 ```
 
 Notes:

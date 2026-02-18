@@ -28,7 +28,7 @@ public class ListLogsTests
         result.Value.Should().BeOfType<ListResult<LogResponse>>();
     }
 
-    [Fact(Skip = "May fail if there not enough logs")]
+    [Fact(Skip = "May fail if there is not enough logs")]
     public async Task GetListAsync_ReturnsPaginatedLogs_WhenPageSpecified()
     {
         // Act
@@ -41,7 +41,7 @@ public class ListLogsTests
         result.Value.PerPage.Should().Be(10);
     }
 
-    [Fact(Skip = "May fail if there not enough logs")]
+    [Fact(Skip = "May fail if there is not enough logs")]
     public async Task GetListAsync_ReturnsFilteredLogs_WhenOptionsProvided()
     {
         // Arrange

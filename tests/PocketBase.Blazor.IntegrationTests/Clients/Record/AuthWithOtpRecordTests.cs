@@ -6,6 +6,7 @@ using Blazor.Responses.Auth;
 using Helpers.MailHog;
 
 [Trait("Category", "Integration")]
+[Trait("Requires", "SMTP")]
 [Collection("PocketBase.Blazor.User")]
 public class AuthWithOtpRecordTests
 {
@@ -25,7 +26,7 @@ public class AuthWithOtpRecordTests
         _mailHogService = new MailHogService(new HttpClient(), options);
     }
 
-    [Fact(Skip = "Requires SMTP server + configuration")]
+    [Fact]
     public async Task AuthWithOtpAsync_Succeeds_WithValidOtp()
     {
         var adminSession = default(AuthResponse);
@@ -130,7 +131,7 @@ public class AuthWithOtpRecordTests
         }
     }
 
-    [Fact(Skip = "Requires SMTP server + configuration")]
+    [Fact]
     public async Task AuthWithOtpAsync_Fails_WithInvalidOtpCode()
     {
         var adminSession = default(AuthResponse);
@@ -225,7 +226,7 @@ public class AuthWithOtpRecordTests
         }
     }
 
-    [Fact(Skip = "Requires SMTP server + configuration")]
+    [Fact]
     public async Task AuthWithOtpAsync_Fails_WithExpiredOtp()
     {
         var adminSession = default(AuthResponse);

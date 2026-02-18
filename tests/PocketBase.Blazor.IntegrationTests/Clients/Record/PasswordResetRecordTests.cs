@@ -109,7 +109,8 @@ public class PasswordResetRecordTests : IAsyncLifetime
         result.IsSuccess.Should().BeTrue();
     }
 
-    [Fact(Skip = "Requires SMTP server + configuration")]
+    [Fact]
+    [Trait("Requires", "SMTP")]
     public async Task ConfirmPasswordResetAsync_WithValidToken_ReturnsSuccess()
     {
         // Arrange - Preserve current admin session for post-test cleanup
@@ -158,7 +159,8 @@ public class PasswordResetRecordTests : IAsyncLifetime
         result.IsSuccess.Should().BeTrue();
     }
 
-    [Fact(Skip = "Requires SMTP server + configuration")]
+    [Fact]
+    [Trait("Requires", "SMTP")]
     public async Task ConfirmPasswordResetAsync_WithMismatchedPasswords_ReturnsFailure()
     {
         // Request password reset first
@@ -178,7 +180,8 @@ public class PasswordResetRecordTests : IAsyncLifetime
         result.Errors.Should().BeEmpty();
     }
 
-    [Fact(Skip = "Requires SMTP server + configuration")]
+    [Fact]
+    [Trait("Requires", "SMTP")]
     public async Task ConfirmPasswordResetAsync_WithWeakPassword_ReturnsFailure()
     {
         // Request password reset first

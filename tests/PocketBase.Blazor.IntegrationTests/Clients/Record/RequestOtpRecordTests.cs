@@ -96,7 +96,8 @@ public class RequestOtpRecordTests
         }
     }
 
-    [Fact(Skip = "Requires SMTP server + configuration")]
+    [Fact]
+    [Trait("Requires", "SMTP")]
     public async Task RequestOtpAsync_Succeeds_WhenEmailExists()
     {
         var adminSession = default(AuthResponse);

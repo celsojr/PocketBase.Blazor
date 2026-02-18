@@ -132,7 +132,7 @@ public class GenerateAppleClientSecretTests
         var keyId = Environment.GetEnvironmentVariable("APPLE_KEY_ID");
         var privateKey = Environment.GetEnvironmentVariable("APPLE_PRIVATE_KEY");
 
-        //var privateKey = await File.ReadAllTextAsync("/etc/secrets/apple-private-key.pem");
+        // var privateKey = await File.ReadAllTextAsync("/etc/secrets/apple-private-key.pem");
         // Set file permissions: chmod 600 /etc/secrets/apple-private-key.pem
 
         var result = await _pb.Settings.GenerateAppleClientSecretAsync(

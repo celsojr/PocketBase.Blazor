@@ -59,10 +59,10 @@ public class AuthWithPasswordRecordTests
     [InlineData("test@example.com", null)]
     [InlineData("test@example.com", "")]
     [InlineData("test@example.com", "   ")]
-    public async Task Auth_with_invalid_arguments_throws_exception(string email, string password)
+    public async Task Auth_with_invalid_arguments_throws_exception(string? email, string? password)
     {
         Func<Task> act = async () => await _pb.Collection("users")
-            .AuthWithPasswordAsync(email, password);
+            .AuthWithPasswordAsync(email!, password!);
 
         await act.Should().ThrowAsync<ArgumentException>();
     }

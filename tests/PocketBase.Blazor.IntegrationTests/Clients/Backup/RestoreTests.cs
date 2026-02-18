@@ -20,9 +20,18 @@ public class RestoreTests
         _output = output;
     }
 
-    [Fact(Skip = "This test should not work on Windows")]
+    [Fact]
     public async Task RestoreAsync_ExistingBackup_ShouldSucceed()
     {
+        // Skip on Windows since PocketBase doesn't support restore on Windows
+        // Restoring should return 204 No Content, but actually fails internally
+        if (OperatingSystem.IsWindows())
+        {
+            _output.WriteLine("Skipping restore test on Windows");
+            _output.WriteLine("Reason: PocketBase doesn't support restore on Windows");
+            return;
+        }
+
         // Arrange - Create a backup
         var backupName = $"restore-test-{Guid.NewGuid():N}.zip";
         await _pb.Backup.CreateAsync(backupName);
@@ -86,9 +95,18 @@ public class RestoreTests
         }
     }
 
-    [Fact(Skip = "This test should not work on Windows")]
+    [Fact]
     public async Task RestoreAsync_WithInvalidName_ShouldSanitizeAndRestore()
     {
+        // Skip on Windows since PocketBase doesn't support restore on Windows
+        // Restoring should return 204 No Content, but actually fails internally
+        if (OperatingSystem.IsWindows())
+        {
+            _output.WriteLine("Skipping restore test on Windows");
+            _output.WriteLine("Reason: PocketBase doesn't support restore on Windows");
+            return;
+        }
+
         // Arrange - Create a backup with sanitized name
         var originalName = "Test Restore@Backup.zip";
         await _pb.Backup.CreateAsync(originalName);
@@ -110,9 +128,18 @@ public class RestoreTests
         }
     }
 
-    [Fact(Skip = "This test should not work on Windows")]
+    [Fact]
     public async Task RestoreAsync_WithCancellationToken_ShouldRespectCancellation()
     {
+        // Skip on Windows since PocketBase doesn't support restore on Windows
+        // Restoring should return 204 No Content, but actually fails internally
+        if (OperatingSystem.IsWindows())
+        {
+            _output.WriteLine("Skipping restore test on Windows");
+            _output.WriteLine("Reason: PocketBase doesn't support restore on Windows");
+            return;
+        }
+
         // Arrange - Create a backup first
         var backupName = $"restore-cancel-{Guid.NewGuid():N}";
         await _pb.Backup.CreateAsync(backupName);
