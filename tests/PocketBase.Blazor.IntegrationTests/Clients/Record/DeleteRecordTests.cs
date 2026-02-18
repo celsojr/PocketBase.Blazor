@@ -220,7 +220,7 @@ public class DeleteRecordTests
                     new TextFieldModel { Name = "name", Required = true }
                 }
             });
-    
+
         var parentId = parentResult.Value.Id;
 
         // Create child collection with cascade relation
@@ -231,8 +231,8 @@ public class DeleteRecordTests
                 Fields =
                 {
                     new TextFieldModel { Name = "title", Required = true },
-                    new RelationFieldModel 
-                    { 
+                    new RelationFieldModel
+                    {
                         Name = "author",
                         CollectionId = parentId,
                         CascadeDelete = true // Enable cascade delete
@@ -247,24 +247,27 @@ public class DeleteRecordTests
 
         // Create child record linked to parent
         var bookResult = await _pb.Collection("books")
-            .CreateAsync<RecordResponse>(new { 
-                title = "Cascade Test Book", 
-                author = authorId 
+            .CreateAsync<RecordResponse>(new
+            {
+                title = "Cascade Test Book",
+                author = authorId
             });
         var bookId = bookResult.Value.Id;
 
         // Act - Delete parent (should cascade to child)
-        var deleteResult = await _pb.Collection("authors").DeleteAsync(authorId);
+        var deleteResult = await _pb.Collection("authors")
+            .DeleteAsync(authorId);
 
         // Assert
         deleteResult.IsSuccess.Should().BeTrue();
-    
+
         // Verify both parent and child are deleted
-        var getAuthorResult = await _pb.Collection("authors").GetOneAsync<RecordResponse>(authorId);
+        var getAuthorResult = await _pb.Collection("authors")
+            .GetOneAsync<RecordResponse>(authorId);
         getAuthorResult.IsSuccess.Should().BeFalse();
-    
-        var getBookResult = await _pb.Collection("books").GetOneAsync<RecordResponse>(bookId);
+
+        var getBookResult = await _pb.Collection("books")
+            .GetOneAsync<RecordResponse>(bookId);
         getBookResult.IsSuccess.Should().BeFalse();
     }
 }
-

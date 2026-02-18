@@ -27,22 +27,26 @@ public class AuthWithOAuth2RecordTests : IAsyncLifetime
     //   2. Allow us to capture the authorization code from the URL
     private const string RedirectUrl = "http://localhost:8092/test-oauth-callback";
 
-    private readonly string? _testGoogleEmail = Environment.GetEnvironmentVariable("GOOGLE_TEST_EMAIL");
-    private readonly string? _testGooglePassword = Environment.GetEnvironmentVariable("GOOGLE_TEST_PASSWORD");
+    private readonly string? _testGoogleEmail =
+        Environment.GetEnvironmentVariable("GOOGLE_TEST_EMAIL") ?? "valid_google_id@gmail.com";
+
+    private readonly string? _testGooglePassword =
+        Environment.GetEnvironmentVariable("GOOGLE_TEST_PASSWORD") ?? "valid_password@change123!";
 
     public AuthWithOAuth2RecordTests(PocketBaseAdminFixture fixture)
     {
         _pb = fixture.Client;
         _playwright = Playwright.CreateAsync().GetAwaiter().GetResult();
-        _browser = _playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions {
-            Headless = false
-        }).GetAwaiter().GetResult();
+        _browser = _playwright.Chromium
+            .LaunchAsync(new BrowserTypeLaunchOptions {
+                Headless = false
+            }).GetAwaiter().GetResult();
     }
 
     public async Task InitializeAsync()
     {
         // Create auth collection with OAuth2 enabled
-        await _pb.Collections.CreateAsync<RecordResponse>(new
+        var collectionResult = await _pb.Collections.CreateAsync<RecordResponse>(new
         {
             name = CollectionName,
             type = "auth",
@@ -62,13 +66,16 @@ public class AuthWithOAuth2RecordTests : IAsyncLifetime
                         new
                         {
                             name = "google",
-                            clientId = Environment.GetEnvironmentVariable("GOOGLE_CLIENT_ID"),
-                            clientSecret = Environment.GetEnvironmentVariable("GOOGLE_CLIENT_SECRET")
+                            clientId = Environment.GetEnvironmentVariable("GOOGLE_CLIENT_ID") ?? "00000000-dummy.apps.googleusercontent.com",
+                            clientSecret = Environment.GetEnvironmentVariable("GOOGLE_CLIENT_SECRET") ?? "GOCSPX-dummy"
                         }
                     }
                 }
             }
         });
+
+        // Ensure the collection is created
+        collectionResult.IsSuccess.Should().BeTrue();
 
         // Create test user for this collection
         await _pb.Collection(CollectionName)
