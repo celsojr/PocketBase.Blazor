@@ -8,12 +8,10 @@ using Blazor.Responses.Logging;
 public class ListLogsTests
 {
     private readonly IPocketBase _pb;
-    private readonly PocketBaseAdminFixture _fixture;
 
     public ListLogsTests(PocketBaseAdminFixture fixture)
     {
         _pb = fixture.Client;
-        _fixture = fixture;
     }
 
     [Fact]
