@@ -10,6 +10,8 @@ using Blazor.UnitTests.TestHelpers.Utilities;
 using FluentAssertions;
 using Xunit;
 
+[Trait("Category", "Unit")]
+[Trait("Requires", "FileSystem")]
 public class CronGeneratorTests
 {
     private readonly CronGenerator _generator = new();
@@ -114,4 +116,3 @@ public class CronGeneratorTests
         handlersContent.Should().Contain("log.Println(\"cron 'default_cron' executed\", payload)");
     }
 }
-

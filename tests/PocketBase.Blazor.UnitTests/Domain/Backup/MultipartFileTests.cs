@@ -3,6 +3,7 @@ namespace PocketBase.Blazor.UnitTests.Domain.Backup;
 using Blazor.Http;
 using FluentAssertions;
 
+[Trait("Category", "Unit")]
 public class MultipartFileTests
 {
     [Fact]
@@ -49,6 +50,7 @@ public class MultipartFileTests
     }
 
     [Fact]
+    [Trait("Requires", "FileSystem")]
     public void FromFile_ValidPath_ShouldCreateFile()
     {
         var tempPath = Path.GetTempFileName();

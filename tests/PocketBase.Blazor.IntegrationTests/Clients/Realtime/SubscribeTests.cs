@@ -5,6 +5,7 @@ using Blazor.Responses;
 using Xunit.Abstractions;
 using Extensions;
 
+[Trait("Category", "Integration")]
 [Collection("PocketBase.Blazor.Admin")]
 public class SubscribeTests
 {

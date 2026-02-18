@@ -2,6 +2,7 @@ namespace PocketBase.Blazor.IntegrationTests.Clients.Files;
 
 using Blazor.Options;
 
+[Trait("Category", "Integration")]
 [Collection("PocketBase.Blazor.Admin")]
 public class GetFileUrlTests
 {

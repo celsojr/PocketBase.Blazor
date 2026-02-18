@@ -3,6 +3,9 @@ namespace PocketBase.Blazor.UnitTests.Domain.Hosting;
 using Blazor.Hosting;
 using FluentAssertions;
 
+[Trait("Category", "Unit")]
+[Trait("Requires", "FileSystem")]
+[Trait("Requires", "GoRuntime")]
 public class ConfigurationTests
 {
     [Fact]
@@ -76,4 +79,3 @@ public class ConfigurationTests
         }
     }
 }
-

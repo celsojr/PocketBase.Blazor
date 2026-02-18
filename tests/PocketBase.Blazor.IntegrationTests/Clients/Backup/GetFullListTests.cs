@@ -3,6 +3,7 @@ namespace PocketBase.Blazor.IntegrationTests.Clients.Backup;
 using System.Linq;
 using Xunit.Abstractions;
 
+[Trait("Category", "Integration")]
 [Collection("PocketBase.Blazor.Admin")]
 public class GetFullListTests
 {

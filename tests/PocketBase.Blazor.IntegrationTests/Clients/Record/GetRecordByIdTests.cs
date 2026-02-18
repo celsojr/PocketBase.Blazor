@@ -3,6 +3,7 @@ namespace PocketBase.Blazor.IntegrationTests.Clients.Record;
 using Blazor.Responses;
 using Blazor.IntegrationTests.Helpers;
 
+[Trait("Category", "Integration")]
 [Collection("PocketBase.Blazor.User")]
 public class GetRecordByIdTests
 {

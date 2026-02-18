@@ -3,6 +3,7 @@ namespace PocketBase.Blazor.IntegrationTests.Clients.Record;
 using Blazor.IntegrationTests.Helpers;
 using Blazor.Responses;
 
+[Trait("Category", "Integration")]
 [Collection("PocketBase.Blazor.Admin")]
 public class UpdateRecordTests
 {

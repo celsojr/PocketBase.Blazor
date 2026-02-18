@@ -4,6 +4,7 @@ using Blazor.Models;
 using Blazor.Responses;
 using Helpers.MailHog;
 
+[Trait("Category", "Integration")]
 [Collection("PocketBase.Blazor.Admin")]
 public class PasswordResetRecordTests : IAsyncLifetime
 {

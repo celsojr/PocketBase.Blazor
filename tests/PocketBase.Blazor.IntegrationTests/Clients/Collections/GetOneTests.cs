@@ -5,6 +5,7 @@ using System.Net;
 using Blazor.IntegrationTests.Helpers;
 using Blazor.Models;
 
+[Trait("Category", "Integration")]
 [Collection("PocketBase.Blazor.Admin")]
 public class GetOneTests
 {

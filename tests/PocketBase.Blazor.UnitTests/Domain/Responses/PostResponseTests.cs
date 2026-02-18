@@ -9,7 +9,7 @@ using FluentAssertions;
 using Xunit.Abstractions;
 
 [Trait("Category", "Unit")]
-[Trait("Layer", "Domain")]
+[Trait("Requires", "FileSystem")]
 public class PostResponseTests : BaseTest
 {
     public PostResponseTests(ITestOutputHelper output) : base(output)

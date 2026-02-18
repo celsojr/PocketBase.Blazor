@@ -1,5 +1,6 @@
 namespace PocketBase.Blazor.IntegrationTests.Clients.Settings;
 
+[Trait("Category", "Integration")]
 [Collection("PocketBase.Blazor.Admin")]
 public class TestEmailTests
 {

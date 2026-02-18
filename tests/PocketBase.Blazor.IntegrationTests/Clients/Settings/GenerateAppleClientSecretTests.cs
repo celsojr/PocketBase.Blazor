@@ -2,6 +2,7 @@ namespace PocketBase.Blazor.IntegrationTests.Clients.Settings;
 
 using Blazor.Requests.Settings;
 
+[Trait("Category", "Integration")]
 [Collection("PocketBase.Blazor.Admin")]
 public class GenerateAppleClientSecretTests
 {

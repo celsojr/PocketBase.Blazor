@@ -4,6 +4,7 @@ using FluentAssertions;
 using Blazor.Clients.Backup;
 using Blazor.Http;
 
+[Trait("Category", "Unit")]
 public class GetDownloadUrlTests : IAsyncLifetime
 {
     private readonly HttpTransport _transport;

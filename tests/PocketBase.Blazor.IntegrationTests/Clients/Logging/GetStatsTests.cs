@@ -2,6 +2,7 @@ namespace PocketBase.Blazor.IntegrationTests.Clients.Logging;
 
 using Blazor.Responses.Logging;
 
+[Trait("Category", "Integration")]
 [Collection("PocketBase.Blazor.Admin")]
 public class GetLogStatsTests
 {

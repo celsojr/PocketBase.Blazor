@@ -4,6 +4,7 @@ using Blazor.Events;
 using Blazor.Responses;
 using Xunit.Abstractions;
 
+[Trait("Category", "Integration")]
 [Collection("PocketBase.Blazor.Admin")]
 public class UnsubscribeTests
 {

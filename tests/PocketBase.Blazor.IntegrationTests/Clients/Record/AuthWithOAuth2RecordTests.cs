@@ -7,6 +7,7 @@ using Blazor.Requests.Auth;
 using Blazor.Responses;
 using Microsoft.Playwright;
 
+[Trait("Category", "Integration")]
 [Collection("PocketBase.Blazor.Admin")]
 public class AuthWithOAuth2RecordTests : IAsyncLifetime
 {

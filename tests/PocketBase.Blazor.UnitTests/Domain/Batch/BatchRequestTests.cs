@@ -6,6 +6,7 @@ using Blazor.Requests.Batch;
 using FluentAssertions;
 using Xunit;
 
+[Trait("Category", "Unit")]
 public class BatchRequestTests
 {
     [Fact]

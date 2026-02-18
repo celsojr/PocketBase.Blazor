@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Blazor.Models;
 using Xunit;
 
+[Trait("Category", "Integration")]
 [Collection("PocketBase.Blazor.Admin")]
 public class CreateTests
 {

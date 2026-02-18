@@ -4,6 +4,7 @@ using Blazor.Enums;
 using Blazor.Models;
 using Blazor.Responses.Logging;
 
+[Trait("Category", "Integration")]
 [Collection("PocketBase.Blazor.Admin")]
 public class ListLogsTests
 {

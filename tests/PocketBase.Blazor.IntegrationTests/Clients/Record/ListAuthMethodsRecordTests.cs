@@ -2,6 +2,7 @@ namespace PocketBase.Blazor.IntegrationTests.Clients.Record;
 
 using Blazor.Models;
 
+[Trait("Category", "Integration")]
 [Collection("PocketBase.Blazor.Admin")]
 public class ListAuthMethodsRecordTests : IAsyncLifetime
 {

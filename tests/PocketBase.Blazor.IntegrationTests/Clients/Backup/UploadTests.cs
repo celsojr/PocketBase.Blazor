@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Blazor.Http;
 using Xunit;
 
+[Trait("Category", "Integration")]
 [Collection("PocketBase.Blazor.Admin")]
 public class UploadTests
 {

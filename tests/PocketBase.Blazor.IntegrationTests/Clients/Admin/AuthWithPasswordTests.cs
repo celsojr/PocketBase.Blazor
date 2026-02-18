@@ -3,6 +3,7 @@ namespace PocketBase.Blazor.IntegrationTests.Clients.Admin;
 using Blazor.Responses;
 using static IntegrationTests.Helpers.JwtTokenValidator;
 
+[Trait("Category", "Integration")]
 [Collection("PocketBase.Blazor.Admin")]
 public class AuthWithPasswordTests
 {

@@ -4,6 +4,7 @@ using Blazor.Models;
 using Blazor.Responses;
 using Blazor.Responses.Auth;
 
+[Trait("Category", "Integration")]
 [Collection("PocketBase.Blazor.User")]
 public class RequestOtpRecordTests
 {

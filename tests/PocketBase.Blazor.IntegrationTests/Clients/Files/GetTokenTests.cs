@@ -2,6 +2,7 @@ namespace PocketBase.Blazor.IntegrationTests.Clients.Files;
 
 using System.Text;
 
+[Trait("Category", "Integration")]
 [Collection("PocketBase.Blazor.Admin")]
 public class GetTokenTests
 {

@@ -7,6 +7,7 @@ using Blazor.Responses;
 using Xunit;
 using Xunit.Abstractions;
 
+[Trait("Category", "Integration")]
 [Collection("PocketBase.Blazor.Admin")]
 public class RestoreTests
 {

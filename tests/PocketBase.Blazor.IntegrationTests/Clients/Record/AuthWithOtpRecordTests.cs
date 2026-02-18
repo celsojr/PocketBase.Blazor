@@ -5,6 +5,7 @@ using Blazor.Responses;
 using Blazor.Responses.Auth;
 using Helpers.MailHog;
 
+[Trait("Category", "Integration")]
 [Collection("PocketBase.Blazor.User")]
 public class AuthWithOtpRecordTests
 {

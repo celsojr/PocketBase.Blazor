@@ -3,6 +3,7 @@ namespace PocketBase.Blazor.IntegrationTests.Clients.Health;
 using Responses;
 using System.Net;
 
+[Trait("Category", "Integration")]
 [Collection("PocketBase.Blazor.User")]
 public class HealthCheckTests
 {

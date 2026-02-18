@@ -4,12 +4,15 @@ using System.Runtime.InteropServices;
 using Blazor.Hosting;
 using FluentAssertions;
 
+[Trait("Category", "Unit")]
+[Trait("Requires", "FileSystem")]
+[Trait("Requires", "GoRuntime")]
 public class PocketBaseHostBuilderTests
 {
     private const string TestDataDir = "./test_pb_data";
 
     [Fact]
-    public async Task CreateDefault_ShouldInitializeWithDefaults()
+    public void CreateDefault_ShouldInitializeWithDefaults()
     {
         // Arrange & Act
         var builder = PocketBaseHostBuilder.CreateDefault();
@@ -110,4 +113,3 @@ public class PocketBaseHostBuilderTests
         throw new PlatformNotSupportedException();
     }
 }
-

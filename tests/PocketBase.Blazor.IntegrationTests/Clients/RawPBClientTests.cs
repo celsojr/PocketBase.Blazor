@@ -5,6 +5,7 @@ using Blazor.IntegrationTests.Helpers;
 using Blazor.Responses.Auth;
 using Xunit.Abstractions;
 
+[Trait("Category", "Integration")]
 public class RawPBClientTests
 {
     private readonly ITestOutputHelper _output;

@@ -2,6 +2,7 @@ namespace PocketBase.Blazor.IntegrationTests.Clients.Record;
 
 using static IntegrationTests.Helpers.JwtTokenValidator;
 
+[Trait("Category", "Integration")]
 [Collection("PocketBase.Blazor.User")]
 public class AuthWithPasswordRecordTests
 {

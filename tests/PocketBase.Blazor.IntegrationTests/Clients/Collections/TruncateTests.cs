@@ -6,6 +6,7 @@ using Blazor.Models.Collection;
 using Blazor.Models.Collection.Fields;
 using Blazor.Responses;
 
+[Trait("Category", "Integration")]
 [Collection("PocketBase.Blazor.Admin")]
 public class TruncateTests
 {

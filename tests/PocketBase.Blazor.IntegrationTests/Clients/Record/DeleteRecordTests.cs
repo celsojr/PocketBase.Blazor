@@ -6,6 +6,7 @@ using Blazor.Responses;
 using Blazor.Models.Collection;
 using Blazor.Models.Collection.Fields;
 
+[Trait("Category", "Integration")]
 [Collection("PocketBase.Blazor.Admin")]
 public class DeleteRecordTests
 {
