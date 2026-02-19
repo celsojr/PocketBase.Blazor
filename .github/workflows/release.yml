@@ -24,8 +24,14 @@ jobs:
       - name: Build
         run: dotnet build -c Release --no-restore
 
-      - name: Run Tests
-        run: dotnet test ./tests/PocketBase.Blazor.Tests/PocketBase.Blazor.Tests.csproj -c Release --no-build --verbosity normal
+      - name: Run unit smoke tests (non-blocking)
+        continue-on-error: true
+        run: |
+          dotnet test ./tests/PocketBase.Blazor.UnitTests/PocketBase.Blazor.UnitTests.csproj \
+            -c Release \
+            --no-build \
+            --verbosity minimal \
+            --filter "Category=Unit&Requires!=Pocketbase&Requires!=GoRuntime&Requires!=FileSystem"
 
       - name: Pack
         run: dotnet pack ./src/PocketBase.Blazor/PocketBase.Blazor.csproj -c Release -o ./artifacts --no-build

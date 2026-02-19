@@ -1,171 +1,222 @@
 # PocketBase.Blazor [![NuGet Version](https://img.shields.io/nuget/v/PocketBase.Blazor.svg)](https://www.nuget.org/packages/PocketBase.Blazor) [![NuGet Downloads](https://img.shields.io/nuget/dt/PocketBase.Blazor.svg)](https://www.nuget.org/packages/PocketBase.Blazor/) ![GitHub Packages](https://img.shields.io/badge/GitHub%20Packages-0.0.3-blue)
 
+.NET SDK-style PocketBase client for Blazor and .NET apps.
 
-**PocketBase.Blazor** is a lightweight, Blazor-friendly client wrapper for the [PocketBase REST API](https://pocketbase.io/). It simplifies working with PocketBase in both **Blazor WebAssembly** and **Blazor Server** projects by providing a minimal, strongly-typed API with built-in DI support. 
+## Why Beta
 
-> [!WARNING]  
-> **Disclaimer:**  
-> This repository is an experimental work in progress. It is primarily used in another project and is maintained only for personal use or on-demand updates. The goal is to keep it simple while providing tooling that might be helpful to others. _Not all **PocketBase** functionalities are covered yet_.  
-> 
-> Feel free to use, fork, or modify this project as needed. Pull requests are welcome, and you may contact me with any questions.  
-> 
-> **Important:** This project is not an official Microsoft repository and is not endorsed, sponsored, or affiliated with Microsoft or any of its subsidiaries. Additionally, this is not an official PocketBase SDK; the official PocketBase SDKs are available in JavaScript and Dart and you can find them on their repository.
+PocketBase itself is still evolving toward a final stable v1 API. `PocketBase.Blazor` mirrors that lifecycle and is currently in beta for the same reason.
+
+## JS-SDK Parity (No JS Interop)
+
+This client is intentionally close to PocketBase JS-SDK semantics and method naming, but implemented in pure .NET (no JavaScript interop required).
+
+- If you already know the JS-SDK mental model, most APIs should feel familiar.
+- Result handling is .NET-native (`FluentResults`) with explicit `IsSuccess`, `Value`, and `Errors`.
 
 ## Features
 
-- Minimalistic `IPocketBaseClient` + `PocketBaseClient` implementation using `HttpClient`.  
-- Dependency Injection (DI) extension: `AddPocketBase(options => { ... })`.  
-- `PocketBaseOptions` with pre-configured `JsonSerializerOptions` tailored for Blazor.  
-- Strongly-typed API with automatic error handling for API responses.  
-- Sample Blazor WebAssembly application to get you started quickly.  
-- Unit test project skeleton using **XUnit** and **Moq** for HTTP client mocking.  
-- GitHub Actions workflow for automated NuGet package publishing.  
-- Local build and pack scripts for easy packaging and distribution.
+- Typed domain clients (`Admins`, `Collections`, `Record`, `Files`, `Settings`, `Batch`, `Backup`, `Crons`, `Realtime`)
+- DI setup with `AddPocketBase(...)`
+- Auth/session store support (`AuthStore`)
+- Realtime callback API + SSE stream API
+- Server-hosting utilities (auto PocketBase binary resolve/download when applicable)
+- Cron server generator and optional Go binary build flow
 
-## Quickstart
-
-Install from NuGet:
+## Install
 
 ```bash
-dotnet add package PocketBase.Blazor --version 0.0.3
+dotnet add package PocketBase.Blazor
 ```
 
-Register services in `Program.cs`:
+## Quick Start (Blazor)
 
 ```csharp
+using PocketBase.Blazor;
+using PocketBase.Blazor.Extensions;
+
 builder.Services.AddPocketBase(options =>
 {
-    options.BaseUrl = "https://your-pocketbase.example";
-    options.ApiKey = "pb_pk_xxx"; // optional
-
-    // Optional: tune JSON options (defaults are camelCase and ignore nulls)
-    options.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
-    options.JsonSerializerOptions.DictionaryKeyPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
-    options.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
-    options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
+    options.BaseUrl = "http://127.0.0.1:8090";
+    // options.ApiKey = "pbp_xxx"; // optional
 });
 ```
-Inject and use the client in your components:
 
-```
-@inject IPocketBaseClient Client
+## Usage Examples (From Integration Tests)
 
-@code {
-    private List<Post>? posts;
+Source-of-truth examples live under `tests/PocketBase.Blazor.IntegrationTests/Clients`.
 
-    protected override async Task OnInitializedAsync()
-    {
-        var (items, error) = await Client.GetListAsync<Post>("posts");
-        if (error != null)
-        {
-            // Handle error (e.g., log or show a message)
-        }
-        else
-        {
-            posts = items;
-        }
-    }
+### Authenticate with password
 
-    public class Post
-    {
-        public string Id { get; set; } = "";
-        public string? Title { get; set; }
-        public string? Slug { get; set; }
-    }
+Source: `tests/PocketBase.Blazor.IntegrationTests/Clients/Record/AuthWithPasswordRecordTests.cs`
+
+```csharp
+var authResult = await pb.Collection("users")
+    .AuthWithPasswordAsync(email, password);
+
+if (!authResult.IsSuccess)
+{
+    // inspect authResult.Errors
 }
-
 ```
 
-## Running Unit Tests
+### Create + list records with typed models
 
-PocketBase.Blazor includes a test project using **XUnit** and **Moq**. To run the tests:
-```
-dotnet test ./tests/PocketBase.Blazor.Tests/PocketBase.Blazor.Tests.csproj
+Source: `tests/PocketBase.Blazor.IntegrationTests/Clients/Record/CreateRecordTests.cs` and `tests/PocketBase.Blazor.IntegrationTests/Clients/Record/ListRecordsTests.cs`
 
-```
+```csharp
+await pb.Collection("posts").CreateAsync<PostResponse>(new PostCreateRequest
+{
+    Title = "Eleven Post",
+    Slug = "eleven-post",
+    IsPublished = true
+});
 
-## Deployment
-Build & pack locally
-```
-# Windows
-./build-local.ps1
-
-# macOs/Linux
-chmod +x build.sh
-./build.sh
-```
-
-## CI / Release
-A GitHub Actions workflow is included to pack and publish to NuGet when a tag `v*` is pushed and `NUGET_API_KEY` is present in repository secrets.
-
-## Running the Aspire Sample Application
-
-### 1. Prerequisites
-- [.NET 8 SDK](https://dotnet.microsoft.com/download) (as specified in global.json)
-- [Docker](https://www.docker.com/get-started) (or [Podman](https://podman.io/getting-started/installation)) installed and running
-- Optional: [Aspire CLI](https://aspire.dev/get-started/install-cli/) if you want to use command-line tooling
-> **Note**: The sample uses a containerized PocketBase instance, so Docker (or Podman) must be running.
-
-### 2. Setting Up the Aspire Environment
-To run the sample application, follow these steps:
-
-1. Ensure you have the .NET SDK installed.
-
-1. Open a terminal and navigate to the `samples/AspireSample` directory.
-
-1. Run the following command to start the application:
-
-   ```
-   dotnet run --project AspireSample.AppHost
-   ```
-
-1. Check the terminal output for the super user creation URL. Replace the internal container address and port with the one exposed on your host machine by the Aspire dashboard.
-
-### 3. Access PocketBase in the container
-To run PocketBase commands inside the container, use the following command with Docker:
-```
-docker (or podman) exec aspire_sample_pocketbase /usr/local/bin/pocketbase --version
+var list = await pb.Collection("posts")
+    .GetListAsync<PostResponse>(
+        page: 1,
+        perPage: 10,
+        options: new ListOptions
+        {
+            Expand = "category",
+            Sort = "-created",
+            SkipTotal = true
+        });
 ```
 
-or, you can execute an interactive shell session. Best for interactive commands when you have to answer questions:
+### Batch processing (more advanced than simple CRUD)
+
+Source: `tests/PocketBase.Blazor.IntegrationTests/Clients/Batch/CreateTests.cs`
+
+```csharp
+var batch = pb.CreateBatch();
+
+batch.Collection("posts").Create(new { title = "First" });
+batch.Collection("posts").Create(new { title = "Second" });
+
+var result = await batch.SendAsync();
+
+if (result.IsSuccess)
+{
+    // result.Value contains per-operation status/data
+}
 ```
-docker (or podman) exec -it aspire_sample_pocketbase /bin/sh
-pocketbase --version
+
+### Realtime subscription
+
+Source: `tests/PocketBase.Blazor.IntegrationTests/Clients/Realtime/SubscribeTests.cs`
+
+```csharp
+using (await pb.Collection("categories").SubscribeAsync("*", evt =>
+{
+    Console.WriteLine($"{evt.Action}: {evt.RecordId}");
+}))
+{
+    await pb.Collection("categories").CreateAsync<RecordResponse>(new
+    {
+        name = "Test Category",
+        slug = "test-category"
+    });
+}
 ```
 
-## Roadmap
+## Hosting, Auto-Binary Download, and Custom Cron Build
 
-- **Authentication helpers**  
-  Streamlined utilities for login/logout, session handling, and automatic token refresh.
+This is server-side only (not WASM).
 
-- **Realtime support**  
-  Investigate realtime capabilities using the new Server-Sent Events (SSE) features introduced in ASP.NET Core 10.  
-  This includes leveraging `IAsyncEnumerable<T>`, `SseItem<T>`, and `TypedResults.ServerSentEvents` to enable efficient, one-way realtime updates without requiring external dependencies.
+### Auto-resolve PocketBase executable
 
-- **Aspire integration**  
-  Provide extensions or hooks to integrate PocketBase.Blazor into .NET Aspire applications.
+`PocketBaseHostBuilder` tries to resolve a local executable; if missing, it downloads PocketBase automatically for the current platform/arch.
 
-- **Expanded model generation**  
-  Generate more complete, strongly-typed models based on PocketBase schemas.
+```csharp
+var host = await PocketBaseHostBuilder.CreateDefault()
+    .UseOptions(o =>
+    {
+        o.Host = "127.0.0.1";
+        o.Port = 8090;
+        o.Dir = "./pb_data";
+        o.Dev = true;
+    })
+    .BuildAsync();
+```
 
-- **Possible full SDK implementation**  
-  Explore evolving this project into a more complete PocketBase SDK for .NET/Blazor, depending on demand and community interest.
+### Use your own executable path
 
-## Contributing
+```csharp
+var host = await PocketBaseHostBuilder.CreateDefault()
+    .UseExecutable(@"C:\tools\pocketbase.exe")
+    .UseOptions(o => o.Port = 8090)
+    .BuildAsync();
+```
 
-Contributions and issues are welcome. Please follow standard GitHub PR workflow.
+### Generate custom cron handlers and build a custom binary
+
+Source references: `src/PocketBase.Blazor/Clients/Crons/CronGenerator.cs`, `src/PocketBase.Blazor/Options/CronGenerationOptions.cs`
+
+```csharp
+var generator = new CronGenerator();
+
+var host = await PocketBaseHostBuilder.CreateDefault()
+    .UseCrons(
+        generator,
+        new CronManifest
+        {
+            Crons =
+            [
+                new CronDefinition
+                {
+                    Id = "hello",
+                    Description = "Hello cron",
+                    HandlerBody = "log.Println(\"cron hello executed\", payload)"
+                }
+            ]
+        },
+        new CronGenerationOptions
+        {
+            ProjectDirectory = "cron-server",
+            BuildBinary = true
+        })
+    .BuildAsync();
+```
+
+## Samples
+
+You have two separate runnable examples:
+
+- Standalone Blazor WASM sample: `samples/BlazorWasmSample`
+- Aspire sample: `samples/AspireSample`
+
+## Usage Enforcement Policy
+
+Public API usage examples must be validated in integration tests.
+
+- If README snippets and tests diverge, tests win.
+- Every public API change should include integration test updates in the same PR.
+
+## Run Tests
+
+Unit tests:
+
+```bash
+dotnet test ./tests/PocketBase.Blazor.UnitTests/PocketBase.Blazor.UnitTests.csproj
+```
+
+Integration tests:
+
+```bash
+dotnet test ./tests/PocketBase.Blazor.IntegrationTests/PocketBase.Blazor.IntegrationTests.csproj --filter "Category=Integration&Requires!=SMTP&Requires!=Playwright"
+```
+
+Integration setup guide:
+
+- `tests/PocketBase.Blazor.IntegrationTests/Readme.md`
+
+## Release
+
+Release workflow: `.github/workflows/release.yml`
+
+- Trigger: push tag matching `v*`
+- Pipeline: restore, build, smoke test, pack, publish
 
 ## License
 
-This work is licensed under the **Creative Commons Attribution 4.0 International License (CC BY 4.0)**.  
-
-You are free to:
-
-- **Share** — copy and redistribute the material in any medium or format  
-- **Adapt** — remix, transform, and build upon the material for any purpose, including commercial  
-
-**Under the following terms:**
-
-- **Attribution** — You must give appropriate credit, provide a link to the license, and indicate if changes were made. You may do so in any reasonable manner, but not in any way that suggests the licensor endorses you or your use.
-
-**To view a copy of this license:** [https://creativecommons.org/licenses/by/4.0/](https://creativecommons.org/licenses/by/4.0/)
+Licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
