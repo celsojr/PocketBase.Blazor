@@ -1,0 +1,6 @@
+*
+backups/
+storage/
+
+!.gitignore
+

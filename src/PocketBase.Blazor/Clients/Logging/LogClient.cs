@@ -1,0 +1,51 @@
+using System;
+using System.Collections.Generic;
+using System.Net.Http;
+using System.Threading;
+using System.Threading.Tasks;
+using FluentResults;
+using PocketBase.Blazor.Extensions;
+using PocketBase.Blazor.Http;
+using PocketBase.Blazor.Models;
+using PocketBase.Blazor.Options;
+using PocketBase.Blazor.Responses.Logging;
+
+namespace PocketBase.Blazor.Clients.Logging
+{
+    /// <inheritdoc />
+    public class LogClient : ILogClient
+    {
+        private readonly IHttpTransport _http;
+
+        /// <inheritdoc />
+        public LogClient(IHttpTransport http)
+        {
+            _http = http ?? throw new ArgumentNullException(nameof(http));
+        }
+
+        /// <inheritdoc />
+        public async Task<Result<ListResult<LogResponse>>> GetListAsync(int page = 1, int perPage = 30, ListOptions? options = null, CancellationToken cancellationToken = default)
+        {
+            var query = options?.BuildQuery(page, perPage) ?? new Dictionary<string, object?>();
+            return await _http.SendAsync<ListResult<LogResponse>>(HttpMethod.Get, "api/logs", query: query, cancellationToken: cancellationToken);
+        }
+
+        /// <inheritdoc />
+        public async Task<Result<LogResponse>> GetOneAsync(string id, CommonOptions? options = null, CancellationToken cancellationToken = default)
+        {
+            if (string.IsNullOrWhiteSpace(id))
+                throw new ArgumentException("Log id is required.", nameof(id));
+
+            var query = options?.ToDictionary();
+            return await _http.SendAsync<LogResponse>(HttpMethod.Get, $"api/logs/{id}", query: query, cancellationToken: cancellationToken);
+        }
+
+        /// <inheritdoc />
+        public async Task<Result<List<HourlyStatsResponse>>> GetStatsAsync(LogStatsOptions? options = null, CancellationToken cancellationToken = default)
+        {
+            var query = options?.ToDictionary();
+            return await _http.SendAsync<List<HourlyStatsResponse>>(HttpMethod.Get, "api/logs/stats", query: query, cancellationToken: cancellationToken);
+        }
+    }
+}
+

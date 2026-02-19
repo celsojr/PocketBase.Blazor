@@ -7,7 +7,7 @@
 
     <!-- Package identity -->
     <PackageId>PocketBase.Blazor</PackageId>
-    <Version>0.0.3</Version>
+    <Version>0.1.0-beta.1</Version>
     <Authors>Celso Jr</Authors>
     <Company>Celso Jr</Company>
     <Description>Blazor SDK wrapper over the PocketBase REST API.</Description>
@@ -33,10 +33,14 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Fluid.Core" Version="2.31.0" />
+    <PackageReference Include="FluentResults" Version="4.0.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.0" />
+    <PackageReference Include="MimeMapping" Version="3.1.0" />
     <PackageReference Include="System.Net.Http.Json" Version="8.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="8.0.0" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="7.7.1" />
   </ItemGroup>
 
 </Project>

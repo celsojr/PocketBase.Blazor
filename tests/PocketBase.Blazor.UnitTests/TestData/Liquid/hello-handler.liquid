@@ -1,0 +1,26 @@
+ticker := time.NewTicker(10 * time.Second)
+defer ticker.Stop()
+
+name := "World!"
+count := 0
+
+if n, ok := payload["name"].(string); ok && n != "" {
+    name = n
+}
+
+if c, ok := payload["count"].(float64); ok {
+    count = int(c)
+}
+
+// Run for 1 minute (6 times at 10s intervals)
+for i := 0; i < 6; i++ {
+    count += 10
+    log.Printf("[CRON] Hello, %s %d", name, count)
+
+    <-ticker.C
+}
+
+// # Test hello handler (note: payload must be object, not string)
+// curl -X POST http://localhost:8090/internal/cron \
+//   -H "Content-Type: application/json" \
+//   -d '{"id":"hello","expression":"* * * * *","payload":{"name":"Pocketbase.Blazor!","count":10}}'

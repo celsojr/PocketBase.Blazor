@@ -1,0 +1,72 @@
+﻿@page "/"
+@using PocketBase.Blazor
+@inject IPocketBaseClient Client
+
+<h3 class="page-title">Posts</h3>
+
+@if (posts == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table table-striped table-hover table-bordered w-100 align-middle">
+        <thead class="table-light">
+            <tr>
+                <th scope="col">Slug</th>
+                <th scope="col">Title</th>
+                <th scope="col">Author</th>
+                <th scope="col" class="text-center">Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var p in posts)
+            {
+                <tr>
+                    <td class="text-muted">@p.Slug</td>
+                    <td>@p.Title</td>
+                    <td>@p.Author</td>
+                    <td class="text-center">
+                        <span class="badge @(p.IsPublished ? "bg-success" : "bg-secondary")">
+                            @(p.IsPublished ? "Published" : "Draft")
+                        </span>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<Post>? posts;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var (items, error) = await Client.GetListAsync<Post>("posts");
+
+        if (error != null)
+        {
+            if (error.RequiresApiKey)
+            {
+                Console.WriteLine("⚠ This endpoint requires an API key or admin privileges.");
+            }
+            else
+            {
+                Console.WriteLine($"Error {error.Status}: {error.Message}");
+            }
+        }
+        else
+        {
+            posts = items;
+        }
+    }
+
+    public class Post
+    {
+        public string Id { get; set; } = null!;
+        public string? Slug { get; set; }
+        public string? Title { get; set; }
+        public string? Author { get; set; }
+        public bool IsPublished { get; set; }
+    }
+}
