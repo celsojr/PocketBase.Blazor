@@ -1,4 +1,4 @@
-# PocketBase.Blazor [![NuGet Version](https://img.shields.io/nuget/v/PocketBase.Blazor.svg)](https://www.nuget.org/packages/PocketBase.Blazor) [![NuGet Downloads](https://img.shields.io/nuget/dt/PocketBase.Blazor.svg)](https://www.nuget.org/packages/PocketBase.Blazor/) ![GitHub Packages](https://img.shields.io/badge/GitHub%20Packages-0.0.3-blue)
+# PocketBase.Blazor [![NuGet Version](https://img.shields.io/nuget/v/PocketBase.Blazor.svg)](https://www.nuget.org/packages/PocketBase.Blazor) [![NuGet Downloads](https://img.shields.io/nuget/dt/PocketBase.Blazor.svg)](https://www.nuget.org/packages/PocketBase.Blazor/) ![GitHub Packages](https://img.shields.io/badge/GitHub%20Packages-0.1.0-blue)
 
 .NET SDK-style PocketBase client for Blazor and .NET apps.
 
