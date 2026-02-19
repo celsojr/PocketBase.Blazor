@@ -1,10 +1,10 @@
-# PocketBase.Blazor [![NuGet Version](https://img.shields.io/nuget/v/PocketBase.Blazor.svg)](https://www.nuget.org/packages/PocketBase.Blazor) [![NuGet Downloads](https://img.shields.io/nuget/dt/PocketBase.Blazor.svg)](https://www.nuget.org/packages/PocketBase.Blazor/) ![GitHub Packages](https://img.shields.io/badge/GitHub%20Packages-0.1.0-blue)
+# PocketBase.Blazor (Beta) [![NuGet Version](https://img.shields.io/nuget/v/PocketBase.Blazor.svg)](https://www.nuget.org/packages/PocketBase.Blazor) [![NuGet Downloads](https://img.shields.io/nuget/dt/PocketBase.Blazor.svg)](https://www.nuget.org/packages/PocketBase.Blazor/) ![GitHub Packages](https://img.shields.io/badge/GitHub%20Packages-0.1.0-blue)
 
 .NET SDK-style PocketBase client for Blazor and .NET apps.
 
 ## Why Beta
 
-PocketBase itself is still evolving toward a final stable v1 API. `PocketBase.Blazor` mirrors that lifecycle and is currently in beta for the same reason.
+[PocketBase](https://pocketbase.io/) itself is still evolving toward a final stable v1 API. `PocketBase.Blazor` is also evolving slightly and is currently in beta for the same reason.
 
 ## JS-SDK Parity (No JS Interop)
 
