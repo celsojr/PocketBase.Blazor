@@ -69,12 +69,13 @@ if (!authResult.IsSuccess)
 Source: `tests/PocketBase.Blazor.IntegrationTests/Clients/Record/CreateRecordTests.cs` and `tests/PocketBase.Blazor.IntegrationTests/Clients/Record/ListRecordsTests.cs`
 
 ```csharp
-await pb.Collection("posts").CreateAsync<PostResponse>(new PostCreateRequest
-{
-    Title = "Eleven Post",
-    Slug = "eleven-post",
-    IsPublished = true
-});
+await pb.Collection("posts")
+    .CreateAsync<PostResponse>(new PostCreateRequest
+    {
+        Title = "Eleven Post",
+        Slug = "eleven-post",
+        IsPublished = true
+    });
 
 var list = await pb.Collection("posts")
     .GetListAsync<PostResponse>(
