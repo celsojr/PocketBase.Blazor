@@ -22,7 +22,7 @@ jobs:
         run: dotnet restore
 
       - name: Build
-        run: dotnet build -c Release --no-restore
+        run: dotnet build -c Release --no-restore -p:NoWarn=CS1591
 
       - name: Run unit smoke tests (non-blocking)
         continue-on-error: true
