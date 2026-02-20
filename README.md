@@ -25,7 +25,7 @@ This client is intentionally close to PocketBase JS-SDK semantics and method nam
 ## Install
 
 ```bash
-dotnet add package PocketBase.Blazor
+dotnet add package PocketBase.Blazor --version 0.1.0-beta.1
 ```
 
 ## Quick Start (Blazor)

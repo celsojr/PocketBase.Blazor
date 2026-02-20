@@ -1,155 +1,195 @@
-# PocketBase.Blazor Clients Design Notes
+# PocketBase.Blazor Design Notes
 
-## 1. General Design Philosophy
+This document explains the architectural direction of the project for contributors and reviewers.
+It focuses on the why behind decisions, not just the what.
 
-- Treat every PocketBase service as a **client**, not a service.  
-- Maintain **JS SDK semantics** for all methods:
-  - Return types match JS SDK (`Task<bool>` for create/delete actions, `Task<T>` for fetches).  
-  - Method behavior mirrors JS SDK for consistency.
-- Use **`IHttpTransport`** for HTTP calls; no custom HttpClient logic per client.  
-- Include **interfaces with XML documentation** for every client.  
-- Method signatures are **single-line** for readability and consistency.
+## 1. Project Positioning
 
----
+PocketBase.Blazor is a .NET-native SDK-style client inspired by PocketBase JS-SDK semantics.
 
-## 2. Backup Client
+Primary goals:
 
-- Interface: `IBackupClient`  
-- Concrete: `BackupClient`  
-- Features:
-  - CRUD operations for backups (`CreateAsync`, `UploadAsync`, `DeleteAsync`, `RestoreAsync`).  
-  - `GetDownloadUrl` helper method.  
-  - Returns `bool` where JS SDK expects success confirmation.  
-- Uses `MultipartFile` for file uploads.
+- Keep API ergonomics familiar to JS-SDK users.
+- Stay fully .NET-native (no JS interop dependency).
+- Be testable by downstream apps through interface-first design.
+- Keep transport, auth state, hosting, and cron concerns separated.
 
-### MultipartFile
+Non-goals:
 
-- Represents a file to send via multipart/form-data.  
-- Factory methods: `FromBytes`, `FromFile`.  
-- Compatible with `_http.SendAsync` calls.
+- Port every JS-SDK convenience feature immediately.
+- Bind package version 1:1 to PocketBase versioning.
+- Optimize for WASM-hosted PocketBase process scenarios.
 
----
+## 2. Why No JS Interop
 
-## 3. CronJob Client
+We intentionally avoid JS interop for core client behavior.
 
-- Interface: `ICronJobClient`  
-- Concrete: `CronJobClient`  
-- Supports:
-  - `GetFullList`
-  - `Run`
-- Uses `CommonOptions.ToDictionary()` to map query parameters.
+Why:
 
----
+- Predictable runtime behavior in server and worker contexts.
+- Easier diagnostics in .NET stacks (exceptions, logging, cancellation flow).
+- Strong typing and XML-doc discoverability in C# tooling.
+- No hidden dependency on browser runtime APIs.
+- Cleaner unit/integration test surface for CI.
 
-## 4. Log Client
+Consequence:
 
-- Interface: `ILogClient`  
-- Concrete: `LogClient`  
-- Methods:
-  - `GetListAsync` (paged results with `ListOptions`)  
-  - `GetOneAsync`  
-  - `GetStatsAsync` (hourly statistics)  
-- Queries mapped via `ToDictionary()` extensions.  
-- Validations added for required parameters.
+- We implement HTTP/realtime semantics directly in .NET.
+- We accept extra maintenance effort to keep JS-SDK parity where practical.
 
----
+## 3. API Shape and Parity Strategy
 
-## 5. Settings Client
+Design intent is semantic parity with PocketBase JS-SDK mental model, while remaining idiomatic in C#.
 
-- Interface: `ISettingsClient`  
-- Concrete: `SettingsClient`  
-- Methods:
-  - `GetAllAsync` returns `JsonElement`  
-  - `UpdateAsync` updates settings object  
-  - `TestS3` and `TestEmailAsync` return `bool` on success  
-  - `GenerateAppleClientSecretAsync` returns `AppleClientSecretResponse`  
-- Parameters validated to prevent runtime errors.  
+Current API principles:
 
----
+- `IPocketBase` is the main entry point (`Collection(...)`, `Admins`, `Files`, `Settings`, etc).
+- Domain-specific clients model PocketBase API areas.
+- Methods are async and cancellation-friendly.
+- Responses use `FluentResults` (`IsSuccess`, `Value`, `Errors`) rather than implicit exceptions-only flow.
 
-## 6. Realtime Client
+Why `FluentResults`:
 
-- Interface: `IRealtimeClient`  
-- Concrete: `RealtimeClient`  
-- Designed to mimic JS SDK subscription API.  
-- Tracks subscriptions locally and calls `_http.SendAsync` to register them.  
-- **Note:** No live SSE events are streamed yet; only subscription registration is supported.  
+- Makes error handling explicit and composable.
+- Avoids forcing exception-driven control flow for common API failures.
+- Works well in UI and background jobs where failure is expected behavior.
 
-### Standalone SSE Client
+## 4. Interface-First Design (Mock-Friendly by Intent)
 
-- Interface: `IRealtimeSseClient`  
-- Concrete: `RealtimeSseClient`  
-- Fully separated from HTTP-only clients.  
-- Connects to `/realtime` via **Server-Sent Events**.  
-- Dispatches live `RealtimeEvent` objects to callbacks.  
-- Supports `Subscribe`, `Unsubscribe`, `StartListeningAsync`, and `Stop`.  
-- Handles `IsConnected` state and `OnDisconnect` event.
+Every major client has an interface.
 
----
+Examples:
 
-## 7. Common Options & ToDictionary
+- `IPocketBase`
+- `IRecordClient`, `IAdminsClient`, `ISettingsClient`, etc.
+- `IHttpTransport`
+- Hosting abstractions (`IPocketBaseHost`, `IPocketBaseHostBuilder`)
 
-- `CommonOptions` already has `Query` dictionary, `Body`, `Headers`.  
-- `ToDictionary()` extensions normalize options for query parameters.  
-- `Fields` property included if set.  
-- Similar extensions created for `ListOptions` and `LogStatsOptions`.
+Why:
 
----
+- Consumer apps can mock SDK boundaries using Moq/NSubstitute/FakeItEasy.
+- Tests can focus on app behavior without spinning up PocketBase.
+- Easier extension points and internal refactoring with less API breakage.
 
-## 8. Interfaces Importance
+Guideline:
 
-- **Decoupling:** Consumers depend on interface, not implementation.  
-- **Testability:** Mocking and unit testing.  
-- **Consistency:** All clients follow the same pattern.  
-- **Future-proofing:** Change implementation without changing consumers.  
-- **DI Friendly:** Easily inject clients.
+- New public client capability should have interface coverage at introduction time.
 
----
+## 5. Transport Abstraction (`IHttpTransport`)
 
-## 9. Method Signature Rules
+All clients depend on `IHttpTransport` instead of custom HTTP code.
 
-- All method signatures should be **single-line**.  
-- Constructor parameters validated (`ArgumentNullException` for required parameters).  
-- Optional parameters defaulted for convenience (e.g., `CancellationToken = default`).
+Why:
 
----
+- Enforces one place for auth header updates and request building.
+- Centralizes JSON serialization behavior and API error mapping.
+- Reduces duplicated HTTP plumbing across clients.
+- Simplifies test doubles for low-level HTTP behavior.
 
-## 10. Pending Enhancements / Notes
+Contributor rule:
 
-- Full SSE / WebSocket integration for `RealtimeClient`.  
-- Optional automatic reconnect with exponential backoff.  
-- Unified base client class could be introduced in future.  
-- Exception messages could be aligned with JS SDK for parity.
+- Do not add ad-hoc `HttpClient` logic inside domain clients when transport can own it.
 
-## 11. RecordClient vs JS SDK RecordService
+## 6. Auth State and Lifecycle
 
-### JS SDK Features
+`PocketBase` composes `PocketBaseStore` with auth/realtime integration.
 
-The original JS SDK `RecordService` includes a broader set of convenience methods beyond core CRUD, such as:
+Why:
 
-- `getList(page, perPage, options)` ? paginated list of records.
-- `getFullList(options)` ? retrieves all records across pages automatically.
-- `getFirstListItem(filter, options)` ? returns the first record matching a filter.
-- `getOne(recordId, options)` ? fetches a single record by ID.
-- `create(bodyParams, options)` ? create new records.
-- `update(recordId, bodyParams, options)` ? update existing records.
-- `delete(recordId, options)` ? delete a record.
-- `subscribe` ? integrates with the Realtime service for record events.
-- Helpers for `expand` and batch operations (create/update/delete multiple records at once).
+- Auth token lifecycle is cross-cutting and should not leak into every feature client.
+- Realtime subscriptions and auth state need consistent synchronization.
 
-### C# `RecordClient` Implementation
+Lifecycle stance:
 
-- Focuses on **core REST CRUD operations** and pagination.
-- Provides `GetListAsync`, `GetFullListAsync`, `GetFirstListItemAsync`, `GetOneAsync`, `CreateAsync`, `UpdateAsync`, `DeleteAsync`.
-- Uses `IHttpTransport` for all HTTP communication.
-- Includes parameter validation and query mapping via `ToDictionary()`.
-- Does not include realtime subscription helpers, batch helpers, or certain convenience methods that exist in the JS SDK.
-- Optional helper methods (batch operations, expanded relations, subscription integration) can be added later as extensions or additional clients.
+- `IPocketBase` is `IAsyncDisposable`.
+- Realtime clients are disposed with the root client to avoid leaking long-lived connections.
 
-### Rationale
+## 7. Hosting Model (Non-WASM Focus)
 
-- Keeps the API clean and focused on core responsibilities.
-- Avoids over-complicating the initial C# port.
-- Aligns with the “client-first” design philosophy.
-- Makes future extension easier while preserving JS SDK semantics where it matters most.
+For server/desktop/integration scenarios, hosting APIs enable managing PocketBase process lifecycle from .NET.
 
+Key types:
+
+- `PocketBaseHostBuilder`
+- `IPocketBaseHost`
+- `PocketBaseBinaryResolver`
+
+### 7.1 Auto-resolve Executable
+
+If no executable path is provided, builder resolves a local binary and auto-downloads if missing.
+
+Why:
+
+- Low-friction local setup for contributors and CI.
+- Reduces onboarding steps for integration scenarios.
+
+### 7.2 Custom Executable Path
+
+`UseExecutable(...)` allows explicit executable control.
+
+Why:
+
+- Teams may pin custom builds or pre-installed binaries.
+- Some environments disallow runtime download.
+- Supports deterministic release engineering.
+
+## 8. Cron Server Strategy
+
+`CronGenerator` can generate Go cron server files and optionally build a custom binary.
+
+Why this exists:
+
+- PocketBase cron extension path is Go-native.
+- Many .NET consumers still need custom cron behavior near their PocketBase instance.
+- Generation flow reduces manual boilerplate and standardizes project structure.
+
+Tradeoff:
+
+- Requires Go toolchain for full build flow (`BuildBinary = true`).
+- We keep this explicit and opt-in.
+
+## 9. Testing Philosophy
+
+Two layers by design:
+
+- Unit tests for pure logic and boundaries.
+- Integration tests as the usage source-of-truth for public API behavior.
+
+Contributor expectation:
+
+- Public API additions/changes should include integration coverage.
+- README usage snippets should mirror integration-tested behavior.
+
+Trait-based filtering exists to keep CI practical for optional dependencies (SMTP, Playwright, filesystem, Go runtime, etc).
+
+## 10. Versioning and Compatibility Direction
+
+SDK versioning is independent from PocketBase upstream versioning.
+
+Why:
+
+- PocketBase cadence does not map cleanly to SDK release cadence.
+- We need room for SDK-level betas/patches without fake upstream coupling.
+
+Compatibility should be documented explicitly (for example: validated against PocketBase `0.34.x`) rather than inferred from package version.
+
+## 11. Contribution Guardrails
+
+When reviewing or proposing changes, evaluate against this checklist:
+
+- Does this preserve JS-SDK-style semantics where intended?
+- Is the change .NET-native and free from unnecessary JS interop?
+- Is the public surface interface-backed?
+- Does the change bypass `IHttpTransport` (if yes, why)?
+- Are failure modes explicit through `Result` where appropriate?
+- Is integration coverage added/updated for public behavior?
+- Does it keep hosting and cron concerns optional, not mandatory?
+
+## 12. Open Direction (Intentional)
+
+Likely areas for evolution:
+
+- Broader parity coverage with JS-SDK convenience methods.
+- Better host configuration providers (YAML/TOML support, etc).
+- Stronger compatibility metadata and diagnostics.
+- Continued stabilization of API contracts through beta iterations.
