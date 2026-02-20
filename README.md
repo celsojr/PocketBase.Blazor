@@ -28,6 +28,11 @@ This client is intentionally close to PocketBase JS-SDK semantics and method nam
 dotnet add package PocketBase.Blazor --version 0.1.0-beta.1
 ```
 
+## Architecture Notes
+
+- High-level philosophy: `design-notes.md`
+- Contributor guardrails/checklist: `contributing-architecture.md`
+
 ## Quick Start (Blazor)
 
 ```csharp
