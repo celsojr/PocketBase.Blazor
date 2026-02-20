@@ -25,7 +25,7 @@ public class GetOneTests
         var logId = listResult.Value.Items.First().Id;
 
         // Act
-        var result = await _pb.Log.GetOneAsync(logId);
+        var result = await _pb.Log.GetOneAsync(logId!);
 
         // Assert
         result.IsSuccess.Should().BeTrue();

@@ -41,14 +41,6 @@ namespace PocketBase.Blazor.Models
         /// This property contains the raw JSON structure of expanded records. Use JSON
         /// deserialization methods to convert this to strongly-typed models when needed.
         /// </remarks>
-        /// <example>
-        /// <code>
-        /// if (record.Expand.HasValue && record.Expand.Value.TryGetProperty("category", out var category))
-        /// {
-        ///     var categoryName = category.GetProperty("name").GetString();
-        /// }
-        /// </code>
-        /// </example>
         public JsonElement? Expand { get; set; }
     }
 }

@@ -246,8 +246,8 @@ public class AuthWithOAuth2RecordTests : IAsyncLifetime
     [Fact]
     public async Task AuthWithOAuth2CodeAsync_WithNullRequest_ThrowsArgumentNullException()
     {
-        await Assert.ThrowsAsync<ArgumentNullException>(() =>
-            _pb.Collection(CollectionName)
+        await Assert.ThrowsAsync<ArgumentNullException>(async () =>
+            await _pb.Collection(CollectionName)
                 .AuthWithOAuth2CodeAsync(null!));
     }
 
@@ -255,7 +255,7 @@ public class AuthWithOAuth2RecordTests : IAsyncLifetime
     {
         var tcs = new TaskCompletionSource<string>();
     
-        page.RequestFinished += async (_, request) =>
+        page.RequestFinished += (_, request) =>
         {
             if (request.Url.Contains(RedirectUrl))
             {

@@ -54,7 +54,7 @@ public class GetFullListTests
         // Assert
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().NotBeNull();
-        result.Value.Should().Contain(b => b.Key.Contains(backupName));
+        result.Value.Should().Contain(b => b.Key!.Contains(backupName));
 
         foreach (var backup in result.Value)
         {

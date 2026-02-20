@@ -21,6 +21,7 @@ public class GetDownloadUrlTests : IAsyncLifetime
 
     public async Task DisposeAsync()
     {
+        await Task.CompletedTask;
         _transport.Dispose();
     }
 

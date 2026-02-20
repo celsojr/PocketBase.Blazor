@@ -24,7 +24,7 @@ public class DeleteTests
 
         // Verify it exists
         var listBefore = await _pb.Backup.GetFullListAsync();
-        listBefore.Value.Should().Contain(b => b.Key.Contains(backupName));
+        listBefore.Value.Should().Contain(b => b.Key!.Contains(backupName));
 
         // Act
         var result = await _pb.Backup.DeleteAsync(backupName);
@@ -34,7 +34,7 @@ public class DeleteTests
 
         // Verify it's gone
         var listAfter = await _pb.Backup.GetFullListAsync();
-        listAfter.Value.Should().NotContain(b => b.Key.Contains(backupName));
+        listAfter.Value.Should().NotContain(b => b.Key!.Contains(backupName));
     }
 
     [Fact]
@@ -52,7 +52,7 @@ public class DeleteTests
 
         // Verify backup is gone
         var listAfter = await _pb.Backup.GetFullListAsync();
-        listAfter.Value.Should().NotContain(b => b.Key.Contains("test_delete_backup"));
+        listAfter.Value.Should().NotContain(b => b.Key!.Contains("test_delete_backup"));
     }
 
     [Fact]
