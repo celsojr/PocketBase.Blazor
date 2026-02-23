@@ -7,7 +7,7 @@
 
     <!-- Package identity -->
     <PackageId>PocketBase.Blazor</PackageId>
-    <Version>0.1.0-beta.1</Version>
+    <Version>0.1.1-beta.2</Version>
     <Authors>Celso Jr</Authors>
     <Company>Celso Jr</Company>
     <Description>Blazor SDK wrapper over the PocketBase REST API.</Description>

@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using PocketBase.Blazor.Converters;
 using PocketBase.Blazor.Events;
 using PocketBase.Blazor.Http;
@@ -133,7 +134,14 @@ namespace PocketBase.Blazor.Clients.Realtime
         private ImmutableList<Action<RealtimeRecordEvent>> GetHandlers(string topic) =>
             _subscriptions.TryGetValue(topic, out var handlers) ? handlers : [];
 
-        private static ILogger CreateDefaultLogger<T>() =>
-            LoggerFactory.Create(builder => builder.AddConsole()).CreateLogger<T>();
+        private static ILogger CreateDefaultLogger<T>()
+        {
+            if (OperatingSystem.IsBrowser())
+            {
+                return NullLogger<T>.Instance;
+            }
+
+            return LoggerFactory.Create(builder => builder.AddConsole()).CreateLogger<T>();
+        }
     }
 }

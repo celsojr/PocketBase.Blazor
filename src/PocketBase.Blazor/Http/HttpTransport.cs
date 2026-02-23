@@ -47,9 +47,22 @@ namespace PocketBase.Blazor.Http
             }
 
             _client.DefaultRequestHeaders.Add("Accept", "application/json");
-            _client.DefaultRequestHeaders.Add("User-Agent", "PocketBase.Blazor");
+            TryAddHeader("User-Agent", "PocketBase.Blazor");
 
             _pocketBaseOptions = options ?? new PocketBaseOptions();
+        }
+
+        private void TryAddHeader(string name, string value)
+        {
+            try
+            {
+                _client.DefaultRequestHeaders.Add(name, value);
+            }
+            catch (Exception) when (OperatingSystem.IsBrowser())
+            {
+                // Browser networking forbids some headers (eg. User-Agent).
+                // Ignore so WASM can continue using Fetch defaults.
+            }
         }
 
         /// <inheritdoc />

@@ -29,7 +29,14 @@ public static class ServiceCollectionExtensions
             {
                 http.DefaultRequestHeaders.Add("Accept", "application/json");
                 http.DefaultRequestHeaders.Add("Authorization", options.ApiKey);
-                http.DefaultRequestHeaders.Add("User-Agent", "PocketBase.Blazor");
+                try
+                {
+                    http.DefaultRequestHeaders.Add("User-Agent", "PocketBase.Blazor");
+                }
+                catch (Exception) when (OperatingSystem.IsBrowser())
+                {
+                    // Forbidden header in browser/WASM.
+                }
             }
 
             return http;

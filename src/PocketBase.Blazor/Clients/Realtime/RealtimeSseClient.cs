@@ -1,8 +1,10 @@
+using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using PocketBase.Blazor.Events;
 using PocketBase.Blazor.Http;
 using PocketBase.Blazor.Options;
@@ -49,7 +51,14 @@ namespace PocketBase.Blazor.Clients.Realtime
             await UnsubscribeInternalAsync([topic], cancellationToken);
         }
 
-        private static ILogger CreateDefaultLogger<T>() =>
-            LoggerFactory.Create(builder => builder.AddConsole()).CreateLogger<T>();
+        private static ILogger CreateDefaultLogger<T>()
+        {
+            if (OperatingSystem.IsBrowser())
+            {
+                return NullLogger<T>.Instance;
+            }
+
+            return LoggerFactory.Create(builder => builder.AddConsole()).CreateLogger<T>();
+        }
     }
 }
