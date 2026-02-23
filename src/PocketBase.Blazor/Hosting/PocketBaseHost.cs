@@ -141,16 +141,22 @@ namespace PocketBase.Blazor.Hosting
             await _startLock.WaitAsync(cancellationToken);
             try
             {
-                _logger.LogInformation("Stopping PocketBase...");
+                if (!_isRunning || _process == null)
+                    return;
 
-                if (!_isRunning)
-                {
-                    return; // Already stopped
-                }
+                _logger.LogInformation("Stopping PocketBase...");
 
                 if (!_process.HasExited)
                 {
-                    _process.Kill();
+                    try
+                    {
+                        _process.Kill(entireProcessTree: true);
+                    }
+                    catch (InvalidOperationException)
+                    {
+                        // Already exited
+                    }
+
                     await _process.WaitForExitAsync(cancellationToken);
                 }
 
@@ -170,6 +176,7 @@ namespace PocketBase.Blazor.Hosting
             _process.OutputDataReceived -= OnOutputDataReceived;
             _process.ErrorDataReceived -= OnErrorDataReceived;
             _process.Dispose();
+            _process = null!;
             _cts.Dispose();
         }
     }
