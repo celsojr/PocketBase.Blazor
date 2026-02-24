@@ -16,11 +16,8 @@ namespace PocketBase.Blazor.Clients.Crons
     /// <inheritdoc />
     public sealed class CronGenerator : ICronGenerator
     {
-    /// <inheritdoc />
-        public async Task GenerateAsync(
-            CronManifest cronManifest,
-            CronGenerationOptions options,
-            CancellationToken cancellationToken = default)
+        /// <inheritdoc />
+        public async Task GenerateAsync(CronManifest cronManifest, CronGenerationOptions options, CancellationToken cancellationToken = default)
         {
             ArgumentNullException.ThrowIfNull(cronManifest);
             ArgumentNullException.ThrowIfNull(options);
@@ -42,9 +39,7 @@ namespace PocketBase.Blazor.Clients.Crons
         }
 
         /// <inheritdoc />
-        public async Task GenerateServerProjectFilesAsync(
-            CronGenerationOptions options,
-            CancellationToken cancellationToken)
+        public async Task GenerateServerProjectFilesAsync(CronGenerationOptions options, CancellationToken cancellationToken)
         {
             string moduleName = options.ModuleName;
             string outputDir = Path.Combine(options.ProjectDirectory, options.OutputDirectory);
@@ -182,11 +177,7 @@ namespace PocketBase.Blazor.Clients.Crons
         }
 
         /// <inheritdoc />
-        public async Task GenerateHandlersAsync(
-            CronManifest manifest,
-            string outputDir,
-            CronGenerationOptions options,
-            CancellationToken ct)
+        public async Task GenerateHandlersAsync(CronManifest manifest, string outputDir, CronGenerationOptions options, CancellationToken ct)
         {
             string templateSource = """
             // AUTO GENERATED - DO NOT EDIT
@@ -258,9 +249,7 @@ namespace PocketBase.Blazor.Clients.Crons
         }
 
         /// <inheritdoc />
-        public async Task BuildGoBinaryAsync(
-            CronGenerationOptions options,
-            CancellationToken ct)
+        public async Task BuildGoBinaryAsync(CronGenerationOptions options, CancellationToken ct)
         {
             // Initialize Go module
             ProcessStartInfo initPsi = new ProcessStartInfo

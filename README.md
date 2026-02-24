@@ -1,6 +1,6 @@
 # PocketBase.Blazor (Beta) [![NuGet Version](https://img.shields.io/nuget/v/PocketBase.Blazor.svg)](https://www.nuget.org/packages/PocketBase.Blazor) [![NuGet Downloads](https://img.shields.io/nuget/dt/PocketBase.Blazor.svg)](https://www.nuget.org/packages/PocketBase.Blazor/) ![GitHub Packages](https://img.shields.io/badge/GitHub%20Packages-0.1.1-blue)
 
-.NET SDK-style PocketBase client for Blazor and .NET apps.
+PocketBase.Blazor is a PocketBase .NET REST client wrapper (with some extra powers) for Blazor and .NET apps.
 
 ## Why Beta
 
@@ -10,7 +10,7 @@
 
 This client is intentionally close to PocketBase JS-SDK semantics and method naming, but implemented in pure .NET (no JavaScript interop required).
 
-- If you already know the JS-SDK mental model, most APIs should feel familiar.
+- If you already know the JS-SDK mental model, most REST APIs should feel familiar.
 - Result handling is .NET-native (`FluentResults`) with explicit `IsSuccess`, `Value`, and `Errors`.
 
 ## Features

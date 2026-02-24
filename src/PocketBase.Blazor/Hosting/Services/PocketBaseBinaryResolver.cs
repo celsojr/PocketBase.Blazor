@@ -58,9 +58,6 @@ namespace PocketBase.Blazor.Hosting.Services
                 string arch = GetArchitectureString();
                 string platformName = GetOSPlatformName();
 
-                // In future we're gonna provide our own custom GO build to be able to create cron jobs also from this library
-                // https://github.com/pocketbase/pocketbase/releases/download/v0.34.0/pocketbase_0.34.0_windows_amd64.zip
-
                 string downloadUrl = $"{BaseDownloadUrl}/v{Version}/pocketbase_{Version}_{platformName}_{arch}.zip";
 
                 string tempFile = Path.GetTempFileName();
