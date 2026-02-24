@@ -2,10 +2,10 @@ using System.Text.Json;
 
 namespace PocketBase.Blazor.Responses.Auth
 {
-    public sealed class AuthResponse
+    public class AuthResponse
     {
-        public string Token { get; set; } = default!;
-        public UserResponse? Record { get; set; }
+        public string Token { get; init; } = default!;
+        public UserResponse? Record { get; init; }
 
         /// <inheritdoc />
         public override string ToString()
