@@ -49,7 +49,7 @@ Beta is not an excuse for random changes; it is a controlled phase for convergin
 - Integration tests are source-of-truth for public API behavior and docs examples.
 - Integration tests should not be run simultaneously, either through test runners or manually, due to the lack of isolation of the authorization context.
 
-## Coding Conventions (Beta Baseline)
+## Coding Conventions
 
 - Private instance fields use `_camelCase`.
 - Avoid `this.` qualification unless required for disambiguation.
@@ -57,6 +57,19 @@ Beta is not an excuse for random changes; it is a controlled phase for convergin
 - Use `var` only when the type is obvious from the right-hand side (for example, anonymous types or object creation with repetitive generic types).
 - Keep DTO intent explicit: `*Request` for outbound payloads, `*Response` for inbound API payloads, `*Model` for reusable domain/client structures.
 - Keep transport/auth/hosting/cron boundaries separated; do not move cross-cutting concerns into client DTOs.
+
+## Module Organization Plan
+
+Target structure (feature-first, boundary-aware):
+
+- `Clients/<Feature>`: transport-facing client contracts and implementations.
+- `Requests/<Feature>`: payloads sent to PocketBase.
+- `Responses/<Feature>`: payloads received from PocketBase.
+- `Models/<Feature>`: reusable SDK domain models not tied to a single HTTP request/response shape.
+- `Options/<Feature>`: request option builders and query/body configuration objects.
+- `Events/<Feature>`: event payload contracts used by realtime/event-driven flows.
+- `Infrastructure/Http|Store|Hosting|Realtime`: runtime plumbing and cross-cutting integrations.
+- `Abstractions`: top-level interfaces shared across features when needed.
 
 ## Evolution Intent
 
