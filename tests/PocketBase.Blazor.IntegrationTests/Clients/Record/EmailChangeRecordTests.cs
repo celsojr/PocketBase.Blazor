@@ -2,6 +2,7 @@ namespace PocketBase.Blazor.IntegrationTests.Clients.Record;
 
 using Blazor.Models;
 using Blazor.Responses;
+using Blazor.Responses.Auth;
 using Helpers.MailHog;
 
 [Trait("Category", "Integration")]
@@ -20,7 +21,7 @@ public class EmailChangeRecordTests : IAsyncLifetime
     {
         _pb = fixture.Client;
 
-        var options = new MailHogOptions
+        MailHogOptions options = new MailHogOptions
         {
             BaseUrl = "http://localhost:8027"
         };
@@ -31,7 +32,7 @@ public class EmailChangeRecordTests : IAsyncLifetime
     public async Task InitializeAsync()
     {
         // Configure SMTP
-        var smtpResult = await _pb.Settings.UpdateAsync(new
+        Result smtpResult = await _pb.Settings.UpdateAsync(new
         {
             smtp = new
             {
@@ -68,10 +69,10 @@ public class EmailChangeRecordTests : IAsyncLifetime
     public async Task DisposeAsync()
     {
         // Delete test collection
-        var listResult = await _pb.Collections
+        Result<ListResult<CollectionModel>> listResult = await _pb.Collections
             .GetListAsync<CollectionModel>(options: new ListOptions { SkipTotal = true });
 
-        var collection = listResult.Value.Items
+        CollectionModel? collection = listResult.Value.Items
             .FirstOrDefault(c => c.Name == CollectionName);
 
         if (collection?.Id != null)
@@ -95,15 +96,15 @@ public class EmailChangeRecordTests : IAsyncLifetime
     public async Task RequestEmailChangeAsync_WithAuthenticatedUser_ReturnsSuccess()
     {
         // Arrange - reserve current admin session for post-test cleanup
-        var adminSession = _pb.AuthStore.CurrentSession;
+        AuthResponse? adminSession = _pb.AuthStore.CurrentSession;
 
         // Authenticate user first
-        var auth = await _pb.Collection(CollectionName)
+        Result<AuthResponse> auth = await _pb.Collection(CollectionName)
             .AuthWithPasswordAsync(OriginalEmail, Password);
 
         auth.IsSuccess.Should().BeTrue();
 
-        var result = await _pb.Collection(CollectionName)
+        Result result = await _pb.Collection(CollectionName)
             .RequestEmailChangeAsync(NewEmail);
 
         result.IsSuccess.Should().BeTrue();
@@ -118,7 +119,7 @@ public class EmailChangeRecordTests : IAsyncLifetime
     public async Task ConfirmEmailChangeAsync_WithValidToken_UpdatesEmail()
     {
         // Preserve admin session
-        var adminSession = _pb.AuthStore.CurrentSession;
+        AuthResponse? adminSession = _pb.AuthStore.CurrentSession;
 
         // Authenticate user
         await _pb.Collection(CollectionName)
@@ -129,13 +130,13 @@ public class EmailChangeRecordTests : IAsyncLifetime
             .RequestEmailChangeAsync(NewEmail);
 
         // Extract confirmation token from MailHog
-        var token = await _mailHogService
+        string? token = await _mailHogService
             .GetLatestTokenAsync(NewEmail, VerificationType.EmailChange);
 
         token.Should().NotBeNull();
 
         // Confirm change
-        var result = await _pb.Collection(CollectionName)
+        Result result = await _pb.Collection(CollectionName)
             .ConfirmEmailChangeAsync(token, Password);
 
         result.IsSuccess.Should().BeTrue();
@@ -144,7 +145,7 @@ public class EmailChangeRecordTests : IAsyncLifetime
         _pb.AuthStore.Clear();
 
         // Authenticate using new email
-        var auth = await _pb.Collection(CollectionName)
+        Result<AuthResponse> auth = await _pb.Collection(CollectionName)
             .AuthWithPasswordAsync(NewEmail, Password);
 
         auth.IsSuccess.Should().BeTrue();
@@ -159,7 +160,7 @@ public class EmailChangeRecordTests : IAsyncLifetime
     [Fact]
     public async Task ConfirmEmailChangeAsync_WithInvalidToken_ReturnsSuccess()
     {
-        var result = await _pb.Collection(CollectionName)
+        Result result = await _pb.Collection(CollectionName)
             .ConfirmEmailChangeAsync("invalid-token", Password);
 
         // PocketBase security model: still returns success

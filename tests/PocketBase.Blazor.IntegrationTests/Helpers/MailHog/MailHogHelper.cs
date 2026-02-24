@@ -22,11 +22,11 @@ public class MailHogService : IMailHogService
     {
         ArgumentException.ThrowIfNullOrEmpty(recipientEmail);
 
-        var message = await GetLatestMessageForRecipientAsync(recipientEmail);
+        MailHogMessage? message = await GetLatestMessageForRecipientAsync(recipientEmail);
         if (message?.Content?.Body == null)
             return null;
 
-        var otpPattern = $@"\b\d{{{otpLength}}}\b";
+        string otpPattern = $@"\b\d{{{otpLength}}}\b";
         return ExtractPattern(message.Content.Body, otpPattern);
     }
 
@@ -34,14 +34,14 @@ public class MailHogService : IMailHogService
     {
         ArgumentException.ThrowIfNullOrEmpty(recipientEmail);
 
-        var message = await GetLatestMessageForRecipientAsync(recipientEmail);
+        MailHogMessage? message = await GetLatestMessageForRecipientAsync(recipientEmail);
         if (message?.Content?.Body == null)
             return null;
 
-        var cleanedBody = CleanQuotedPrintableBody(message.Content.Body);
+        string cleanedBody = CleanQuotedPrintableBody(message.Content.Body);
 
         // Determine token URL fragment based on type
-        var tokenPattern = type switch
+        string tokenPattern = type switch
         {
             PasswordReset => "password-reset",
             EmailChange => "email-change",
@@ -54,17 +54,17 @@ public class MailHogService : IMailHogService
 
     public async Task ClearAllMessagesAsync()
     {
-        var response = await _httpClient.DeleteAsync(_options.DeleteEndpoint);
+        HttpResponseMessage response = await _httpClient.DeleteAsync(_options.DeleteEndpoint);
         response.EnsureSuccessStatusCode();
     }
 
     private async Task<MailHogMessage?> GetLatestMessageForRecipientAsync(string recipientEmail)
     {
-        var response = await _httpClient.GetAsync(_options.MessagesEndpoint);
+        HttpResponseMessage response = await _httpClient.GetAsync(_options.MessagesEndpoint);
         response.EnsureSuccessStatusCode();
 
-        var content = await response.Content.ReadAsStringAsync();
-        var messages = JsonSerializer.Deserialize<MailHogMessages>(content);
+        string content = await response.Content.ReadAsStringAsync();
+        MailHogMessages? messages = JsonSerializer.Deserialize<MailHogMessages>(content);
 
         return messages?.Items?
             .Where(m => m.Content?.Headers?.To?.Contains(recipientEmail) == true)
@@ -77,7 +77,7 @@ public class MailHogService : IMailHogService
         if (string.IsNullOrEmpty(text))
             return null;
 
-        var match = Regex.Match(text, pattern);
+        Match match = Regex.Match(text, pattern);
         return match.Success ? match.Groups[groupIndex].Value : null;
     }
 

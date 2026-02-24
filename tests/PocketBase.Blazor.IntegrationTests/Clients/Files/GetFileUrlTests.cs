@@ -33,7 +33,7 @@ public class GetFileUrlTests
     [Fact]
     public async Task GetUrl_ReturnsUrl_WithValidParameters()
     {
-        var result = await _pb.Files.GetUrl("_pb_users_auth_", "ssl170o5679k806", "star_ne6lkj8zxl.jpg");
+        Result<string> result = await _pb.Files.GetUrl("_pb_users_auth_", "ssl170o5679k806", "star_ne6lkj8zxl.jpg");
 
         result.Value.Should().NotBeEmpty();
         result.Value.Should().Be("api/files/_pb_users_auth_/ssl170o5679k806/star_ne6lkj8zxl.jpg");
@@ -42,39 +42,39 @@ public class GetFileUrlTests
     [Fact]
     public async Task GetUrl_ReturnsEmpty_WhenFileNameEmpty()
     {
-       var result = await _pb.Files.GetUrl("users", "user123", "", null!);
+        Result<string> result = await _pb.Files.GetUrl("users", "user123", "", null!);
 
-       result.Value.Should().BeEmpty();
+        result.Value.Should().BeEmpty();
     }
 
     [Fact]
     public async Task GetUrl_ReturnsEmpty_WhenRecordIdEmpty()
     {
-       var result = await _pb.Files.GetUrl("users", "", "avatar.jpg", null!);
+        Result<string> result = await _pb.Files.GetUrl("users", "", "avatar.jpg", null!);
 
-       result.Value.Should().BeEmpty();
+        result.Value.Should().BeEmpty();
     }
 
     [Fact]
     public async Task GetUrl_EncodesSpecialCharacters()
     {
-       var result = await _pb.Files.GetUrl("users/group", "user 123", "file name.jpg", null!);
+        Result<string> result = await _pb.Files.GetUrl("users/group", "user 123", "file name.jpg", null!);
 
-       result.Value.Should().NotBeEmpty();
-       result.Value.Should().Contain("api/files/users%2Fgroup/user%20123/file%20name.jpg");
+        result.Value.Should().NotBeEmpty();
+        result.Value.Should().Contain("api/files/users%2Fgroup/user%20123/file%20name.jpg");
     }
 
     [Fact]
     public async Task GetUrl_IncludesThumbQuery()
     {
-       var options = new FileOptions
-       {
-           Thumb = "100x300"
-       };
+        FileOptions options = new FileOptions
+        {
+            Thumb = "100x300"
+        };
 
-       var result = await _pb.Files.GetUrl("users", "user123", "avatar.jpg", options);
+        Result<string> result = await _pb.Files.GetUrl("users", "user123", "avatar.jpg", options);
 
-       result.Value.Should().Contain("thumb=100x300");
+        result.Value.Should().Contain("thumb=100x300");
     }
 
     [Theory]
@@ -86,27 +86,27 @@ public class GetFileUrlTests
     [InlineData("100x0", "100x0")]
     public async Task GetUrl_SupportsAllThumbFormats(string thumb, string expected)
     {
-       var options = new FileOptions
-       {
-           Thumb = thumb
-       };
+        FileOptions options = new FileOptions
+        {
+            Thumb = thumb
+        };
 
-       var result = await _pb.Files.GetUrl("users", "user123", "avatar.jpg", options);
+        Result<string> result = await _pb.Files.GetUrl("users", "user123", "avatar.jpg", options);
 
-       result.Value.Should().Contain($"thumb={expected}");
+        result.Value.Should().Contain($"thumb={expected}");
     }
 
     [Fact]
     public async Task GetUrl_IncludesToken()
     {
-       var options = new FileOptions
-       {
-           Token = "file_token_abc123"
-       };
+        FileOptions options = new FileOptions
+        {
+            Token = "file_token_abc123"
+        };
 
-       var result = await _pb.Files.GetUrl("users", "user123", "avatar.jpg", options);
+        Result<string> result = await _pb.Files.GetUrl("users", "user123", "avatar.jpg", options);
 
-       result.Value.Should().Contain("token=file_token_abc123");
+        result.Value.Should().Contain("token=file_token_abc123");
     }
 
     [Theory]
@@ -115,44 +115,44 @@ public class GetFileUrlTests
     [InlineData("true")]
     public async Task GetUrl_IncludesDownload_WhenTruthy(string downloadValue)
     {
-       var options = new FileOptions
-       {
-           Download = downloadValue
-       };
+        FileOptions options = new FileOptions
+        {
+            Download = downloadValue
+        };
 
-       var result = await _pb.Files.GetUrl("users", "user123", "avatar.jpg", options);
+        Result<string> result = await _pb.Files.GetUrl("users", "user123", "avatar.jpg", options);
 
-       result.Value.Should().Contain($"download={downloadValue}");
+        result.Value.Should().Contain($"download={downloadValue}");
     }
 
     [Fact]
     public async Task GetUrl_RemovesDownload_WhenFalse()
     {
-       var options = new FileOptions
-       {
-           Thumb = "100x100"
-       };
+        FileOptions options = new FileOptions
+        {
+            Thumb = "100x100"
+        };
 
-       var result = await _pb.Files.GetUrl("users", "user123", "avatar.jpg", options);
+        Result<string> result = await _pb.Files.GetUrl("users", "user123", "avatar.jpg", options);
 
-       result.Value.Should().NotContain("download=");
-       result.Value.Should().Contain("thumb=100x100");
+        result.Value.Should().NotContain("download=");
+        result.Value.Should().Contain("thumb=100x100");
     }
 
     [Fact]
     public async Task GetUrl_HandlesMultipleQueryParams()
     {
-       var options = new FileOptions
-       {
-              Thumb = "100x300f",
-              Token = "abc123",
-              Download = "true"
-       };
+        FileOptions options = new FileOptions
+        {
+            Thumb = "100x300f",
+            Token = "abc123",
+            Download = "true"
+        };
 
-       var result = await _pb.Files.GetUrl("posts", "post456", "image.png", options);
+        Result<string> result = await _pb.Files.GetUrl("posts", "post456", "image.png", options);
 
-       result.Value.Should().Contain("thumb=100x300f");
-       result.Value.Should().Contain("token=abc123");
-       result.Value.Should().Contain("download=true");
+        result.Value.Should().Contain("thumb=100x300f");
+        result.Value.Should().Contain("token=abc123");
+        result.Value.Should().Contain("download=true");
     }
 }

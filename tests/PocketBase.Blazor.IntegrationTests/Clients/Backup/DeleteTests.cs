@@ -2,6 +2,7 @@ namespace PocketBase.Blazor.IntegrationTests.Clients.Backup;
 
 using System.Threading;
 using System.Threading.Tasks;
+using Blazor.Responses.Backup;
 using Xunit;
 
 [Trait("Category", "Integration")]
@@ -19,21 +20,21 @@ public class DeleteTests
     public async Task DeleteAsync_ExistingBackup_ShouldSucceed()
     {
         // Arrange - Create a backup
-        var backupName = $"test-delete-{Guid.NewGuid():N}.zip";
+        string backupName = $"test-delete-{Guid.NewGuid():N}.zip";
         await _pb.Backup.CreateAsync(backupName);
 
         // Verify it exists
-        var listBefore = await _pb.Backup.GetFullListAsync();
+        Result<List<BackupInfoResponse>> listBefore = await _pb.Backup.GetFullListAsync();
         listBefore.Value.Should().Contain(b => b.Key!.Contains(backupName));
 
         // Act
-        var result = await _pb.Backup.DeleteAsync(backupName);
+        Result result = await _pb.Backup.DeleteAsync(backupName);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
 
         // Verify it's gone
-        var listAfter = await _pb.Backup.GetFullListAsync();
+        Result<List<BackupInfoResponse>> listAfter = await _pb.Backup.GetFullListAsync();
         listAfter.Value.Should().NotContain(b => b.Key!.Contains(backupName));
     }
 
@@ -41,17 +42,17 @@ public class DeleteTests
     public async Task DeleteAsync_WithInvalidName_ShouldSanitizeAndDelete()
     {
         // Arrange - Create with sanitized name
-        var originalName = "Test Delete@Backup.zip";
+        string originalName = "Test Delete@Backup.zip";
         await _pb.Backup.CreateAsync(originalName);
 
         // Act - Try to delete with original (invalid) name
-        var deleteResult = await _pb.Backup.DeleteAsync(originalName);
+        Result deleteResult = await _pb.Backup.DeleteAsync(originalName);
 
         // Assert - Should succeed due to sanitization
         deleteResult.IsSuccess.Should().BeTrue();
 
         // Verify backup is gone
-        var listAfter = await _pb.Backup.GetFullListAsync();
+        Result<List<BackupInfoResponse>> listAfter = await _pb.Backup.GetFullListAsync();
         listAfter.Value.Should().NotContain(b => b.Key!.Contains("test_delete_backup"));
     }
 
@@ -59,14 +60,14 @@ public class DeleteTests
     public async Task DeleteAsync_WhenUnauthenticated_ShouldFail()
     {
         // Arrange - Create a backup first
-        var backupName = $"test-unauth-delete-{Guid.NewGuid():N}";
+        string backupName = $"test-unauth-delete-{Guid.NewGuid():N}";
         await _pb.Backup.CreateAsync(backupName);
 
         try
         {
             // Act - Try to delete with unauthenticated client
-            await using var pb = new PocketBase(_pb.BaseUrl);
-            var result = await pb.Backup.DeleteAsync(backupName);
+            await using PocketBase pb = new PocketBase(_pb.BaseUrl);
+            Result result = await pb.Backup.DeleteAsync(backupName);
 
             // Assert
             result.IsSuccess.Should().BeFalse();
@@ -83,14 +84,14 @@ public class DeleteTests
     public async Task DeleteAsync_WithCancellationToken_ShouldRespectCancellation()
     {
         // Arrange - Create a backup first
-        var backupName = $"test-cancel-delete-{Guid.NewGuid():N}";
+        string backupName = $"test-cancel-delete-{Guid.NewGuid():N}";
         await _pb.Backup.CreateAsync(backupName);
 
-        var cts = new CancellationTokenSource();
+        CancellationTokenSource cts = new CancellationTokenSource();
         await cts.CancelAsync(); // Cancel immediately
 
         // Act
-        var act = async () => await _pb.Backup.DeleteAsync(backupName, cts.Token);
+        Func<Task<Result>> act = async () => await _pb.Backup.DeleteAsync(backupName, cts.Token);
 
         // Assert
         await act.Should().ThrowAsync<OperationCanceledException>();

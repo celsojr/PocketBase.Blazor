@@ -6,17 +6,17 @@ public static class JwtTokenValidator
 {
     public static DateTimeOffset? GetTokenExpiry(string token)
     {
-        var parts = token.Split('.', StringSplitOptions.RemoveEmptyEntries);
+        string[] parts = token.Split('.', StringSplitOptions.RemoveEmptyEntries);
         if (parts.Length != 3) return null;
 
-        var rawPayload = parts[1];
-        var payload = Encoding.UTF8.GetString(ParsePayload(rawPayload));
-        var encoded = JsonSerializer.Deserialize<IDictionary<string, object>>(payload)!;
+        string rawPayload = parts[1];
+        string payload = Encoding.UTF8.GetString(ParsePayload(rawPayload));
+        IDictionary<string, object> encoded = JsonSerializer.Deserialize<IDictionary<string, object>>(payload)!;
 
         if (encoded["exp"] is JsonElement jsonElement && jsonElement.ValueKind == JsonValueKind.Number)
         {
-            var exp = jsonElement.GetInt32();
-            var expiredAt = DateTimeOffset.FromUnixTimeSeconds(exp);
+            int exp = jsonElement.GetInt32();
+            DateTimeOffset expiredAt = DateTimeOffset.FromUnixTimeSeconds(exp);
             return expiredAt;
         }
         return null;

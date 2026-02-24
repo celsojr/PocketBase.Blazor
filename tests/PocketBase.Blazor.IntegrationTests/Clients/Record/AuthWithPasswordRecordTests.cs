@@ -1,5 +1,6 @@
 namespace PocketBase.Blazor.IntegrationTests.Clients.Record;
 
+using Blazor.Responses.Auth;
 using static IntegrationTests.Helpers.JwtTokenValidator;
 
 [Trait("Category", "Integration")]
@@ -18,7 +19,7 @@ public class AuthWithPasswordRecordTests
     [Fact]
     public async Task Auth_with_valid_credentials_returns_token()
     {
-        var result = await _pb.Collection("users")
+        Result<AuthResponse> result = await _pb.Collection("users")
             .AuthWithPasswordAsync(
                 _fixture.Settings.UserTesterEmail,
                 _fixture.Settings.UserTesterPassword
@@ -27,17 +28,17 @@ public class AuthWithPasswordRecordTests
         result.IsSuccess.Should().BeTrue();
         result.Value.Token.Should().NotBeNullOrEmpty();
 
-        var tokenParts = result.Value.Token.Split('.');
+        string[] tokenParts = result.Value.Token.Split('.');
         tokenParts.Should().HaveCount(3, "JWT tokens should have 3 parts");
 
-        var expiry = GetTokenExpiry(result.Value.Token);
+        DateTimeOffset? expiry = GetTokenExpiry(result.Value.Token);
         expiry.Should().BeAfter(DateTimeOffset.Now, "Token should not be expired");
     }
 
     [Fact]
     public async Task Auth_with_invalid_email_returns_error()
     {
-        var result = await _pb.Collection("users")
+        Result<AuthResponse> result = await _pb.Collection("users")
             .AuthWithPasswordAsync("wrong@email.com", _fixture.Settings.UserTesterPassword);
 
         result.IsSuccess.Should().BeFalse();
@@ -46,7 +47,7 @@ public class AuthWithPasswordRecordTests
     [Fact]
     public async Task Auth_with_invalid_password_returns_error()
     {
-        var result = await _pb.Collection("users")
+        Result<AuthResponse> result = await _pb.Collection("users")
             .AuthWithPasswordAsync(_fixture.Settings.UserTesterEmail, "wrongpassword");
 
         result.IsSuccess.Should().BeFalse();
@@ -70,7 +71,7 @@ public class AuthWithPasswordRecordTests
     [Fact]
     public async Task Auth_can_be_cancelled()
     {
-        using var cts = new CancellationTokenSource();
+        using CancellationTokenSource cts = new CancellationTokenSource();
         cts.CancelAfter(0); // Cancel immediately
 
         Func<Task> act = async () => await _pb.Collection("users")

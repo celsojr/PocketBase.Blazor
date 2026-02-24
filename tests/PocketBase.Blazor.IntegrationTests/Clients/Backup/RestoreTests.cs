@@ -33,7 +33,7 @@ public class RestoreTests
         }
 
         // Arrange - Create a backup
-        var backupName = $"restore-test-{Guid.NewGuid():N}.zip";
+        string backupName = $"restore-test-{Guid.NewGuid():N}.zip";
         await _pb.Backup.CreateAsync(backupName);
 
         await Task.Delay(2000); // Wait for backup
@@ -41,7 +41,7 @@ public class RestoreTests
         try
         {
             // Act
-            var result = await _pb.Backup.RestoreAsync(backupName);
+            Result result = await _pb.Backup.RestoreAsync(backupName);
 
             // Assert
             result.IsSuccess.Should().BeTrue();
@@ -59,10 +59,10 @@ public class RestoreTests
     public async Task RestoreAsync_NonExistentBackup_ShouldFail()
     {
         // Arrange
-        var nonExistent = $"non-existent-{Guid.NewGuid():N}.zip";
+        string nonExistent = $"non-existent-{Guid.NewGuid():N}.zip";
 
         // Act
-        var result = await _pb.Backup.RestoreAsync(nonExistent);
+        Result result = await _pb.Backup.RestoreAsync(nonExistent);
 
         // Assert
         result.IsSuccess.Should().BeFalse();
@@ -73,7 +73,7 @@ public class RestoreTests
     public async Task RestoreAsync_WhenUnauthenticated_ShouldFail()
     {
         // Arrange - Create a backup first
-        var backupName = $"restore-unauth-{Guid.NewGuid():N}.zip";
+        string backupName = $"restore-unauth-{Guid.NewGuid():N}.zip";
         await _pb.Backup.CreateAsync(backupName);
 
         await Task.Delay(2000);
@@ -81,8 +81,8 @@ public class RestoreTests
         try
         {
             // Act - Try to restore with unauthenticated client
-            await using var pb = new PocketBase(_pb.BaseUrl);
-            var result = await pb.Backup.RestoreAsync(backupName);
+            await using PocketBase pb = new PocketBase(_pb.BaseUrl);
+            Result result = await pb.Backup.RestoreAsync(backupName);
 
             // Assert
             result.IsSuccess.Should().BeFalse();
@@ -108,7 +108,7 @@ public class RestoreTests
         }
 
         // Arrange - Create a backup with sanitized name
-        var originalName = "Test Restore@Backup.zip";
+        string originalName = "Test Restore@Backup.zip";
         await _pb.Backup.CreateAsync(originalName);
 
         await Task.Delay(2000);
@@ -116,7 +116,7 @@ public class RestoreTests
         try
         {
             // Act - Try to restore with original (invalid) name
-            var result = await _pb.Backup.RestoreAsync(originalName);
+            Result result = await _pb.Backup.RestoreAsync(originalName);
 
             // Assert - Should succeed due to sanitization
             result.IsSuccess.Should().BeTrue();
@@ -141,18 +141,18 @@ public class RestoreTests
         }
 
         // Arrange - Create a backup first
-        var backupName = $"restore-cancel-{Guid.NewGuid():N}";
+        string backupName = $"restore-cancel-{Guid.NewGuid():N}";
         await _pb.Backup.CreateAsync(backupName);
 
         await Task.Delay(2000);
 
-        var cts = new CancellationTokenSource();
+        CancellationTokenSource cts = new CancellationTokenSource();
         await cts.CancelAsync(); // Cancel immediately
 
         try
         {
             // Act
-            var act = async () => await _pb.Backup.RestoreAsync(backupName, cts.Token);
+            Func<Task<Result>> act = async () => await _pb.Backup.RestoreAsync(backupName, cts.Token);
 
             // Assert
             await act.Should().ThrowAsync<OperationCanceledException>();
@@ -168,7 +168,7 @@ public class RestoreTests
     public async Task RestoreAsync_EmptyKey_ShouldThrowArgumentException()
     {
         // Act
-        var act = async () => await _pb.Backup.RestoreAsync("");
+        Func<Task<Result>> act = async () => await _pb.Backup.RestoreAsync("");
 
         // Assert
         await act.Should().ThrowAsync<ArgumentException>();
@@ -178,7 +178,7 @@ public class RestoreTests
     public async Task RestoreAsync_WhitespaceKey_ShouldThrowArgumentException()
     {
         // Act
-        var act = async () => await _pb.Backup.RestoreAsync("   ");
+        Func<Task<Result>> act = async () => await _pb.Backup.RestoreAsync("   ");
 
         // Assert
         await act.Should().ThrowAsync<ArgumentException>();
@@ -199,8 +199,8 @@ public class RestoreTests
         // WARNING: This is a destructive test - only run in isolated environment
 
         // 1. Create test data
-        var collectionName = $"restore_test_{Guid.NewGuid():N}"[..20];
-        var result = await _pb.Collections.CreateAsync<CollectionModel>(new
+        string collectionName = $"restore_test_{Guid.NewGuid():N}"[..20];
+        Result<CollectionModel> result = await _pb.Collections.CreateAsync<CollectionModel>(new
         {
             name = collectionName,
             type = "base",
@@ -212,7 +212,7 @@ public class RestoreTests
             .CreateAsync<RecordResponse>(new { title = "Test Record" });
 
         // 3. Create backup
-        var backupName = $"integration-restore-{Guid.NewGuid():N}.zip";
+        string backupName = $"integration-restore-{Guid.NewGuid():N}.zip";
         await _pb.Backup.CreateAsync(backupName);
         await Task.Delay(2000);
 
@@ -222,12 +222,12 @@ public class RestoreTests
             await _pb.Collections.DeleteAsync(collectionName);
 
             // 5. Restore backup
-            var restoreResult = await _pb.Backup.RestoreAsync(backupName);
+            Result restoreResult = await _pb.Backup.RestoreAsync(backupName);
             restoreResult.IsSuccess.Should().BeTrue();
 
             // 6. Verify collection was restored
             await Task.Delay(2000); // Wait for restore
-            var collections = await _pb.Collections.GetListAsync<CollectionModel>();
+            Result<ListResult<CollectionModel>> collections = await _pb.Collections.GetListAsync<CollectionModel>();
             collections.Value.Items.Should().Contain(c => c.Name == collectionName);
         }
         finally

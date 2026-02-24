@@ -1,5 +1,6 @@
 namespace PocketBase.Blazor.IntegrationTests.Clients.Collections;
 
+using Blazor.Models;
 using Blazor.Models.Collection;
 using Blazor.Models.Collection.Fields;
 
@@ -17,7 +18,7 @@ public class UpdateTest
     [Fact]
     public async Task Update_collection_successfully()
     {
-        var createResult = await _pb.Collections.CreateAsync(
+        Result<CollectionModel> createResult = await _pb.Collections.CreateAsync(
             new BaseCollectionCreateModel
             {
                 Name = "exampleToUpdate",
@@ -34,7 +35,7 @@ public class UpdateTest
 
         createResult.IsSuccess.Should().BeTrue();
 
-        var updateResult = await _pb.Collections.UpdateAsync(
+        Result<CollectionModel> updateResult = await _pb.Collections.UpdateAsync(
             createResult.Value.Id,
             new BaseCollectionUpdateModel
             {

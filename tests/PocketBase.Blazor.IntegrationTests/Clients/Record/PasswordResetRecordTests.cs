@@ -2,6 +2,7 @@ namespace PocketBase.Blazor.IntegrationTests.Clients.Record;
 
 using Blazor.Models;
 using Blazor.Responses;
+using Blazor.Responses.Auth;
 using Helpers.MailHog;
 
 [Trait("Category", "Integration")]
@@ -19,7 +20,7 @@ public class PasswordResetRecordTests : IAsyncLifetime
     {
         _pb = fixture.Client;
 
-        var options = new MailHogOptions
+        MailHogOptions options = new MailHogOptions
         {
             BaseUrl = "http://localhost:8027"
         };
@@ -29,7 +30,7 @@ public class PasswordResetRecordTests : IAsyncLifetime
     public async Task InitializeAsync()
     {
         // Configure SMTP
-        var smtpResult = await _pb.Settings.UpdateAsync(new
+        Result smtpResult = await _pb.Settings.UpdateAsync(new
         {
             smtp = new
             {
@@ -65,12 +66,12 @@ public class PasswordResetRecordTests : IAsyncLifetime
     public async Task DisposeAsync()
     {
         // Clean up PocketBase collection
-        var listResult = await _pb.Collections
+        Result<ListResult<CollectionModel>> listResult = await _pb.Collections
             .GetListAsync<CollectionModel>(options: new ListOptions { SkipTotal = true });
 
         listResult.IsSuccess.Should().BeTrue();
 
-        var collection = listResult.Value.Items
+        CollectionModel? collection = listResult.Value.Items
             .FirstOrDefault(c => c.Name?.Equals(CollectionName) == true);
 
         if (collection?.Id != null)
@@ -92,7 +93,7 @@ public class PasswordResetRecordTests : IAsyncLifetime
     [Fact]
     public async Task RequestPasswordResetAsync_WithValidEmail_ReturnsSuccess()
     {
-        var result = await _pb.Collection(CollectionName)
+        Result result = await _pb.Collection(CollectionName)
             .RequestPasswordResetAsync(TestEmail);
 
         // API returns success even if email is not sent (security feature)
@@ -102,7 +103,7 @@ public class PasswordResetRecordTests : IAsyncLifetime
     [Fact]
     public async Task RequestPasswordResetAsync_WithInvalidEmail_ReturnsSuccess()
     {
-        var result = await _pb.Collection(CollectionName)
+        Result result = await _pb.Collection(CollectionName)
             .RequestPasswordResetAsync("nonexistent@example.com");
 
         // API returns success even for non-existent emails (security feature)
@@ -114,19 +115,19 @@ public class PasswordResetRecordTests : IAsyncLifetime
     public async Task ConfirmPasswordResetAsync_WithValidToken_ReturnsSuccess()
     {
         // Arrange - Preserve current admin session for post-test cleanup
-        var adminSession = _pb.AuthStore.CurrentSession;
+        AuthResponse? adminSession = _pb.AuthStore.CurrentSession;
 
         // Trigger password reset email for the target user
         await _pb.Collection(CollectionName)
             .RequestPasswordResetAsync(TestEmail);
 
         // Retrieve reset token from MailHog
-        var token = await _mailHogService
+        string? token = await _mailHogService
             .GetLatestTokenAsync(TestEmail, VerificationType.PasswordReset);
         token.Should().NotBeNull();
 
         // Confirm password reset using the retrieved token
-        var result = await _pb.Collection(CollectionName)
+        Result result = await _pb.Collection(CollectionName)
             .ConfirmPasswordResetAsync(token, NewPassword, NewPassword);
 
         result.IsSuccess.Should().BeTrue();
@@ -136,7 +137,7 @@ public class PasswordResetRecordTests : IAsyncLifetime
         _pb.AuthStore.CurrentSession.Should().BeNull();
 
         // Verify we can authenticate with the new password
-        var authResult = await _pb.Collection(CollectionName)
+        Result<AuthResponse> authResult = await _pb.Collection(CollectionName)
             .AuthWithPasswordAsync(TestEmail, NewPassword);
 
         authResult.IsSuccess.Should().BeTrue();
@@ -152,7 +153,7 @@ public class PasswordResetRecordTests : IAsyncLifetime
     [Fact]
     public async Task ConfirmPasswordResetAsync_WithInvalidToken_ReturnsSuccess()
     {
-        var result = await _pb.Collection(CollectionName)
+        Result result = await _pb.Collection(CollectionName)
             .ConfirmPasswordResetAsync("invalid-token", NewPassword, NewPassword);
 
         // API returns success even for invalid token (security feature)
@@ -167,12 +168,12 @@ public class PasswordResetRecordTests : IAsyncLifetime
         await _pb.Collection(CollectionName)
             .RequestPasswordResetAsync(TestEmail);
 
-        var token = await _mailHogService
+        string? token = await _mailHogService
             .GetLatestTokenAsync(TestEmail, VerificationType.PasswordReset);
 
         token.Should().NotBeNull();
 
-        var result = await _pb.Collection(CollectionName)
+        Result result = await _pb.Collection(CollectionName)
             .ConfirmPasswordResetAsync(token, NewPassword, "DifferentPassword123!");
 
         // API returns success even for different passwords (security feature)
@@ -188,12 +189,12 @@ public class PasswordResetRecordTests : IAsyncLifetime
         await _pb.Collection(CollectionName)
             .RequestPasswordResetAsync(TestEmail);
 
-        var token = await _mailHogService
+        string? token = await _mailHogService
             .GetLatestTokenAsync(TestEmail, VerificationType.PasswordReset);
 
         token.Should().NotBeNull();
 
-        var result = await _pb.Collection(CollectionName)
+        Result result = await _pb.Collection(CollectionName)
             .ConfirmPasswordResetAsync(token, "weak", "weak");
 
         result.IsSuccess.Should().BeTrue();

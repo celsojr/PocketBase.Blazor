@@ -19,7 +19,7 @@ public class GetOneTests
     [Fact]
     public async Task Get_one_collection_by_id()
     {
-        var listResult = await _pb.Collections.GetListAsync<CollectionModel>(
+        Result<ListResult<CollectionModel>> listResult = await _pb.Collections.GetListAsync<CollectionModel>(
             perPage: 1,
             options: new ListOptions()
             { 
@@ -27,9 +27,9 @@ public class GetOneTests
             });
 
         listResult.IsSuccess.Should().BeTrue();
-        var collectionId = listResult.Value.Items.First().Id;
+        string collectionId = listResult.Value.Items.First().Id;
 
-        var getResult = await _pb.Collections.GetOneAsync<CollectionModel>(collectionId);
+        Result<CollectionModel> getResult = await _pb.Collections.GetOneAsync<CollectionModel>(collectionId);
         getResult.IsSuccess.Should().BeTrue();
         getResult.Value.Id.Should().Be(collectionId);
     }
@@ -37,7 +37,7 @@ public class GetOneTests
     [Fact]
     public async Task Get_one_with_invalid_id_returns_error()
     {
-        var result = await _pb.Collections
+        Result<CollectionModel> result = await _pb.Collections
             .GetOneAsync<CollectionModel>("invalid-id-that-doesnt-exist");
 
         result.IsSuccess.Should().BeFalse();
@@ -46,7 +46,7 @@ public class GetOneTests
     [Fact]
     public async Task Get_one_with_empty_id_returns_error_result()
     {
-        var result = await _pb.Collections
+        Result<CollectionModel> result = await _pb.Collections
             .GetOneAsync<CollectionModel>("");
 
         result.IsSuccess.Should().BeFalse();
@@ -60,7 +60,7 @@ public class GetOneTests
     [Fact]
     public async Task Get_one_with_whitespace_id_returns_error_result()
     {
-        var result = await _pb.Collections
+        Result<CollectionModel> result = await _pb.Collections
             .GetOneAsync<CollectionModel>("   ");
 
         result.IsSuccess.Should().BeFalse();
@@ -74,7 +74,7 @@ public class GetOneTests
     [Fact]
     public async Task Get_one_with_null_id_returns_error_result()
     {
-        var result = await _pb.Collections
+        Result<CollectionModel> result = await _pb.Collections
             .GetOneAsync<CollectionModel>(null!);
 
         result.IsSuccess.Should().BeFalse();
@@ -88,16 +88,16 @@ public class GetOneTests
     [Fact]
     public async Task Get_one_with_fields_option()
     {
-        var listResult = await _pb.Collections.GetListAsync<CollectionModel>(
+        Result<ListResult<CollectionModel>> listResult = await _pb.Collections.GetListAsync<CollectionModel>(
             perPage: 1,
             options: new ListOptions()
             { 
                 SkipTotal = true
             });
 
-        var collectionId = listResult.Value.Items.First().Id;
+        string collectionId = listResult.Value.Items.First().Id;
 
-        var result = await _pb.Collections.GetOneAsync<CollectionModel>(
+        Result<CollectionModel> result = await _pb.Collections.GetOneAsync<CollectionModel>(
             collectionId,
             options: new ListOptions { Fields = "id,name,created" });
 
@@ -111,16 +111,16 @@ public class GetOneTests
     [Fact]
     public async Task Get_one_returns_complete_model_data()
     {
-        var listResult = await _pb.Collections.GetListAsync<CollectionModel>(
+        Result<ListResult<CollectionModel>> listResult = await _pb.Collections.GetListAsync<CollectionModel>(
             perPage: 1,
             options: new ListOptions()
             { 
                 SkipTotal = true
             });
 
-        var collection = listResult.Value.Items.First();
+        CollectionModel collection = listResult.Value.Items.First();
 
-        var getResult = await _pb.Collections
+        Result<CollectionModel> getResult = await _pb.Collections
             .GetOneAsync<CollectionModel>(collection.Id);
 
         getResult.IsSuccess.Should().BeTrue();
@@ -136,16 +136,16 @@ public class GetOneTests
     [Fact]
     public async Task Get_one_with_custom_model_type()
     {
-        var listResult = await _pb.Collections.GetListAsync<CollectionModel>(
+        Result<ListResult<CollectionModel>> listResult = await _pb.Collections.GetListAsync<CollectionModel>(
             perPage: 1,
             options: new ListOptions()
             { 
                 SkipTotal = true
             });
 
-        var collectionId = listResult.Value.Items.First().Id;
+        string collectionId = listResult.Value.Items.First().Id;
 
-        var result = await _pb.Collections
+        Result<MinimalCollectionModel> result = await _pb.Collections
             .GetOneAsync<MinimalCollectionModel>(collectionId);
 
         result.IsSuccess.Should().BeTrue();
@@ -158,16 +158,16 @@ public class GetOneTests
     [Fact]
     public async Task Get_one_respects_cancellation_token()
     {
-        var listResult = await _pb.Collections.GetListAsync<CollectionModel>(
+        Result<ListResult<CollectionModel>> listResult = await _pb.Collections.GetListAsync<CollectionModel>(
             perPage: 1,
             options: new ListOptions()
             { 
                 SkipTotal = true
             });
 
-        var collectionId = listResult.Value.Items.First().Id;
+        string collectionId = listResult.Value.Items.First().Id;
 
-        using var cts = new CancellationTokenSource();
+        using CancellationTokenSource cts = new CancellationTokenSource();
         cts.CancelAfter(0); // Cancel immediately
 
         Func<Task> act = async () => await _pb.Collections
@@ -179,17 +179,17 @@ public class GetOneTests
     [Fact]
     public async Task Get_one_returns_quickly_for_existing_collection()
     {
-        var listResult = await _pb.Collections.GetListAsync<CollectionModel>(
+        Result<ListResult<CollectionModel>> listResult = await _pb.Collections.GetListAsync<CollectionModel>(
             perPage: 1,
             options: new ListOptions()
             { 
                 SkipTotal = true
             });
 
-        var collectionId = listResult.Value.Items.First().Id;
+        string collectionId = listResult.Value.Items.First().Id;
 
-        var stopwatch = Stopwatch.StartNew();
-        var result = await _pb.Collections
+        Stopwatch stopwatch = Stopwatch.StartNew();
+        Result<CollectionModel> result = await _pb.Collections
             .GetOneAsync<CollectionModel>(collectionId);
         stopwatch.Stop();
 
@@ -200,13 +200,13 @@ public class GetOneTests
     [Fact]
     public async Task Get_one_can_be_called_concurrently()
     {
-        var listResult = await _pb.Collections.GetListAsync<CollectionModel>();
-        var collectionIds = listResult.Value.Items.Take(3).Select(c => c.Id).ToList();
+        Result<ListResult<CollectionModel>> listResult = await _pb.Collections.GetListAsync<CollectionModel>();
+        List<string> collectionIds = listResult.Value.Items.Take(3).Select(c => c.Id).ToList();
 
-        var tasks = collectionIds.Select(id =>
+        IEnumerable<Task<Result<CollectionModel>>> tasks = collectionIds.Select(id =>
             _pb.Collections.GetOneAsync<CollectionModel>(id));
 
-        var results = await Task.WhenAll(tasks);
+        Result<CollectionModel>[] results = await Task.WhenAll(tasks);
 
         results.Should().AllSatisfy(r => r.IsSuccess.Should().BeTrue());
         results.Select(r => r.Value.Id).Should().BeEquivalentTo(collectionIds);
@@ -215,7 +215,7 @@ public class GetOneTests
     [Fact]
     public async Task Get_one_system_collection()
     {
-        var listResult = await _pb.Collections
+        Result<ListResult<CollectionModel>> listResult = await _pb.Collections
             .GetListAsync<CollectionModel>(
             perPage: 1,
             options: new ListOptions()
@@ -224,8 +224,8 @@ public class GetOneTests
                 SkipTotal = true,
             });
 
-        var systemCollection = listResult.Value.Items.First();
-        var result = await _pb.Collections
+        CollectionModel systemCollection = listResult.Value.Items.First();
+        Result<CollectionModel> result = await _pb.Collections
             .GetOneAsync<CollectionModel>(systemCollection.Id);
 
         result.IsSuccess.Should().BeTrue();
@@ -235,7 +235,7 @@ public class GetOneTests
     [Fact]
     public async Task Get_one_base_collection()
     {
-        var listResult = await _pb.Collections
+        Result<ListResult<CollectionModel>> listResult = await _pb.Collections
             .GetListAsync<CollectionModel>(
             perPage: 1,
             options: new ListOptions()
@@ -244,8 +244,8 @@ public class GetOneTests
                 SkipTotal = true,
             });
 
-        var baseCollection = listResult.Value.Items.First();
-        var result = await _pb.Collections
+        CollectionModel baseCollection = listResult.Value.Items.First();
+        Result<CollectionModel> result = await _pb.Collections
             .GetOneAsync<CollectionModel>(baseCollection.Id);
 
         result.IsSuccess.Should().BeTrue();
@@ -255,7 +255,7 @@ public class GetOneTests
     [Fact]
     public async Task Get_one_view_collection()
     {
-        var listResult = await _pb.Collections
+        Result<ListResult<CollectionModel>> listResult = await _pb.Collections
             .GetListAsync<CollectionModel>(
             perPage: 1,
             options: new ListOptions()
@@ -266,8 +266,8 @@ public class GetOneTests
 
         if (listResult.Value.Items.Count != 0)
         {
-            var viewCollection = listResult.Value.Items.First();
-            var result = await _pb.Collections
+            CollectionModel viewCollection = listResult.Value.Items.First();
+            Result<CollectionModel> result = await _pb.Collections
                 .GetOneAsync<CollectionModel>(viewCollection.Id);
 
             result.IsSuccess.Should().BeTrue();

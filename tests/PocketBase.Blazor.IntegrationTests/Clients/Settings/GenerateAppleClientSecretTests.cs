@@ -1,6 +1,7 @@
 namespace PocketBase.Blazor.IntegrationTests.Clients.Settings;
 
 using Blazor.Requests.Settings;
+using Blazor.Responses.Auth;
 
 [Trait("Category", "Integration")]
 [Collection("PocketBase.Blazor.Admin")]
@@ -102,7 +103,7 @@ public class GenerateAppleClientSecretTests
     [Fact]
     public async Task GenerateAppleClientSecretAsync_Fails_WithInvalidCredentials()
     {
-        var result = await _pb.Settings.GenerateAppleClientSecretAsync(
+        Result<AppleClientSecretResponse> result = await _pb.Settings.GenerateAppleClientSecretAsync(
             new ClientSecretConfigRequest
             {
                 ClientId = "com.example.app",
@@ -127,15 +128,15 @@ public class GenerateAppleClientSecretTests
         // Use .gitignore for local secret files
         // Rotate keys regularly
 
-        var clientId = Environment.GetEnvironmentVariable("APPLE_CLIENT_ID");
-        var teamId = Environment.GetEnvironmentVariable("APPLE_TEAM_ID");
-        var keyId = Environment.GetEnvironmentVariable("APPLE_KEY_ID");
-        var privateKey = Environment.GetEnvironmentVariable("APPLE_PRIVATE_KEY");
+        string? clientId = Environment.GetEnvironmentVariable("APPLE_CLIENT_ID");
+        string? teamId = Environment.GetEnvironmentVariable("APPLE_TEAM_ID");
+        string? keyId = Environment.GetEnvironmentVariable("APPLE_KEY_ID");
+        string? privateKey = Environment.GetEnvironmentVariable("APPLE_PRIVATE_KEY");
 
         // var privateKey = await File.ReadAllTextAsync("/etc/secrets/apple-private-key.pem");
         // Set file permissions: chmod 600 /etc/secrets/apple-private-key.pem
 
-        var result = await _pb.Settings.GenerateAppleClientSecretAsync(
+        Result<AppleClientSecretResponse> result = await _pb.Settings.GenerateAppleClientSecretAsync(
             new ClientSecretConfigRequest
             {
                 ClientId = clientId,
@@ -152,7 +153,7 @@ public class GenerateAppleClientSecretTests
     [Fact]
     public async Task GenerateAppleClientSecretAsync_Fails_WhenDurationTooLarge()
     {
-        var result = await _pb.Settings.GenerateAppleClientSecretAsync(
+        Result<AppleClientSecretResponse> result = await _pb.Settings.GenerateAppleClientSecretAsync(
             new ClientSecretConfigRequest
             {
                 ClientId = "com.example.app",

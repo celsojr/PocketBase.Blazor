@@ -18,7 +18,7 @@ public class UpdateRecordTests
     public async Task Update_post_successfully()
     {
         // Arrange
-        var firstCategoryResult = await _pb.Collection("categories")
+        Result<RecordResponse> firstCategoryResult = await _pb.Collection("categories")
             .CreateAsync<RecordResponse>(new
             {
                 name = "Test Category 1",
@@ -26,8 +26,8 @@ public class UpdateRecordTests
             });
     
         firstCategoryResult.IsSuccess.Should().BeTrue();
-    
-        var anotherCategoryResult = await _pb.Collection("categories")
+
+        Result<RecordResponse> anotherCategoryResult = await _pb.Collection("categories")
             .CreateAsync<RecordResponse>(new
             {
                 name = "Test Category 2", 
@@ -35,12 +35,12 @@ public class UpdateRecordTests
             });
     
         anotherCategoryResult.IsSuccess.Should().BeTrue();
-    
-        var categoryId = firstCategoryResult.Value.Id;
-        var anotherCategoryId = anotherCategoryResult.Value.Id;
+
+        string categoryId = firstCategoryResult.Value.Id;
+        string anotherCategoryId = anotherCategoryResult.Value.Id;
 
         // Create the Post
-        var postRequest = new PostCreateRequest
+        PostCreateRequest postRequest = new PostCreateRequest
         {
             Category = categoryId,
             Slug = "test-post",
@@ -50,15 +50,15 @@ public class UpdateRecordTests
             IsPublished = false
         };
 
-        var createResult = await _pb.Collection("posts")
+        Result<PostResponse> createResult = await _pb.Collection("posts")
             .CreateAsync<PostResponse>(postRequest);
 
         createResult.IsSuccess.Should().BeTrue();
-        var post = createResult.Value;
-        var postId = post.Id;
+        PostResponse post = createResult.Value;
+        string postId = post.Id;
 
         // Act
-        var updateRequest = new PostCreateRequest
+        PostCreateRequest updateRequest = new PostCreateRequest
         {
             Category = anotherCategoryId,
             Slug = $"{post.Slug}-updated",
@@ -67,13 +67,13 @@ public class UpdateRecordTests
             IsPublished = true
         };
 
-        var updateResult = await _pb.Collection("posts")
+        Result<PostResponse> updateResult = await _pb.Collection("posts")
             .UpdateAsync<PostResponse>(postId, updateRequest);
 
         // Assert
         updateResult.IsSuccess.Should().BeTrue();
 
-        var updatedPost = updateResult.Value;
+        PostResponse updatedPost = updateResult.Value;
         updatedPost.Should().NotBeNull();
         updatedPost.Id.Should().Be(postId);
         updatedPost.Title.Should().Be($"{post.Title} Updated");
@@ -81,9 +81,9 @@ public class UpdateRecordTests
         updatedPost.Category.Should().Be(anotherCategoryId);
         updatedPost.IsPublished.Should().BeTrue();
         updatedPost.Content.Should().Be("Updated content");
-    
+
         // Verify the update persisted
-        var getResult = await _pb.Collection("posts")
+        Result<PostResponse> getResult = await _pb.Collection("posts")
             .GetOneAsync<PostResponse>(postId);
 
         getResult.IsSuccess.Should().BeTrue();
@@ -91,4 +91,3 @@ public class UpdateRecordTests
         getResult.Value.Category.Should().Be(anotherCategoryId);
     }
 }
-

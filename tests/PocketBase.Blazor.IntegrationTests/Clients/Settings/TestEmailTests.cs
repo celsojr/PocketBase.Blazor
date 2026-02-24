@@ -28,7 +28,7 @@ public class TestEmailTests
     [Fact]
     public async Task TestEmailAsync_Fails_WhenSmtpNotConfigured()
     {
-        var result = await _pb.Settings.TestEmailAsync("users", "test@example.com", "verification");
+        Result<bool> result = await _pb.Settings.TestEmailAsync("users", "test@example.com", "verification");
 
         result.IsSuccess.Should().BeFalse();
     }
@@ -53,7 +53,7 @@ public class TestEmailTests
         });
 
         // Null collection name or id fallbacks to _superusers collection if not set
-        var result = await _pb.Settings.TestEmailAsync(null!, "recipient@example.com", "verification");
+        Result<bool> result = await _pb.Settings.TestEmailAsync(null!, "recipient@example.com", "verification");
     
         result.IsSuccess.Should().BeTrue();
     }

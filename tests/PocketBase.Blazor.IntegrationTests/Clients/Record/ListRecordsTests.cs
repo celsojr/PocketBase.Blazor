@@ -1,5 +1,6 @@
 namespace PocketBase.Blazor.IntegrationTests.Clients.Record;
 
+using Blazor.Models;
 using IntegrationTests.Helpers;
 using Responses;
 
@@ -17,7 +18,7 @@ public class ListRecordsTests
     [Fact]
     public async Task List_posts_returns_items_as_objects()
     {
-        var result = await _pb
+        Result<ListResult<object>> result = await _pb
             .Collection("posts")
             .GetListAsync<object>();
 
@@ -35,7 +36,7 @@ public class ListRecordsTests
     [Fact]
     public async Task List_posts_returns_items()
     {
-        var result = await _pb
+        Result<ListResult<RecordResponse>> result = await _pb
             .Collection("posts")
             .GetListAsync<RecordResponse>();
 
@@ -46,7 +47,7 @@ public class ListRecordsTests
     [Fact]
     public async Task GetList_respects_page_and_perPage()
     {
-        var result = await _pb
+        Result<ListResult<RecordResponse>> result = await _pb
             .Collection("posts")
             .GetListAsync<RecordResponse>(page: 1, perPage: 3);
 
@@ -60,7 +61,7 @@ public class ListRecordsTests
     [Fact]
     public async Task GetList_applies_filter()
     {
-        var result = await _pb
+        Result<ListResult<RecordResponse>> result = await _pb
             .Collection("posts")
             .GetListAsync<RecordResponse>(
                 options: new ListOptions
@@ -77,9 +78,9 @@ public class ListRecordsTests
     [Fact]
     public async Task GetList_requires_auth_when_rules_apply()
     {
-        await using var unauthenticatedPb = new PocketBase(_pb.BaseUrl);
+        await using PocketBase unauthenticatedPb = new PocketBase(_pb.BaseUrl);
 
-        var result = await unauthenticatedPb
+        Result<ListResult<RecordResponse>> result = await unauthenticatedPb
             .Collection("posts")
             .GetListAsync<RecordResponse>();
 
@@ -90,7 +91,7 @@ public class ListRecordsTests
     [Fact]
     public async Task Get_posts_with_expanded_category_should_include_category_data()
     {
-        var result = await _pb.Collection("posts")
+        Result<ListResult<PostResponse>> result = await _pb.Collection("posts")
             .GetListAsync<PostResponse>(
                 perPage: 1,
                 options: new ListOptions()
@@ -101,18 +102,18 @@ public class ListRecordsTests
 
         result.Value.Items.Should().NotBeEmpty();
 
-        var post = result.Value.Items.First();
+        PostResponse post = result.Value.Items.First();
         post.Expand.Should().NotBeNull();
         post.Expand.Should().ContainKey("category");
 
-        var fieldExpansion = post.Expand["category"];
+        JsonElement? fieldExpansion = post.Expand["category"];
         fieldExpansion.Should().NotBeNull();
 
-        var options = new PocketBaseOptions();
+        PocketBaseOptions options = new PocketBaseOptions();
         options.JsonSerializerOptions.WriteIndented = true;
 
-        var fieldJson = JsonSerializer.Serialize(fieldExpansion, options.JsonSerializerOptions);
-        var category = JsonSerializer.Deserialize<CategoryResponse>(fieldJson, options.JsonSerializerOptions);
+        string fieldJson = JsonSerializer.Serialize(fieldExpansion, options.JsonSerializerOptions);
+        CategoryResponse? category = JsonSerializer.Deserialize<CategoryResponse>(fieldJson, options.JsonSerializerOptions);
 
         category.Should().NotBeNull();
         category.Name.Should().NotBeNullOrWhiteSpace();

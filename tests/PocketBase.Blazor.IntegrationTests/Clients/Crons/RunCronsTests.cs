@@ -17,14 +17,14 @@ public class RunCronsTests
     public async Task RunAsync_with_valid_id_should_succeed()
     {
         // Arrange
-        var cronList = await _pb.Crons.GetFullListAsync();
-        var existingCron = cronList.Value.FirstOrDefault();
+        Result<IEnumerable<Responses.Cron.CronsResponse>> cronList = await _pb.Crons.GetFullListAsync();
+        Responses.Cron.CronsResponse? existingCron = cronList.Value.FirstOrDefault();
  
         existingCron.Should().NotBeNull();
         existingCron.Id.Should().NotBeNullOrWhiteSpace();
 
         // Act
-        var result = await _pb.Crons.RunAsync(existingCron.Id);
+        Result result = await _pb.Crons.RunAsync(existingCron.Id);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
@@ -34,7 +34,7 @@ public class RunCronsTests
     public async Task RunAsync_with_invalid_id_should_fail()
     {
         // Act
-        var result = await _pb.Crons.RunAsync("non_existent_id");
+        Result result = await _pb.Crons.RunAsync("non_existent_id");
 
         // Assert
         result.IsSuccess.Should().BeFalse();
@@ -48,7 +48,7 @@ public class RunCronsTests
         const string logsCleanupId = "__pbLogsCleanup__";
 
         // Act
-        var result = await _pb.Crons.RunAsync(logsCleanupId);
+        Result result = await _pb.Crons.RunAsync(logsCleanupId);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
@@ -79,11 +79,11 @@ public class RunCronsTests
     public async Task Running_crons_should_fail_when_not_admin()
     {
         // Arrange - Get the built-in logs cleanup cron
-        await using var client = new PocketBase(_fixture.Settings.BaseUrl);
+        await using PocketBase client = new PocketBase(_fixture.Settings.BaseUrl);
         const string logsCleanupId = "__pbLogsCleanup__";
 
         // Act
-        var result = await client.Crons.RunAsync(logsCleanupId);
+        Result result = await client.Crons.RunAsync(logsCleanupId);
 
         // Assert
         result.IsSuccess.Should().BeFalse();

@@ -1,5 +1,7 @@
 namespace PocketBase.Blazor.IntegrationTests.Clients.Settings;
 
+using Blazor.Responses.Settings;
+
 [Trait("Category", "Integration")]
 [Collection("PocketBase.Blazor.Admin")]
 public class ListSettingsTests
@@ -15,7 +17,7 @@ public class ListSettingsTests
     public async Task GetAsync_ReturnsSettings()
     {
         // Arrange & Act
-        var result = await _pb.Settings.GetListAsync();
+        Result<SettingsResponse> result = await _pb.Settings.GetListAsync();
 
         // Assert
         result.IsSuccess.Should().BeTrue();

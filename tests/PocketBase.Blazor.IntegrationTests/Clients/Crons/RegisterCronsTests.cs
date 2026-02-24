@@ -1,6 +1,7 @@
 namespace PocketBase.Blazor.IntegrationTests.Clients.Crons;
 
 using Blazor.Requests;
+using Blazor.Responses.Cron;
 
 [Trait("Category", "Integration")]
 [Collection("PocketBase.Blazor.Admin")]
@@ -16,9 +17,9 @@ public class RegisterCronsTests
     public async Task Register_and_run_cron_successfully()
     {
         // Arrange
-        var cronId = "hello";
-        var expression = "*/2 * * * *"; // Every 2 minutes
-        var payload = new Dictionary<string, object?>
+        string cronId = "hello";
+        string expression = "*/2 * * * *"; // Every 2 minutes
+        Dictionary<string, object?> payload = new Dictionary<string, object?>
         {
             ["name"] = "Pocketbase.Blazor!",
             ["count"] = 7
@@ -28,7 +29,7 @@ public class RegisterCronsTests
         // using a custom self-hosted extended PocketBase instance
 
         // Act: register (or update) a cron
-        var registerResult = await _pb.Crons.RegisterAsync(
+        Result<CronRegisterResponse> registerResult = await _pb.Crons.RegisterAsync(
             new CronRegisterRequest
             {
                 Id = cronId,
@@ -43,7 +44,7 @@ public class RegisterCronsTests
         registerResult.Value!.Status.Should().Be("cron registered");
 
         // Act: list crons
-        var listResult = await _pb.Crons.GetFullListAsync();
+        Result<IEnumerable<CronsResponse>> listResult = await _pb.Crons.GetFullListAsync();
 
         listResult.IsSuccess.Should().BeTrue();
         listResult.Value.Should().Contain(c => c.Id == cronId);

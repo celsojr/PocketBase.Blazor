@@ -1,6 +1,7 @@
 namespace PocketBase.Blazor.IntegrationTests.Infrastructure;
 
 using System.Text.Json.Serialization;
+using Blazor.Responses.Auth;
 
 public class PocketBaseAdminFixture : IAsyncLifetime
 {
@@ -9,13 +10,13 @@ public class PocketBaseAdminFixture : IAsyncLifetime
 
     public async Task InitializeAsync()
     {
-        var options = new PocketBaseOptions();
+        PocketBaseOptions options = new PocketBaseOptions();
         options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
         options.JsonSerializerOptions.WriteIndented = true;
 
         Client = new PocketBase(Settings.BaseUrl, options: options);
 
-        var auth = await Client.Admins
+        Result<AuthResponse> auth = await Client.Admins
             .AuthWithPasswordAsync(
                 Settings.AdminTesterEmail,
                 Settings.AdminTesterPassword

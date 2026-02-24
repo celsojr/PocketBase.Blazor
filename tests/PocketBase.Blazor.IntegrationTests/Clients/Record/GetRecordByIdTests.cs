@@ -1,7 +1,8 @@
 namespace PocketBase.Blazor.IntegrationTests.Clients.Record;
 
-using Blazor.Responses;
 using Blazor.IntegrationTests.Helpers;
+using Blazor.Models;
+using Blazor.Responses;
 
 [Trait("Category", "Integration")]
 [Collection("PocketBase.Blazor.User")]
@@ -17,7 +18,7 @@ public class GetRecordByIdTests
     [Fact]
     public async Task Get_one_record_by_id()
     {
-        var listResult = await _pb.Collection("users")
+        Result<ListResult<RecordResponse>> listResult = await _pb.Collection("users")
             .GetListAsync<RecordResponse>(
                 perPage: 1,
                 options: new ListOptions()
@@ -27,9 +28,9 @@ public class GetRecordByIdTests
             );
 
         listResult.IsSuccess.Should().BeTrue();
-        var recordId = listResult.Value.Items.First().Id;
+        string recordId = listResult.Value.Items.First().Id;
 
-        var getResult = await _pb.Collection("users")
+        Result<RecordResponse> getResult = await _pb.Collection("users")
             .GetOneAsync<RecordResponse>(recordId);
 
         getResult.IsSuccess.Should().BeTrue();
@@ -39,7 +40,7 @@ public class GetRecordByIdTests
     [Fact]
     public async Task Get_one_record_with_invalid_id_returns_error()
     {
-        var result = await _pb.Collection("users")
+        Result<RecordResponse> result = await _pb.Collection("users")
             .GetOneAsync<RecordResponse>("invalid-id-that-doesnt-exist");
 
         result.IsSuccess.Should().BeFalse();
@@ -48,7 +49,7 @@ public class GetRecordByIdTests
     [Fact]
     public async Task Get_posts_with_expanded_category_should_include_category_data()
     {
-        var result = await _pb.Collection("posts")
+        Result<ListResult<PostResponse>> result = await _pb.Collection("posts")
             .GetListAsync<PostResponse>(
                 perPage: 1,
                 options: new ListOptions()
@@ -59,9 +60,9 @@ public class GetRecordByIdTests
 
         result.Value.Items.Should().NotBeEmpty();
 
-        var post = result.Value.Items.First();
-    
-        var category = post.ExpandedCategory;
+        PostResponse post = result.Value.Items.First();
+
+        Helpers.CategoryResponse? category = post.ExpandedCategory;
         category.Should().NotBeNull();
         category!.Name.Should().NotBeNullOrWhiteSpace();
         category.Slug.Should().NotBeNullOrWhiteSpace();

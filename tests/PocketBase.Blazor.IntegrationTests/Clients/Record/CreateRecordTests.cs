@@ -24,7 +24,7 @@ public class CreateRecordTests
         string categoryId = $"{Guid.NewGuid():N}"[..15];
 
         // Anonymous object model
-        var categoryResult = await _pb.Collection("categories")
+        Result<RecordResponse> categoryResult = await _pb.Collection("categories")
             .CreateAsync<RecordResponse>(new
             {
                 id = categoryId,
@@ -37,7 +37,7 @@ public class CreateRecordTests
 
         // Act
         // POCO model (properties names must match with db schema)
-        var postRequest = new PostCreateRequest
+        PostCreateRequest postRequest = new PostCreateRequest
         {
             Category = categoryResult.Value.Id, // Or categoryId
             Slug = "eleven-post",
@@ -47,13 +47,13 @@ public class CreateRecordTests
             IsPublished = true
         };
 
-        var postResult = await _pb.Collection("posts")
+        Result<PostResponse> postResult = await _pb.Collection("posts")
             .CreateAsync<PostResponse>(postRequest);
 
         // Assert
         postResult.IsSuccess.Should().BeTrue();
 
-        var post = postResult.Value;
+        PostResponse post = postResult.Value;
         post.Should().NotBeNull();
         post.Title.Should().Be("Eleven Post");
         post.Category.Should().Be(categoryId);
@@ -61,4 +61,3 @@ public class CreateRecordTests
     }
 
 }
-

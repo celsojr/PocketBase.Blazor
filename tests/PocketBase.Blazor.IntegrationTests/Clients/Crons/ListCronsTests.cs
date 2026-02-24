@@ -19,7 +19,7 @@ public class ListCronsTests
     public async Task GetFullList_with_null_options_should_work()
     {
         // Act
-        var result = await _pb.Crons.GetFullListAsync();
+        Result<IEnumerable<CronsResponse>> result = await _pb.Crons.GetFullListAsync();
 
         // Assert
         result.IsSuccess.Should().BeTrue();
@@ -30,7 +30,7 @@ public class ListCronsTests
     public async Task GetFullList_should_return_crons()
     {
         // Act
-        var result = await _pb.Crons.GetFullListAsync(
+        Result<IEnumerable<CronsResponse>> result = await _pb.Crons.GetFullListAsync(
             options: new CommonOptions {
                 Fields = "expression:excerpt(3,true)",
                 Query = new Dictionary<string, object?>
@@ -49,7 +49,7 @@ public class ListCronsTests
     public async Task GetFullList_with_cancellation_should_throw()
     {
         // Arrange
-        var cts = new CancellationTokenSource();
+        CancellationTokenSource cts = new CancellationTokenSource();
         cts.Cancel();
 
         // Act & Assert
@@ -61,10 +61,10 @@ public class ListCronsTests
     public async Task List_crons_should_fail_when_not_admin()
     {
         // Arrange
-        await using var client = new PocketBase(_fixture.Settings.BaseUrl);
+        await using PocketBase client = new PocketBase(_fixture.Settings.BaseUrl);
 
         // Act
-        var result = await client.Crons.GetFullListAsync();
+        Result<IEnumerable<CronsResponse>> result = await client.Crons.GetFullListAsync();
 
         // Assert
         result.IsSuccess.Should().BeFalse();

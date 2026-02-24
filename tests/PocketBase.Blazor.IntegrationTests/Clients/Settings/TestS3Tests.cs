@@ -15,7 +15,7 @@ public class TestS3Tests
     public async Task TestS3_Fails_WhenS3NotConfigured()
     {
         // Arrange & Act
-        var result = await _pb.Settings.TestS3Async();
+        Result<bool> result = await _pb.Settings.TestS3Async();
 
         // Assert
         result.IsSuccess.Should().BeFalse();
@@ -26,7 +26,7 @@ public class TestS3Tests
     public async Task TestS3_Fails_WhenInvalidFileSystem()
     {
         // Arrange & Act
-        var result = await _pb.Settings.TestS3Async("invalid");
+        Result<bool> result = await _pb.Settings.TestS3Async("invalid");
 
         // Assert
         result.IsSuccess.Should().BeFalse();
@@ -36,7 +36,7 @@ public class TestS3Tests
     public async Task TestS3_Succeeds_WithBackupFileSystem()
     {
         // Arrange & Act
-        var result = await _pb.Settings.TestS3Async("backups");
+        Result<bool> result = await _pb.Settings.TestS3Async("backups");
         
         // Assert
         result.IsSuccess.Should().BeFalse(); // Should fail if not configured

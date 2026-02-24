@@ -18,7 +18,7 @@ public class CreateTest
     [Fact]
     public async Task Create_base_collections_successfully()
     {
-        var baseResult = await _pb.Collections.CreateAsync(
+        Result<CollectionModel> baseResult = await _pb.Collections.CreateAsync(
             new BaseCollectionCreateModel
             {
                 Name = "exampleBase",
@@ -44,7 +44,7 @@ public class CreateTest
     [Fact]
     public async Task Create_auth_collection_successfully()
     {
-        var newCollection = new AuthCollectionCreateModel
+        AuthCollectionCreateModel newCollection = new AuthCollectionCreateModel
         {
             Name = "exampleAuth",
             CreateRule = "id = @request.auth.id",
@@ -64,7 +64,7 @@ public class CreateTest
             }
         };
 
-        var result = await _pb.Collections.CreateAsync(newCollection);
+        Result<CollectionModel> result = await _pb.Collections.CreateAsync(newCollection);
 
         result.IsSuccess.Should().BeTrue();
         result.Value.Name.Should().Be(newCollection.Name);
@@ -76,14 +76,14 @@ public class CreateTest
     [Fact]
     public async Task Create_view_collection_successfully()
     {
-        var newCollection = new ViewCollectionCreateModel
+        ViewCollectionCreateModel newCollection = new ViewCollectionCreateModel
         {
             Name = "exampleView",
             ListRule = "@request.auth.id != \"\"",
             ViewQuery = "SELECT id, email FROM users"
         };
 
-        var result = await _pb.Collections.CreateAsync(newCollection);
+        Result<CollectionModel> result = await _pb.Collections.CreateAsync(newCollection);
 
         result.IsSuccess.Should().BeTrue();
         result.Value.Name.Should().Be(newCollection.Name);
@@ -94,7 +94,7 @@ public class CreateTest
     [Fact]
     public async Task Create_collection_using_plain_object_payload()
     {
-        var name = $"anon_{Guid.NewGuid():N}"[..20];
+        string name = $"anon_{Guid.NewGuid():N}"[..20];
 
         var request = new
         {
@@ -117,7 +117,7 @@ public class CreateTest
             }
         };
 
-        var result = await _pb.Collections.CreateAsync<CollectionModel>(request);
+        Result<CollectionModel> result = await _pb.Collections.CreateAsync<CollectionModel>(request);
 
         result.IsSuccess.Should().BeTrue();
         result.Value.Name.Should().Be(name);

@@ -15,12 +15,12 @@ public class PocketBaseHostTests : IAsyncLifetime
 
     public async Task InitializeAsync()
     {
-        var builder = PocketBaseHostBuilder.CreateDefault();
+        IPocketBaseHostBuilder builder = PocketBaseHostBuilder.CreateDefault();
 
-        var loggerFactory = LoggerFactory.Create(builder => 
+        ILoggerFactory loggerFactory = LoggerFactory.Create(builder => 
             builder.AddConsole().SetMinimumLevel(LogLevel.Debug));
 
-        var logger = loggerFactory.CreateLogger<PocketBaseHost>();
+        ILogger<PocketBaseHost> logger = loggerFactory.CreateLogger<PocketBaseHost>();
 
         await builder
             .UseLogger(logger)
@@ -66,8 +66,8 @@ public class PocketBaseHostTests : IAsyncLifetime
         _host.Options.Should().NotBeNull();
 
         // Verify process is responsive
-        using var client = new HttpClient();
-        var response = await client.GetAsync(
+        using HttpClient client = new HttpClient();
+        HttpResponseMessage response = await client.GetAsync(
             $"http://{_host.Options.Host}:{_host.Options.Port}/api/health");
 
         response.Should().NotBeNull();
@@ -109,7 +109,7 @@ public class PocketBaseHostTests : IAsyncLifetime
         await _host.StartAsync();
 
         _host.Process.Should().NotBeNull();
-        var processId = _host.Process.Id;
+        int processId = _host.Process.Id;
 
         // Act
         await _host.DisposeAsync();
@@ -127,7 +127,7 @@ public class PocketBaseHostTests : IAsyncLifetime
         await _host.StartAsync();
 
         _host.Process.Should().NotBeNull();
-        var originalProcessId = _host.Process.Id;
+        int originalProcessId = _host.Process.Id;
 
         // Act - Make sure there is no other active
         // instance being served through the same port

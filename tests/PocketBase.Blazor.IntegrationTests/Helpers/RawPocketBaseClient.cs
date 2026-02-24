@@ -28,16 +28,16 @@ public class RawPocketBaseClient
 
     public async Task<T?> GetAsync<T>(string endpoint)
     {
-        var response = await _httpClient.GetAsync(endpoint);
+        HttpResponseMessage response = await _httpClient.GetAsync(endpoint);
         response.EnsureSuccessStatusCode();
 
-        var json = await response.Content.ReadAsStringAsync();
+        string json = await response.Content.ReadAsStringAsync();
         return JsonSerializer.Deserialize<T>(json, _jsonOptions);
     }
 
     public async Task<string> GetRawAsync(string endpoint)
     {
-        var response = await _httpClient.GetAsync(endpoint);
+        HttpResponseMessage response = await _httpClient.GetAsync(endpoint);
         response.EnsureSuccessStatusCode();
 
         return await response.Content.ReadAsStringAsync();
@@ -45,13 +45,13 @@ public class RawPocketBaseClient
 
     public async Task<T?> PostAsync<T>(string endpoint, object data)
     {
-        var json = JsonSerializer.Serialize(data, _jsonOptions);
-        var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+        string json = JsonSerializer.Serialize(data, _jsonOptions);
+        StringContent content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
 
-        var response = await _httpClient.PostAsync(endpoint, content);
+        HttpResponseMessage response = await _httpClient.PostAsync(endpoint, content);
         response.EnsureSuccessStatusCode();
 
-        var responseJson = await response.Content.ReadAsStringAsync();
+        string responseJson = await response.Content.ReadAsStringAsync();
         return JsonSerializer.Deserialize<T>(responseJson, _jsonOptions);
     }
 }

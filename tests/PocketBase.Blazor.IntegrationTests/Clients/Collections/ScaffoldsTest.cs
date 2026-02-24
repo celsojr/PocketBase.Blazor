@@ -1,5 +1,7 @@
 namespace PocketBase.Blazor.IntegrationTests.Clients.Collections;
 
+using Blazor.Responses.Scaffolds;
+
 [Trait("Category", "Integration")]
 [Collection("PocketBase.Blazor.Admin")]
 public class ScaffoldsTest
@@ -14,12 +16,12 @@ public class ScaffoldsTest
     [Fact]
     public async Task GetScaffolds_returns_all_expected_scaffold_types()
     {
-        var result = await _pb.Collections.GetScaffoldsAsync();
+        Result<CollectionScaffoldsResponse> result = await _pb.Collections.GetScaffoldsAsync();
 
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().NotBeNull();
 
-        var scaffolds = result.Value!;
+        CollectionScaffoldsResponse scaffolds = result.Value!;
 
         scaffolds.Auth.Should().NotBeNull();
         scaffolds.Base.Should().NotBeNull();
@@ -33,12 +35,12 @@ public class ScaffoldsTest
     [Fact]
     public async Task GetScaffolds_preserves_field_options()
     {
-        var result = await _pb.Collections.GetScaffoldsAsync();
-        var auth = result.Value!.Auth;
+        Result<CollectionScaffoldsResponse> result = await _pb.Collections.GetScaffoldsAsync();
+        CollectionScaffoldModel auth = result.Value!.Auth;
 
         auth.Fields.Should().NotBeEmpty();
 
-        var idField = auth.Fields
+        ScaffoldFieldModel idField = auth.Fields
             .First(f => f.Name == "id");
 
         idField.Type.Should().Be("text");
@@ -56,8 +58,8 @@ public class ScaffoldsTest
     [Fact]
     public async Task GetScaffolds_auth_collection_contains_auth_configuration()
     {
-        var result = await _pb.Collections.GetScaffoldsAsync();
-        var auth = result.Value!.Auth;
+        Result<CollectionScaffoldsResponse> result = await _pb.Collections.GetScaffoldsAsync();
+        CollectionScaffoldModel auth = result.Value!.Auth;
 
         auth.AuthRule.Should().NotBeNull();
         auth.AuthAlert.Should().NotBeNull();
@@ -71,8 +73,8 @@ public class ScaffoldsTest
     [Fact]
     public async Task GetScaffolds_view_collection_contains_view_query()
     {
-        var result = await _pb.Collections.GetScaffoldsAsync();
-        var view = result.Value!.View;
+        Result<CollectionScaffoldsResponse> result = await _pb.Collections.GetScaffoldsAsync();
+        CollectionScaffoldModel view = result.Value!.View;
 
         view.Type.Should().Be("view");
         view.ViewQuery.Should().NotBeNull();
@@ -82,8 +84,8 @@ public class ScaffoldsTest
     [Fact]
     public async Task GetScaffolds_auth_indexes_are_present()
     {
-        var result = await _pb.Collections.GetScaffoldsAsync();
-        var auth = result.Value!.Auth;
+        Result<CollectionScaffoldsResponse> result = await _pb.Collections.GetScaffoldsAsync();
+        CollectionScaffoldModel auth = result.Value!.Auth;
 
         auth.Indexes.Should().NotBeEmpty();
         auth.Indexes.Any(i => i.Contains("email")).Should().BeTrue();

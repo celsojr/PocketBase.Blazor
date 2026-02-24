@@ -19,7 +19,7 @@ public class ListLogsTests
     public async Task GetListAsync_ReturnsLogs_WhenDefaultParams()
     {
         // Act
-        var result = await _pb.Log.GetListAsync();
+        Result<ListResult<LogResponse>> result = await _pb.Log.GetListAsync();
 
         // Assert
         result.IsSuccess.Should().BeTrue();
@@ -32,7 +32,7 @@ public class ListLogsTests
     public async Task GetListAsync_ReturnsPaginatedLogs_WhenPageSpecified()
     {
         // Act
-        var result = await _pb.Log.GetListAsync(page: 2, perPage: 10);
+        Result<ListResult<LogResponse>> result = await _pb.Log.GetListAsync(page: 2, perPage: 10);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
@@ -45,7 +45,7 @@ public class ListLogsTests
     public async Task GetListAsync_ReturnsFilteredLogs_WhenOptionsProvided()
     {
         // Arrange
-        var options = new ListOptions
+        ListOptions options = new ListOptions
         {
             Filter = $"level={(int)LogLevel.Error}",
             Sort = "-created",
@@ -55,7 +55,7 @@ public class ListLogsTests
         };
 
         // Act
-        var result = await _pb.Log.GetListAsync(options: options);
+        Result<ListResult<LogResponse>> result = await _pb.Log.GetListAsync(options: options);
 
         // Assert
         result.IsSuccess.Should().BeTrue();

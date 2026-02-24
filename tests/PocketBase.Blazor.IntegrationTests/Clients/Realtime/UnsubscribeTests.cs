@@ -23,35 +23,35 @@ public class UnsubscribeTests
     public async Task Realtime_UnsubscribeAsync_WithSpecificRecord_ShouldStopReceivingEvents()
     {
         // Arrange
-        await using var pb = new PocketBase(_pb.BaseUrl);
-        var eventsReceived = new List<RealtimeRecordEvent>();
+        await using PocketBase pb = new PocketBase(_pb.BaseUrl);
+        List<RealtimeRecordEvent> eventsReceived = new List<RealtimeRecordEvent>();
 
         // Authenticate as admin
         await pb.Admins.AuthWithPasswordAsync(
             _fixture.Settings.AdminTesterEmail,
             _fixture.Settings.AdminTesterPassword
         );
-        
+
         // Subscribe to a specific record
-        var record1 = await pb.Collection("categories").CreateAsync<RecordResponse>(new
+        Result<RecordResponse> record1 = await pb.Collection("categories").CreateAsync<RecordResponse>(new
         {
             name = "Test Category 1",
             slug = "test-category-1",
         });
-        
-        var record2 = await pb.Collection("categories").CreateAsync<RecordResponse>(new
+
+        Result<RecordResponse> record2 = await pb.Collection("categories").CreateAsync<RecordResponse>(new
         {
             name = "Test Category 2",
             slug = "test-category-2",
         });
 
-        var subscription1 = await pb.Realtime.SubscribeAsync("categories", record1.Value.Id, evt =>
+        IDisposable subscription1 = await pb.Realtime.SubscribeAsync("categories", record1.Value.Id, evt =>
         {
             eventsReceived.Add(evt);
             _output.WriteLine($"Callback: {evt.Action} - {evt.RecordId}");
         });
 
-        var subscription2 = await pb.Realtime.SubscribeAsync("categories", record2.Value.Id, evt =>
+        IDisposable subscription2 = await pb.Realtime.SubscribeAsync("categories", record2.Value.Id, evt =>
         {
             eventsReceived.Add(evt);
             _output.WriteLine($"Callback: {evt.Action} - {evt.RecordId}");
@@ -82,23 +82,23 @@ public class UnsubscribeTests
     public async Task Realtime_UnsubscribeAsync_WithWildcard_ShouldStopReceivingAllCollectionEvents()
     {
         // Arrange
-        await using var pb = new PocketBase(_pb.BaseUrl);
-        var eventsReceived = new List<RealtimeRecordEvent>();
+        await using PocketBase pb = new PocketBase(_pb.BaseUrl);
+        List<RealtimeRecordEvent> eventsReceived = new List<RealtimeRecordEvent>();
 
         // Authenticate as admin
         await pb.Admins.AuthWithPasswordAsync(
             _fixture.Settings.AdminTesterEmail,
             _fixture.Settings.AdminTesterPassword
         );
-        
-        var subscription = await pb.Realtime.SubscribeAsync("categories", "*", evt =>
+
+        IDisposable subscription = await pb.Realtime.SubscribeAsync("categories", "*", evt =>
         {
             eventsReceived.Add(evt);
             _output.WriteLine($"Callback: {evt.Action} - {evt.RecordId}");
         });
 
         // Create initial record
-        var record = await pb.Collection("categories").CreateAsync<RecordResponse>(new
+        Result<RecordResponse> record = await pb.Collection("categories").CreateAsync<RecordResponse>(new
         {
             name = "Test Category",
             slug = "test-category",
@@ -126,29 +126,29 @@ public class UnsubscribeTests
     public async Task Realtime_UnsubscribeAsync_WithWildcardStar_ShouldStopReceivingWildcardEventsOnly()
     {
         // Arrange
-        await using var pb = new PocketBase(_pb.BaseUrl);
-        var eventsReceived = new List<RealtimeRecordEvent>();
+        await using PocketBase pb = new PocketBase(_pb.BaseUrl);
+        List<RealtimeRecordEvent> eventsReceived = new List<RealtimeRecordEvent>();
 
         // Authenticate as admin
         await pb.Admins.AuthWithPasswordAsync(
             _fixture.Settings.AdminTesterEmail,
             _fixture.Settings.AdminTesterPassword
         );
-        
+
         // Subscribe to wildcard and specific record
-        var wildcardSubscription = await pb.Realtime.SubscribeAsync("categories", "*", evt =>
+        IDisposable wildcardSubscription = await pb.Realtime.SubscribeAsync("categories", "*", evt =>
         {
             eventsReceived.Add(evt);
             _output.WriteLine($"Wildcard Callback: {evt.Action} - {evt.RecordId}");
         });
 
-        var record = await pb.Collection("categories").CreateAsync<RecordResponse>(new
+        Result<RecordResponse> record = await pb.Collection("categories").CreateAsync<RecordResponse>(new
         {
             name = "Test Category",
             slug = "test-category",
         });
 
-        var specificSubscription = await pb.Realtime.SubscribeAsync("categories", record.Value.Id, evt =>
+        IDisposable specificSubscription = await pb.Realtime.SubscribeAsync("categories", record.Value.Id, evt =>
         {
             eventsReceived.Add(evt);
             _output.WriteLine($"Specific Callback: {evt.Action} - {evt.RecordId}");
@@ -178,20 +178,20 @@ public class UnsubscribeTests
     public async Task RealtimeSse_UnsubscribeAsync_ShouldStopStreaming()
     {
         // Arrange
-        await using var pb = new PocketBase(_pb.BaseUrl);
-        var eventsReceived = new List<RealtimeRecordEvent>();
-        var cts = new CancellationTokenSource(TimeSpan.FromSeconds(15));
+        await using PocketBase pb = new PocketBase(_pb.BaseUrl);
+        List<RealtimeRecordEvent> eventsReceived = new List<RealtimeRecordEvent>();
+        CancellationTokenSource cts = new CancellationTokenSource(TimeSpan.FromSeconds(15));
 
         // Authenticate as admin
         await pb.Admins.AuthWithPasswordAsync(
             _fixture.Settings.AdminTesterEmail,
             _fixture.Settings.AdminTesterPassword
         );
-        
+
         // Start streaming
-        var streamingTask = Task.Run(async () =>
+        Task streamingTask = Task.Run(async () =>
         {
-            await foreach (var evt in pb.RealtimeSse.SubscribeAsync("categories", "*", cancellationToken: cts.Token))
+            await foreach (RealtimeRecordEvent evt in pb.RealtimeSse.SubscribeAsync("categories", "*", cancellationToken: cts.Token))
             {
                 eventsReceived.Add(evt);
                 _output.WriteLine($"Stream Event: {evt.Action} - {evt.RecordId}");
@@ -201,14 +201,14 @@ public class UnsubscribeTests
         await Task.Delay(2000); // Wait for connection
 
         // Create initial record
-        var record = await pb.Collection("categories").CreateAsync<RecordResponse>(new
+        Result<RecordResponse> record = await pb.Collection("categories").CreateAsync<RecordResponse>(new
         {
             name = "Test Category",
             slug = "test-category",
         });
 
         await Task.Delay(1000);
-        var initialCount = eventsReceived.Count;
+        int initialCount = eventsReceived.Count;
 
         // Act - Unsubscribe
         await pb.RealtimeSse.UnsubscribeAsync("categories", "*");
@@ -230,21 +230,21 @@ public class UnsubscribeTests
     public async Task RealtimeSse_UnsubscribeAsync_WithNullRecordId_ShouldUnsubscribeEntireCollection()
     {
         // Arrange
-        await using var pb = new PocketBase(_pb.BaseUrl);
-        var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
-        var isConnectedBefore = false;
-        var isConnectedAfter = false;
+        await using PocketBase pb = new PocketBase(_pb.BaseUrl);
+        CancellationTokenSource cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+        bool isConnectedBefore = false;
+        bool isConnectedAfter = false;
 
         // Authenticate as admin
         await pb.Admins.AuthWithPasswordAsync(
             _fixture.Settings.AdminTesterEmail,
             _fixture.Settings.AdminTesterPassword
         );
-        
+
         // Start streaming
-        var streamingTask = Task.Run(async () =>
+        Task streamingTask = Task.Run(async () =>
         {
-            await foreach (var _ in pb.RealtimeSse.SubscribeAsync("categories", "*", cancellationToken: cts.Token))
+            await foreach (RealtimeRecordEvent _ in pb.RealtimeSse.SubscribeAsync("categories", "*", cancellationToken: cts.Token))
             {
                 // Just consume
             }
@@ -273,21 +273,21 @@ public class UnsubscribeTests
     public async Task Both_Clients_UnsubscribeAsync_ShouldHandleMultipleSubscriptions()
     {
         // Arrange
-        await using var pb = new PocketBase(_pb.BaseUrl);
-        var callbackEvents = new List<RealtimeRecordEvent>();
-        var streamEvents = new List<RealtimeRecordEvent>();
+        await using PocketBase pb = new PocketBase(_pb.BaseUrl);
+        List<RealtimeRecordEvent> callbackEvents = new List<RealtimeRecordEvent>();
+        List<RealtimeRecordEvent> streamEvents = new List<RealtimeRecordEvent>();
 
         // Authenticate as admin
         await pb.Admins.AuthWithPasswordAsync(
             _fixture.Settings.AdminTesterEmail,
             _fixture.Settings.AdminTesterPassword
         );
-        
+
         // Create test records
-        var records = new List<string>();
+        List<string> records = new List<string>();
         for (int i = 0; i < 3; i++)
         {
-            var record = await pb.Collection("categories").CreateAsync<RecordResponse>(new
+            Result<RecordResponse> record = await pb.Collection("categories").CreateAsync<RecordResponse>(new
             {
                 name = $"Test Category {i}",
                 slug = $"test-category-{i}",
@@ -296,10 +296,10 @@ public class UnsubscribeTests
         }
 
         // Multiple callback subscriptions
-        var callbackSubscriptions = new List<IDisposable>();
-        foreach (var recordId in records)
+        List<IDisposable> callbackSubscriptions = new List<IDisposable>();
+        foreach (string recordId in records)
         {
-            var sub = await pb.Realtime.SubscribeAsync("categories", recordId, evt =>
+            IDisposable sub = await pb.Realtime.SubscribeAsync("categories", recordId, evt =>
             {
                 callbackEvents.Add(evt);
                 _output.WriteLine($"Callback for {recordId}: {evt.Action}");
@@ -308,10 +308,10 @@ public class UnsubscribeTests
         }
 
         // Stream subscription
-        var streamCts = new CancellationTokenSource(TimeSpan.FromSeconds(15));
-        var streamingTask = Task.Run(async () =>
+        CancellationTokenSource streamCts = new CancellationTokenSource(TimeSpan.FromSeconds(15));
+        Task streamingTask = Task.Run(async () =>
         {
-            await foreach (var evt in pb.RealtimeSse.SubscribeAsync("categories", "*", cancellationToken: streamCts.Token))
+            await foreach (RealtimeRecordEvent evt in pb.RealtimeSse.SubscribeAsync("categories", "*", cancellationToken: streamCts.Token))
             {
                 streamEvents.Add(evt);
                 _output.WriteLine($"Stream: {evt.Action} - {evt.RecordId}");
@@ -325,7 +325,7 @@ public class UnsubscribeTests
         await pb.RealtimeSse.UnsubscribeAsync("categories", records[1]);
 
         // Update all records
-        foreach (var recordId in records)
+        foreach (string recordId in records)
         {
             await pb.Collection("categories").UpdateAsync<RecordResponse>(recordId, new { name = "Updated" });
             await Task.Delay(500);
@@ -340,11 +340,11 @@ public class UnsubscribeTests
         callbackEvents.Should().NotContain(e => e.RecordId == records[1]);
 
         // Cleanup
-        foreach (var sub in callbackSubscriptions) sub.Dispose();
+        foreach (IDisposable sub in callbackSubscriptions) sub.Dispose();
         await streamCts.CancelAsync();
         try { await streamingTask; } catch (OperationCanceledException) { }
         
-        foreach (var recordId in records)
+        foreach (string recordId in records)
         {
             await pb.Collection("categories").DeleteAsync(recordId);
         }
@@ -354,7 +354,7 @@ public class UnsubscribeTests
     public async Task UnsubscribeAsync_WhenNotSubscribed_ShouldNotThrow()
     {
         // Arrange
-        await using var pb = new PocketBase(_pb.BaseUrl);
+        await using PocketBase pb = new PocketBase(_pb.BaseUrl);
 
         // Authenticate as admin
         await pb.Admins.AuthWithPasswordAsync(

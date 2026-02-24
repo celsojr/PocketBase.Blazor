@@ -17,8 +17,8 @@ public class EmailVerificationRecordTests : IAsyncLifetime
     public EmailVerificationRecordTests(PocketBaseAdminFixture fixture)
     {
         _pb = fixture.Client;
-        
-        var options = new MailHogOptions
+
+        MailHogOptions options = new MailHogOptions
         { 
             BaseUrl = "http://localhost:8027"
         };
@@ -28,7 +28,7 @@ public class EmailVerificationRecordTests : IAsyncLifetime
     public async Task InitializeAsync()
     {
         // Configure SMTP
-        var smtpResult = await _pb.Settings.UpdateAsync(new
+        Result smtpResult = await _pb.Settings.UpdateAsync(new
         {
             smtp = new
             {
@@ -64,12 +64,12 @@ public class EmailVerificationRecordTests : IAsyncLifetime
     public async Task DisposeAsync()
     {
         // Clean up PocketBase collection
-        var listResult = await _pb.Collections
+        Result<ListResult<CollectionModel>> listResult = await _pb.Collections
             .GetListAsync<CollectionModel>(options: new ListOptions { SkipTotal = true });
 
         listResult.IsSuccess.Should().BeTrue();
 
-        var collection = listResult.Value.Items
+        CollectionModel? collection = listResult.Value.Items
             .FirstOrDefault(c => c.Name?.Equals(CollectionName) == true);
 
         if (collection?.Id != null)
@@ -92,7 +92,7 @@ public class EmailVerificationRecordTests : IAsyncLifetime
     [Fact]
     public async Task RequestVerificationAsync_WithValidEmail_ReturnsSuccess()
     {
-        var result = await _pb.Collection(CollectionName)
+        Result result = await _pb.Collection(CollectionName)
             .RequestVerificationAsync(TestEmail);
 
         // API returns success even if email is not sent (security feature)
@@ -102,7 +102,7 @@ public class EmailVerificationRecordTests : IAsyncLifetime
     [Fact]
     public async Task RequestVerificationAsync_WithInvalidEmail_ReturnsSuccess()
     {
-        var result = await _pb.Collection(CollectionName)
+        Result result = await _pb.Collection(CollectionName)
             .RequestVerificationAsync("nonexistent@example.com");
 
         // API returns success even for non-existent emails (security feature)
@@ -116,11 +116,11 @@ public class EmailVerificationRecordTests : IAsyncLifetime
         await _pb.Collection(CollectionName)
             .RequestVerificationAsync(TestEmail);
 
-        var token = await _mailHogService
+        string? token = await _mailHogService
             .GetLatestTokenAsync(TestEmail, VerificationType.EmailVerification);
         token.Should().NotBeNull();
 
-        var result = await _pb.Collection(CollectionName)
+        Result result = await _pb.Collection(CollectionName)
             .ConfirmVerificationAsync(token!);
 
         result.IsSuccess.Should().BeTrue();
@@ -129,7 +129,7 @@ public class EmailVerificationRecordTests : IAsyncLifetime
     [Fact]
     public async Task ConfirmVerificationAsync_WithInvalidToken_ReturnsSuccess()
     {
-        var result = await _pb.Collection(CollectionName)
+        Result result = await _pb.Collection(CollectionName)
             .ConfirmVerificationAsync("invalid-token");
 
         // API returns success even for missing email token claim (security feature)

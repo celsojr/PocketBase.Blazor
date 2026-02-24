@@ -5,6 +5,7 @@ using System.Text.Json.Serialization;
 using Blazor.Hosting;
 using Blazor.Hosting.Interfaces;
 using Blazor.IntegrationTests.Helpers;
+using Blazor.Responses.Auth;
 using Microsoft.Extensions.Logging;
 
 [Trait("Category", "Integration")]
@@ -23,12 +24,12 @@ public class PocketBaseIntegrationTests : IAsyncLifetime
     {
         _port = new Random().Next(9000, 9999);
 
-        var builder = PocketBaseHostBuilder.CreateDefault();
+        IPocketBaseHostBuilder builder = PocketBaseHostBuilder.CreateDefault();
 
-        var loggerFactory = LoggerFactory.Create(builder => 
+        ILoggerFactory loggerFactory = LoggerFactory.Create(builder => 
             builder.AddConsole().SetMinimumLevel(LogLevel.Debug));
 
-        var logger = loggerFactory.CreateLogger<PocketBaseHost>();
+        ILogger<PocketBaseHost> logger = loggerFactory.CreateLogger<PocketBaseHost>();
 
         await builder
             .UseLogger(logger)
@@ -50,7 +51,7 @@ public class PocketBaseIntegrationTests : IAsyncLifetime
 
         _httpClient = new HttpClient() { BaseAddress = new Uri("http://127.0.0.1:8090") };
 
-        var options = new PocketBaseOptions();
+        PocketBaseOptions options = new PocketBaseOptions();
         options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
         options.JsonSerializerOptions.WriteIndented = true;
 
@@ -68,13 +69,13 @@ public class PocketBaseIntegrationTests : IAsyncLifetime
         // that handle transient failures, network issues, and service startup delays
         // more gracefully than this simple linear retry approach.
 
-        for (var i = 0; i < maxAttempts; i++)
+        for (int i = 0; i < maxAttempts; i++)
         {
             try
             {
                 if (_httpClient != null)
                 {
-                    var response = await _httpClient.GetAsync("/api/health");
+                    HttpResponseMessage response = await _httpClient.GetAsync("/api/health");
                     if (response.IsSuccessStatusCode)
                         return;
                 }
@@ -109,11 +110,11 @@ public class PocketBaseIntegrationTests : IAsyncLifetime
     {
         // Act
         _httpClient.Should().NotBeNull();
-        var response = await _httpClient.GetAsync("/api/health");
+        HttpResponseMessage response = await _httpClient.GetAsync("/api/health");
 
         // Assert
         response.EnsureSuccessStatusCode();
-        var content = await response.Content.ReadAsStringAsync();
+        string content = await response.Content.ReadAsStringAsync();
         content.Should().Contain("code", "Health endpoint should return status");
         content.Should().Contain("200", "Status code should be 200 OK");
     }
@@ -124,7 +125,7 @@ public class PocketBaseIntegrationTests : IAsyncLifetime
         // Act & Assert
         _pb.Should().NotBeNull();
 
-        var result = await _pb.Admins
+        Result<AuthResponse> result = await _pb.Admins
             .AuthWithPasswordAsync(
                 Settings.AdminTesterEmail,
                 Settings.AdminTesterPassword

@@ -18,7 +18,7 @@ public static class TestPaths
     {
         if (Exists(TestDataDirectory))
         {
-            foreach (var file in GetFiles(TestDataDirectory))
+            foreach (string file in GetFiles(TestDataDirectory))
             {
                 if (Path.GetFileName(file) != ".gitignore")
                     File.Delete(file);
@@ -37,12 +37,11 @@ public static class TestPaths
 
         if (Exists(TestMigrationDirectory))
         {
-            foreach (var file in GetFiles(TestMigrationDirectory))
+            foreach (string file in GetFiles(TestMigrationDirectory))
             {
                 if (!contained.Contains(file))
                     File.Delete(file);
             }
-
         }
     }
 }

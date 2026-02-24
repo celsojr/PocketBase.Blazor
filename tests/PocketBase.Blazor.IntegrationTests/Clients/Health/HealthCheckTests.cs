@@ -17,7 +17,7 @@ public class HealthCheckTests
     [Fact]
     public async Task Health_check_returns_ok()
     {
-        var result = await _pb.Health.CheckAsync();
+        Result<HealthCheckResponse> result = await _pb.Health.CheckAsync();
 
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().BeOfType<HealthCheckResponse>();

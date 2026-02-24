@@ -20,7 +20,7 @@ public class UpdateSettingsTests
         var update = new { meta = new { appName = "UpdatedApp" } };
 
         // Act
-        var result = await _pb.Settings.UpdateAsync(update);
+        Result result = await _pb.Settings.UpdateAsync(update);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
@@ -30,13 +30,13 @@ public class UpdateSettingsTests
     public async Task UpdateAsync_Succeeds_WithTypedRequest()
     {
         // Arrange
-        var update = new SettingsUpdateRequest
+        SettingsUpdateRequest update = new SettingsUpdateRequest
         {
             Meta = new MetaSettingsUpdateRequest { AppName = "TypedUpdate" }
         };
 
         // Act
-        var result = await _pb.Settings.UpdateAsync(update);
+        Result result = await _pb.Settings.UpdateAsync(update);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
@@ -46,7 +46,7 @@ public class UpdateSettingsTests
     public async Task UpdateAsync_Succeeds_WithDictionary()
     {
         // Arrange
-        var update = new Dictionary<string, object?>
+        Dictionary<string, object?> update = new Dictionary<string, object?>
         {
             ["meta"] = new Dictionary<string, object?>
             {
@@ -55,7 +55,7 @@ public class UpdateSettingsTests
         };
 
         // Act
-        var result = await _pb.Settings.UpdateAsync(update);
+        Result result = await _pb.Settings.UpdateAsync(update);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
@@ -69,4 +69,3 @@ public class UpdateSettingsTests
             () => _pb.Settings.UpdateAsync(null!));
     }
 }
-

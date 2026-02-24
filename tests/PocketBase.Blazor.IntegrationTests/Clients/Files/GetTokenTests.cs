@@ -16,34 +16,34 @@ public class GetTokenTests
     [Fact]
     public async Task GetToken_ReturnsToken_ForValidParameters()
     {
-        var result = await _pb.Files.GetTokenAsync();
+        Result<string> result = await _pb.Files.GetTokenAsync();
         result.Value.Should().NotBeEmpty();
 
-        var tokenParts = result.Value.Split('.');
+        string[] tokenParts = result.Value.Split('.');
         tokenParts.Should().HaveCount(3, "JWT tokens should have 3 parts");
 
-        var expiry = GetTokenExpiry(result.Value);
+        DateTimeOffset? expiry = GetTokenExpiry(result.Value);
         expiry.Should().BeAfter(DateTimeOffset.Now, "Token should not be expired");
 
         // Verify it's short-lived
-        var timeUntilExpiry = expiry - DateTimeOffset.UtcNow;
+        TimeSpan? timeUntilExpiry = expiry - DateTimeOffset.UtcNow;
         timeUntilExpiry.Should().BeGreaterThan(TimeSpan.FromMinutes(1));
         timeUntilExpiry.Should().BeLessThan(TimeSpan.FromMinutes(10));
     }
 
     private static DateTimeOffset? GetTokenExpiry(string token)
     {
-        var parts = token.Split('.', StringSplitOptions.RemoveEmptyEntries);
+        string[] parts = token.Split('.', StringSplitOptions.RemoveEmptyEntries);
         if (parts.Length != 3) return null;
 
-        var rawPayload = parts[1];
-        var payload = Encoding.UTF8.GetString(ParsePayload(rawPayload));
-        var encoded = JsonSerializer.Deserialize<IDictionary<string, object>>(payload)!;
+        string rawPayload = parts[1];
+        string payload = Encoding.UTF8.GetString(ParsePayload(rawPayload));
+        IDictionary<string, object> encoded = JsonSerializer.Deserialize<IDictionary<string, object>>(payload)!;
 
         if (encoded["exp"] is JsonElement jsonElement && jsonElement.ValueKind == JsonValueKind.Number)
         {
-            var exp = jsonElement.GetInt32();
-            var expiredAt = DateTimeOffset.FromUnixTimeSeconds(exp);
+            int exp = jsonElement.GetInt32();
+            DateTimeOffset expiredAt = DateTimeOffset.FromUnixTimeSeconds(exp);
             return expiredAt;
         }
         return null;

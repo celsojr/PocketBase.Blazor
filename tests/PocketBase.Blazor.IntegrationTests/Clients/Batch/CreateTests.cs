@@ -2,7 +2,9 @@ namespace PocketBase.Blazor.IntegrationTests.Clients.Batch;
 
 using System.Threading;
 using System.Threading.Tasks;
+using Blazor.Clients.Batch;
 using Blazor.Models;
+using Blazor.Responses.Backup;
 using Xunit;
 
 [Trait("Category", "Integration")]
@@ -20,7 +22,7 @@ public class CreateTests
     public async Task CreateBatch_WhenBatchDisabled_ShouldThrowException()
     {
         // Arrange
-        var smtpResult = await _pb.Settings.UpdateAsync(new
+        Result smtpResult = await _pb.Settings.UpdateAsync(new
         {
             batch = new
             {
@@ -29,14 +31,14 @@ public class CreateTests
         });
         smtpResult.IsSuccess.Should().BeTrue();
 
-        var batch = _pb.CreateBatch();
+        IBatchClient batch = _pb.CreateBatch();
 
         // Dummy collection
         batch.Collection("any")
             .Create(new { test = "value" });
 
         // Act
-        var result = await batch.SendAsync();
+        Result<List<BatchResponse>> result = await batch.SendAsync();
 
         // Assert
         result.IsSuccess.Should().BeFalse();
@@ -63,11 +65,11 @@ public class CreateTests
             }
         };
 
-        var enableResult = await _pb.Settings.UpdateAsync(batchSettings);
+        Result enableResult = await _pb.Settings.UpdateAsync(batchSettings);
         enableResult.IsSuccess.Should().BeTrue();
 
         // Arrange - Create a test collection
-        var collectionName = $"batch_test_{Guid.NewGuid():N}";
+        string collectionName = $"batch_test_{Guid.NewGuid():N}";
 
         // Create a test collection
         await _pb.Collections.CreateAsync<CollectionModel>(new
@@ -83,7 +85,7 @@ public class CreateTests
 
         try
         {
-            var batch = _pb.CreateBatch();
+            IBatchClient batch = _pb.CreateBatch();
 
             batch.Collection(collectionName)
                 .Create(new
@@ -93,7 +95,7 @@ public class CreateTests
                 });
 
             // Act
-            var result = await batch.SendAsync();
+            Result<List<BatchResponse>> result = await batch.SendAsync();
 
             // Assert
             result.IsSuccess.Should().BeTrue();
@@ -115,7 +117,7 @@ public class CreateTests
     public async Task CreateBatch_WithMultipleOperations_ShouldSucceed()
     {
         // Arrange
-        var collectionName = $"batch_multi_{Guid.NewGuid():N}";
+        string collectionName = $"batch_multi_{Guid.NewGuid():N}";
 
         await _pb.Collections.CreateAsync<CollectionModel>(new
         {
@@ -126,14 +128,14 @@ public class CreateTests
 
         try
         {
-            var batch = _pb.CreateBatch();
+            IBatchClient batch = _pb.CreateBatch();
 
             // Create two records
             batch.Collection(collectionName).Create(new { name = "First" });
             batch.Collection(collectionName).Create(new { name = "Second" });
 
             // Act
-            var result = await batch.SendAsync();
+            Result<List<BatchResponse>> result = await batch.SendAsync();
 
             // Assert
             result.IsSuccess.Should().BeTrue();
@@ -150,7 +152,7 @@ public class CreateTests
     public async Task CreateBatch_WithUpdateAndDelete_ShouldSucceed()
     {
         // Arrange
-        var collectionName = $"batch_crud_{Guid.NewGuid():N}";
+        string collectionName = $"batch_crud_{Guid.NewGuid():N}";
 
         await _pb.Collections.CreateAsync<CollectionModel>(new
         {
@@ -162,12 +164,12 @@ public class CreateTests
         try
         {
             // First create a record to update/delete
-            var createResult = await _pb.Collection(collectionName)
+            Result<CollectionModel> createResult = await _pb.Collection(collectionName)
                 .CreateAsync<CollectionModel>(new { value = 100 });
 
-            var recordId = createResult.Value.Id.ToString();
+            string recordId = createResult.Value.Id.ToString();
 
-            var batch = _pb.CreateBatch();
+            IBatchClient batch = _pb.CreateBatch();
 
             // Update the record
             batch.Collection(collectionName).Update(recordId, new { value = 200 });
@@ -176,7 +178,7 @@ public class CreateTests
             batch.Collection(collectionName).Delete(recordId);
 
             // Act
-            var result = await batch.SendAsync();
+            Result<List<BatchResponse>> result = await batch.SendAsync();
 
             // Assert
             result.IsSuccess.Should().BeTrue();
@@ -194,7 +196,7 @@ public class CreateTests
     public async Task CreateBatch_WithUpsert_ShouldSucceed()
     {
         // Arrange
-        var smtpResult = await _pb.Settings.UpdateAsync(new
+        Result smtpResult = await _pb.Settings.UpdateAsync(new
         {
             batch = new
             {
@@ -203,7 +205,7 @@ public class CreateTests
         });
         smtpResult.IsSuccess.Should().BeTrue();
 
-        var collectionName = $"batch_upsert_{Guid.NewGuid():N}";
+        string collectionName = $"batch_upsert_{Guid.NewGuid():N}";
 
         await _pb.Collections.CreateAsync<CollectionModel>(new
         {
@@ -214,13 +216,13 @@ public class CreateTests
 
         try
         {
-            var batch = _pb.CreateBatch();
+            IBatchClient batch = _pb.CreateBatch();
 
             batch.Collection(collectionName)
                 .Upsert(new { email = "test@example.com" });
 
             // Act
-            var result = await batch.SendAsync();
+            Result<List<BatchResponse>> result = await batch.SendAsync();
 
             // Assert
             result.IsSuccess.Should().BeTrue();
@@ -237,11 +239,11 @@ public class CreateTests
     public async Task CreateBatch_WithInvalidCollection_ShouldFail()
     {
         // Arrange
-        var batch = _pb.CreateBatch();
+        IBatchClient batch = _pb.CreateBatch();
         batch.Collection("non_existent_collection").Create(new { test = "value" });
 
         // Act
-        var result = await batch.SendAsync();
+        Result<List<BatchResponse>> result = await batch.SendAsync();
 
         // Assert
         result.IsSuccess.Should().BeFalse();
@@ -252,7 +254,7 @@ public class CreateTests
     public async Task CreateBatch_WithCancellationToken_ShouldRespectCancellation()
     {
         // Arrange
-        var collectionName = $"batch_cancel_{Guid.NewGuid():N}";
+        string collectionName = $"batch_cancel_{Guid.NewGuid():N}";
 
         await _pb.Collections.CreateAsync<CollectionModel>(new
         {
@@ -263,16 +265,16 @@ public class CreateTests
 
         try
         {
-            var batch = _pb.CreateBatch();
+            IBatchClient batch = _pb.CreateBatch();
 
             batch.Collection(collectionName)
                 .Create(new { data = "test" });
 
-            var cts = new CancellationTokenSource();
+            CancellationTokenSource cts = new CancellationTokenSource();
             await cts.CancelAsync();
 
             // Act
-            var act = async () => await batch.SendAsync(cts.Token);
+            Func<Task<Result<List<BatchResponse>>>> act = async () => await batch.SendAsync(cts.Token);
 
             // Assert
             await act.Should().ThrowAsync<OperationCanceledException>();
@@ -287,12 +289,12 @@ public class CreateTests
     public async Task CreateBatch_WhenUnauthenticated_ShouldFail()
     {
         // Arrange
-        await using var pb = new PocketBase(_pb.BaseUrl);
-        var batch = pb.CreateBatch();
+        await using PocketBase pb = new PocketBase(_pb.BaseUrl);
+        IBatchClient batch = pb.CreateBatch();
         batch.Collection("any").Create(new { test = "value" });
 
         // Act
-        var result = await batch.SendAsync();
+        Result<List<BatchResponse>> result = await batch.SendAsync();
 
         // Assert
         result.IsSuccess.Should().BeFalse();
@@ -303,8 +305,8 @@ public class CreateTests
     public async Task CreateBatch_WithMixedCollections_ShouldSucceed()
     {
         // Arrange - Create two collections
-        var collection1 = $"batch_mix1_{Guid.NewGuid():N}";
-        var collection2 = $"batch_mix2_{Guid.NewGuid():N}";
+        string collection1 = $"batch_mix1_{Guid.NewGuid():N}";
+        string collection2 = $"batch_mix2_{Guid.NewGuid():N}";
 
         await _pb.Collections.CreateAsync<CollectionModel>(new
         {
@@ -322,14 +324,14 @@ public class CreateTests
 
         try
         {
-            var batch = _pb.CreateBatch();
+            IBatchClient batch = _pb.CreateBatch();
 
             // Add operations to different collections
             batch.Collection(collection1).Create(new { field1 = "Text value" });
             batch.Collection(collection2).Create(new { field2 = 42 });
 
             // Act
-            var result = await batch.SendAsync();
+            Result<List<BatchResponse>> result = await batch.SendAsync();
 
             // Assert
             result.IsSuccess.Should().BeTrue();

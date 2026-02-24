@@ -19,7 +19,7 @@ public class AuthWithOtpRecordTests
         _fixture = fixture;
         _pb = fixture.Client;
 
-        var options = new MailHogOptions
+        MailHogOptions options = new MailHogOptions
         { 
             BaseUrl = "http://localhost:8027"
         };
@@ -29,9 +29,9 @@ public class AuthWithOtpRecordTests
     [Fact]
     public async Task AuthWithOtpAsync_Succeeds_WithValidOtp()
     {
-        var adminSession = default(AuthResponse);
-        var id = $"{Guid.NewGuid():N}"[..6];
-        var collectionName = $"otp_auth_{id}";
+        AuthResponse? adminSession = default(AuthResponse);
+        string id = $"{Guid.NewGuid():N}"[..6];
+        string collectionName = $"otp_auth_{id}";
 
         try
         {
@@ -45,7 +45,7 @@ public class AuthWithOtpRecordTests
             adminSession = _pb.AuthStore.CurrentSession;
 
             // Configure SMTP to use MailHog
-            var smtpResult = await _pb.Settings.UpdateAsync(new
+            Result smtpResult = await _pb.Settings.UpdateAsync(new
             {
                 smtp = new
                 {
@@ -58,7 +58,7 @@ public class AuthWithOtpRecordTests
             smtpResult.IsSuccess.Should().BeTrue();
 
             // Create collection with OTP enabled
-            var collection = await _pb.Collections.CreateAsync<CollectionModel>(new
+            Result<CollectionModel> collection = await _pb.Collections.CreateAsync<CollectionModel>(new
             {
                 name = collectionName,
                 type = "auth",
@@ -81,8 +81,8 @@ public class AuthWithOtpRecordTests
             collection.IsSuccess.Should().BeTrue();
 
             // Create a test user for this collection
-            var email = $"user_{id}@example.com";
-            var userResult = await _pb.Collection(collectionName)
+            string email = $"user_{id}@example.com";
+            Result<RecordResponse> userResult = await _pb.Collection(collectionName)
                 .CreateAsync<RecordResponse>(new
                 {
                     email,
@@ -93,7 +93,7 @@ public class AuthWithOtpRecordTests
             userResult.IsSuccess.Should().BeTrue();
 
             // Request OTP first
-            var otpRequest = await _pb.Collection(collectionName)
+            Result<RequestOtpResponse> otpRequest = await _pb.Collection(collectionName)
                 .RequestOtpAsync(email);
             otpRequest.IsSuccess.Should().BeTrue();
             otpRequest.Value.OtpId.Should().NotBeNullOrEmpty();
@@ -102,12 +102,12 @@ public class AuthWithOtpRecordTests
             // Note: Wait a moment for the email to be delivered
             await Task.Delay(1000);
 
-            var otpCode = await _mailHogService.GetLatestOtpCodeAsync(email);
+            string? otpCode = await _mailHogService.GetLatestOtpCodeAsync(email);
             otpCode.Should().NotBeNullOrEmpty();
 
             // Act - Authenticate with OTP
             // Note: If the first authentication attempt fails, the OTP may become invalid
-            var authResult = await _pb.Collection(collectionName)
+            Result<AuthResponse> authResult = await _pb.Collection(collectionName)
                 .AuthWithOtpAsync(otpRequest.Value.OtpId, otpCode);
 
             // Assert
@@ -134,9 +134,9 @@ public class AuthWithOtpRecordTests
     [Fact]
     public async Task AuthWithOtpAsync_Fails_WithInvalidOtpCode()
     {
-        var adminSession = default(AuthResponse);
-        var id = $"{Guid.NewGuid():N}"[..6];
-        var collectionName = $"otp_auth_{id}";
+        AuthResponse? adminSession = default(AuthResponse);
+        string id = $"{Guid.NewGuid():N}"[..6];
+        string collectionName = $"otp_auth_{id}";
 
         try
         {
@@ -150,7 +150,7 @@ public class AuthWithOtpRecordTests
             adminSession = _pb.AuthStore.CurrentSession;
 
             // Configure SMTP
-            var smtpResult = await _pb.Settings.UpdateAsync(new
+            Result smtpResult = await _pb.Settings.UpdateAsync(new
             {
                 smtp = new
                 {
@@ -163,7 +163,7 @@ public class AuthWithOtpRecordTests
             smtpResult.IsSuccess.Should().BeTrue();
 
             // Create collection with OTP enabled
-            var collection = await _pb.Collections.CreateAsync<CollectionModel>(new
+            Result<CollectionModel> collection = await _pb.Collections.CreateAsync<CollectionModel>(new
             {
                 name = collectionName,
                 type = "auth",
@@ -186,8 +186,8 @@ public class AuthWithOtpRecordTests
             collection.IsSuccess.Should().BeTrue();
 
             // Create test user for this collection
-            var email = $"user_{id}@example.com";
-            var userResult = await _pb.Collection(collectionName)
+            string email = $"user_{id}@example.com";
+            Result<RecordResponse> userResult = await _pb.Collection(collectionName)
                 .CreateAsync<RecordResponse>(new
                 {
                     email,
@@ -198,12 +198,12 @@ public class AuthWithOtpRecordTests
             userResult.IsSuccess.Should().BeTrue();
 
             // Request OTP - SMTP server is not needed at this point
-            var otpRequest = await _pb.Collection(collectionName)
+            Result<RequestOtpResponse> otpRequest = await _pb.Collection(collectionName)
                 .RequestOtpAsync(email);
             otpRequest.IsSuccess.Should().BeTrue();
 
             // Act - Try with invalid OTP code
-            var authResult = await _pb.Collection(collectionName)
+            Result<AuthResponse> authResult = await _pb.Collection(collectionName)
                 .AuthWithOtpAsync(otpRequest.Value.OtpId, "invalid_code_123");
 
             // Assert
@@ -229,9 +229,9 @@ public class AuthWithOtpRecordTests
     [Fact]
     public async Task AuthWithOtpAsync_Fails_WithExpiredOtp()
     {
-        var adminSession = default(AuthResponse);
-        var id = $"{Guid.NewGuid():N}"[..6];
-        var collectionName = $"otp_auth_{id}";
+        AuthResponse? adminSession = default(AuthResponse);
+        string id = $"{Guid.NewGuid():N}"[..6];
+        string collectionName = $"otp_auth_{id}";
 
         try
         {
@@ -245,7 +245,7 @@ public class AuthWithOtpRecordTests
             adminSession = _pb.AuthStore.CurrentSession;
 
             // Configure SMTP
-            var smtpResult = await _pb.Settings.UpdateAsync(new
+            Result smtpResult = await _pb.Settings.UpdateAsync(new
             {
                 smtp = new
                 {
@@ -258,7 +258,7 @@ public class AuthWithOtpRecordTests
             smtpResult.IsSuccess.Should().BeTrue();
 
             // Create collection with OTP enabled and short expiration
-            var collection = await _pb.Collections.CreateAsync<CollectionModel>(new
+            Result<CollectionModel> collection = await _pb.Collections.CreateAsync<CollectionModel>(new
             {
                 name = collectionName,
                 type = "auth",
@@ -282,8 +282,8 @@ public class AuthWithOtpRecordTests
             collection.IsSuccess.Should().BeTrue();
 
             // Create test user
-            var email = $"user_{id}@example.com";
-            var userResult = await _pb.Collection(collectionName)
+            string email = $"user_{id}@example.com";
+            Result<RecordResponse> userResult = await _pb.Collection(collectionName)
                 .CreateAsync<RecordResponse>(new
                 {
                     email,
@@ -294,7 +294,7 @@ public class AuthWithOtpRecordTests
             userResult.IsSuccess.Should().BeTrue();
 
             // Request OTP
-            var otpRequest = await _pb.Collection(collectionName)
+            Result<RequestOtpResponse> otpRequest = await _pb.Collection(collectionName)
                 .RequestOtpAsync(email);
             otpRequest.IsSuccess.Should().BeTrue();
 
@@ -302,11 +302,11 @@ public class AuthWithOtpRecordTests
             await Task.Delay(TimeSpan.FromSeconds(20));
 
             // Get the OTP code from MailHog (though it should be expired)
-            var otpCode = await _mailHogService.GetLatestOtpCodeAsync(email);
+            string? otpCode = await _mailHogService.GetLatestOtpCodeAsync(email);
             otpCode.Should().NotBeNull();
 
             // Act - Try with expired OTP
-            var authResult = await _pb.Collection(collectionName)
+            Result<AuthResponse> authResult = await _pb.Collection(collectionName)
                 .AuthWithOtpAsync(otpRequest.Value.OtpId, otpCode);
 
             // Assert

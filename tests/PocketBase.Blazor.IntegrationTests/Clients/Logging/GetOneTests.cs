@@ -1,5 +1,8 @@
 namespace PocketBase.Blazor.IntegrationTests.Clients.Logging;
 
+using Blazor.Models;
+using Blazor.Responses.Logging;
+
 [Trait("Category", "Integration")]
 [Collection("PocketBase.Blazor.Admin")]
 public class GetOneTests
@@ -15,17 +18,17 @@ public class GetOneTests
     public async Task GetOneAsync_ReturnsLog_WhenValidId()
     {
         // Arrange - get an existing log id
-        var listResult = await _pb.Log.GetListAsync(
+        Result<ListResult<LogResponse>> listResult = await _pb.Log.GetListAsync(
             perPage: 1,
             options: new ListOptions()
             { 
                 SkipTotal = true
             });
         listResult.IsSuccess.Should().BeTrue();
-        var logId = listResult.Value.Items.First().Id;
+        string? logId = listResult.Value.Items.First().Id;
 
         // Act
-        var result = await _pb.Log.GetOneAsync(logId!);
+        Result<LogResponse> result = await _pb.Log.GetOneAsync(logId!);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
@@ -39,10 +42,10 @@ public class GetOneTests
     public async Task GetOneAsync_ReturnsNotFound_WhenInvalidId()
     {
         // Arrange
-        var invalidId = "non_existent_log_123";
+        string invalidId = "non_existent_log_123";
 
         // Act
-        var result = await _pb.Log.GetOneAsync(invalidId);
+        Result<LogResponse> result = await _pb.Log.GetOneAsync(invalidId);
 
         // Assert
         result.IsSuccess.Should().BeFalse();
@@ -55,17 +58,17 @@ public class GetOneTests
     public async Task GetOneAsync_ReturnsLogWithOptions_WhenFieldsSpecified()
     {
         // Arrange
-        var listResult = await _pb.Log.GetListAsync(perPage: 1);
+        Result<ListResult<LogResponse>> listResult = await _pb.Log.GetListAsync(perPage: 1);
         listResult.IsSuccess.Should().BeTrue();
-        var logId = listResult.Value.Items.First().Id;
+        string? logId = listResult.Value.Items.First().Id;
 
-        var options = new CommonOptions
+        CommonOptions options = new CommonOptions
         {
             Fields = "id,message,level"
         };
 
         // Act
-        var result = await _pb.Log.GetOneAsync(logId!, options);
+        Result<LogResponse> result = await _pb.Log.GetOneAsync(logId!, options);
 
         // Assert
         result.IsSuccess.Should().BeTrue();

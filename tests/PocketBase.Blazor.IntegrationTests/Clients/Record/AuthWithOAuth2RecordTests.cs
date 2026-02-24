@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Blazor.Models;
 using Blazor.Requests.Auth;
 using Blazor.Responses;
+using Blazor.Responses.Auth;
 using Microsoft.Playwright;
 
 [Trait("Category", "Integration")]
@@ -48,7 +49,7 @@ public class AuthWithOAuth2RecordTests : IAsyncLifetime
     public async Task InitializeAsync()
     {
         // Create auth collection with OAuth2 enabled
-        var collectionResult = await _pb.Collections.CreateAsync<RecordResponse>(new
+        Result<RecordResponse> collectionResult = await _pb.Collections.CreateAsync<RecordResponse>(new
         {
             name = CollectionName,
             type = "auth",
@@ -92,12 +93,12 @@ public class AuthWithOAuth2RecordTests : IAsyncLifetime
     public async Task DisposeAsync()
     {
         // Clean up PocketBase collection
-        var listResult = await _pb.Collections
+        Result<ListResult<CollectionModel>> listResult = await _pb.Collections
             .GetListAsync<CollectionModel>(options: new ListOptions { SkipTotal = true });
 
         listResult.IsSuccess.Should().BeTrue();
 
-        var collection = listResult.Value.Items
+        CollectionModel? collection = listResult.Value.Items
             .FirstOrDefault(c => c.Name?.Equals(CollectionName) == true);
 
         if (collection?.Id != null)
@@ -114,10 +115,10 @@ public class AuthWithOAuth2RecordTests : IAsyncLifetime
     public async Task AuthWithOAuth2CodeAsync_WithValidRequest_ReturnsSuccess()
     {
         // Step 1: First get auth methods to get OAuth2 provider info
-        var authMethods = await _pb.Collection(CollectionName)
+        Result<AuthMethodsResponse> authMethods = await _pb.Collection(CollectionName)
             .ListAuthMethodsAsync();
 
-        var googleProvider = authMethods.Value?.Oauth2?.Providers?
+        ProviderResponse? googleProvider = authMethods.Value?.Oauth2?.Providers?
             .FirstOrDefault(p => p.Name == "google");
 
         if (googleProvider == null)
@@ -128,16 +129,16 @@ public class AuthWithOAuth2RecordTests : IAsyncLifetime
         googleProvider.CodeVerifier.Should().NotBeNull();
 
         // Store the provider with its code verifier
-        var storedCodeVerifier = googleProvider!.CodeVerifier;
-        var authUrl = googleProvider.AuthURL + RedirectUrl;
+        string storedCodeVerifier = googleProvider!.CodeVerifier;
+        string authUrl = googleProvider.AuthURL + RedirectUrl;
 
         // Step 2: Use Playwright to automate Google login
-        var page = await _browser.NewPageAsync();
+        IPage page = await _browser.NewPageAsync();
 
         try
         {
             // Step 3: Wait for redirect back to our redirect URL and capture the code
-            var codeTask = WaitForOAuthRedirectAndCaptureCode(page);
+            Task<string> codeTask = WaitForOAuthRedirectAndCaptureCode(page);
 
             // Ensure the required values are present
             authUrl.Should().NotBeNullOrEmpty();
@@ -171,10 +172,10 @@ public class AuthWithOAuth2RecordTests : IAsyncLifetime
             // but that's fine - we only need to extract the 'code' parameter from the URL
 
             // Step 4: Wait for the code from redirect
-            var code = await codeTask.WaitAsync(TimeSpan.FromSeconds(30));
+            string code = await codeTask.WaitAsync(TimeSpan.FromSeconds(30));
             code.Should().NotBeNullOrEmpty();
 
-            var request = new AuthWithOAuth2Request
+            AuthWithOAuth2Request request = new AuthWithOAuth2Request
             {
                 Provider = "google",
                 Code = code,
@@ -186,7 +187,7 @@ public class AuthWithOAuth2RecordTests : IAsyncLifetime
                 }
             };
 
-            var result = await _pb.Collection(CollectionName)
+            Result<AuthRecordResponse> result = await _pb.Collection(CollectionName)
                 .AuthWithOAuth2CodeAsync(request);
 
             result.IsSuccess.Should().BeTrue();
@@ -203,7 +204,7 @@ public class AuthWithOAuth2RecordTests : IAsyncLifetime
     [Fact]
     public async Task AuthWithOAuth2CodeAsync_WithInvalidProvider_ReturnsFailure()
     {
-        var request = new AuthWithOAuth2Request
+        AuthWithOAuth2Request request = new AuthWithOAuth2Request
         {
             Provider = "invalid_provider",
             Code = "test_code",
@@ -211,7 +212,7 @@ public class AuthWithOAuth2RecordTests : IAsyncLifetime
             RedirectUrl = RedirectUrl
         };
 
-        var result = await _pb.Collection(CollectionName)
+        Result<AuthRecordResponse> result = await _pb.Collection(CollectionName)
             .AuthWithOAuth2CodeAsync(request);
 
         result.IsSuccess.Should().BeFalse();
@@ -222,13 +223,13 @@ public class AuthWithOAuth2RecordTests : IAsyncLifetime
     [Trait("Requires", "OAuth2")]
     public async Task AuthWithOAuth2CodeAsync_WithInvalidCode_ReturnsFailure()
     {
-        var authMethods = await _pb.Collection(CollectionName)
+        Result<AuthMethodsResponse> authMethods = await _pb.Collection(CollectionName)
             .ListAuthMethodsAsync();
 
-        var googleProvider = authMethods.Value?.Oauth2?.Providers?
+        ProviderResponse? googleProvider = authMethods.Value?.Oauth2?.Providers?
             .FirstOrDefault(p => p.Name == "google");
 
-        var request = new AuthWithOAuth2Request
+        AuthWithOAuth2Request request = new AuthWithOAuth2Request
         {
             Provider = "google",
             Code = "invalid_code",
@@ -236,7 +237,7 @@ public class AuthWithOAuth2RecordTests : IAsyncLifetime
             RedirectUrl = RedirectUrl
         };
 
-        var result = await _pb.Collection(CollectionName)
+        Result<AuthRecordResponse> result = await _pb.Collection(CollectionName)
             .AuthWithOAuth2CodeAsync(request);
 
         result.IsSuccess.Should().BeFalse();
@@ -253,13 +254,13 @@ public class AuthWithOAuth2RecordTests : IAsyncLifetime
 
     private static async Task<string> WaitForOAuthRedirectAndCaptureCode(IPage page)
     {
-        var tcs = new TaskCompletionSource<string>();
+        TaskCompletionSource<string> tcs = new TaskCompletionSource<string>();
     
         page.RequestFinished += (_, request) =>
         {
             if (request.Url.Contains(RedirectUrl))
             {
-                var codeMatch = Regex.Match(request.Url, @"code=([^&]+)");
+                Match codeMatch = Regex.Match(request.Url, @"code=([^&]+)");
                 if (codeMatch.Success)
                 {
                     tcs.TrySetResult(Uri.UnescapeDataString(codeMatch.Groups[1].Value));
@@ -271,10 +272,10 @@ public class AuthWithOAuth2RecordTests : IAsyncLifetime
         {
             while (!tcs.Task.IsCompleted)
             {
-                var currentUrl = page.Url;
+                string currentUrl = page.Url;
                 if (currentUrl.Contains(RedirectUrl))
                 {
-                    var codeMatch = Regex.Match(currentUrl, @"code=([^&]+)");
+                    Match codeMatch = Regex.Match(currentUrl, @"code=([^&]+)");
                     if (codeMatch.Success)
                     {
                         tcs.TrySetResult(Uri.UnescapeDataString(codeMatch.Groups[1].Value));

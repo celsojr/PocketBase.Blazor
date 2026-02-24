@@ -20,15 +20,15 @@ public class RequestOtpRecordTests
     [Fact]
     public async Task RequestOtpAsync_Fails_WhenCollectionNotConfiguredForOtp()
     {
-        var adminSession = default(AuthResponse);
+        AuthResponse? adminSession = default(AuthResponse);
 
-        var id = $"{Guid.NewGuid():N}"[..6];
-        var collectionName = $"no_otp_{id}";
+        string id = $"{Guid.NewGuid():N}"[..6];
+        string collectionName = $"no_otp_{id}";
 
         try
         {
             // Arrange - store the current user session for later
-            var userSession = _pb.AuthStore.CurrentSession;
+            AuthResponse? userSession = _pb.AuthStore.CurrentSession;
             userSession.Should().NotBeNull();
 
             // Admin creadentials is need for creating new collections
@@ -43,7 +43,7 @@ public class RequestOtpRecordTests
             adminSession.Should().NotBeNull();
 
             // Create a collection with OTP disabled (assuming default is disabled)
-            var collection = await _pb.Collections.CreateAsync<CollectionModel>(new
+            Result<CollectionModel> collection = await _pb.Collections.CreateAsync<CollectionModel>(new
             {
                 name = collectionName,
                 type = "auth",
@@ -58,8 +58,8 @@ public class RequestOtpRecordTests
             collection.Value.Should().NotBeNull();
 
             // Create a test user in this collection
-            var email = $"user_{id}@example.com";
-            var testUserResult = await _pb.Collection(collectionName)
+            string email = $"user_{id}@example.com";
+            Result<RecordResponse> testUserResult = await _pb.Collection(collectionName)
                 .CreateAsync<RecordResponse>(new
                 {
                     email,
@@ -75,7 +75,7 @@ public class RequestOtpRecordTests
             _pb.AuthStore.Save(userSession);
 
             // Act - Should fail
-            var result = await _pb.Collection(collectionName)
+            Result<RequestOtpResponse> result = await _pb.Collection(collectionName)
                 .RequestOtpAsync(email);
 
             // Assert
@@ -100,9 +100,9 @@ public class RequestOtpRecordTests
     [Trait("Requires", "SMTP")]
     public async Task RequestOtpAsync_Succeeds_WhenEmailExists()
     {
-        var adminSession = default(AuthResponse);
-        var id = $"{Guid.NewGuid():N}"[..6];
-        var collectionName = $"otp_enabled_{id}";
+        AuthResponse? adminSession = default(AuthResponse);
+        string id = $"{Guid.NewGuid():N}"[..6];
+        string collectionName = $"otp_enabled_{id}";
         try
         {
             // Arrange - Admin credentials needed for creating and updating collections
@@ -117,7 +117,7 @@ public class RequestOtpRecordTests
             adminSession.Should().NotBeNull();
 
             // Create a collection (no OTP option details for now)
-            var collection = await _pb.Collections.CreateAsync<CollectionModel>(new
+            Result<CollectionModel> collection = await _pb.Collections.CreateAsync<CollectionModel>(new
             {
                 name = collectionName,
                 type = "auth",
@@ -132,7 +132,7 @@ public class RequestOtpRecordTests
             collection.Value.Should().NotBeNull();
 
             // Update the collection to enable OTP (just an update example)
-            var updateResult = await _pb.Collections.UpdateAsync<CollectionModel>(
+            Result<CollectionModel> updateResult = await _pb.Collections.UpdateAsync<CollectionModel>(
                 collectionName,
                 options: new CommonOptions()
                 {
@@ -151,8 +151,8 @@ public class RequestOtpRecordTests
             updateResult.IsSuccess.Should().BeTrue();
 
             // Create a test user in this collection
-            var email = $"user_{id}@example.com";
-            var record = default(Result<RecordResponse>);
+            string email = $"user_{id}@example.com";
+            Result<RecordResponse>? record = default(Result<RecordResponse>);
             record = await _pb.Collection(collectionName)
                 .CreateAsync<RecordResponse>(new
                 {
@@ -166,7 +166,7 @@ public class RequestOtpRecordTests
             record.Value.Should().NotBeNull();
 
             // Act - Request OTP for the user
-            var result = await _pb.Collection(collectionName)
+            Result<RequestOtpResponse> result = await _pb.Collection(collectionName)
                 .RequestOtpAsync(email);
 
             // Assert

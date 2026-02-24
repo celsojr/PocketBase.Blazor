@@ -23,7 +23,7 @@ public class SubscribeTests
     [Fact]
     public async Task SubscribeAsync_ShouldReceiveEvents_WhenDataChanges()
     {
-        var eventsReceived = new List<RealtimeRecordEvent>();
+        List<RealtimeRecordEvent> eventsReceived = new List<RealtimeRecordEvent>();
 
         using (await _pb.Collection("categories").SubscribeAsync("*", evt =>
         {
@@ -31,7 +31,7 @@ public class SubscribeTests
             eventsReceived.Add(evt);
         }))
         {
-            var record = await _pb.Collection("categories").CreateAsync<RecordResponse>(new
+            Result<RecordResponse> record = await _pb.Collection("categories").CreateAsync<RecordResponse>(new
             {
                 name = "Test Category",
                 slug = "test-category",
@@ -51,13 +51,13 @@ public class SubscribeTests
     [Fact]
     public async Task RealtimeSse_ShouldStreamParsedEvents()
     {
-        var events = new List<RealtimeRecordEvent>();
-        var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+        List<RealtimeRecordEvent> events = new List<RealtimeRecordEvent>();
+        CancellationTokenSource cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
 
         // Subscribe to trigger events
-        var subscriptionTask = Task.Run(async () =>
+        Task subscriptionTask = Task.Run(async () =>
         {
-            await foreach (var evt in _pb.RealtimeSse.SubscribeAsync("categories", "*", cancellationToken: cts.Token))
+            await foreach (RealtimeRecordEvent evt in _pb.RealtimeSse.SubscribeAsync("categories", "*", cancellationToken: cts.Token))
             {
                 _output.WriteLine($"Parsed Event: {evt.Action} - {evt.RecordId}");
                 events.Add(evt);
@@ -74,7 +74,7 @@ public class SubscribeTests
         await Task.Delay(1000);
 
         // Trigger an event
-        var record = await _pb.Collection("categories")
+        Result<RecordResponse> record = await _pb.Collection("categories")
             .CreateAsync<RecordResponse>(new
             {
                 name = "SSE Test Category",
@@ -107,7 +107,7 @@ public class SubscribeTests
     public async Task RealtimeSse_IsConnected_ShouldReflectConnectionState()
     {
         // Create a separate instance for this test to avoid affecting other tests
-        await using var pb = new PocketBase(_pb.BaseUrl);
+        await using PocketBase pb = new PocketBase(_pb.BaseUrl);
 
         // Authenticate as admin
         await pb.Admins.AuthWithPasswordAsync(
@@ -118,13 +118,13 @@ public class SubscribeTests
         // Initially should be disconnected
         pb.RealtimeSse.IsConnected.Should().BeFalse();
 
-        var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
-        var eventReceived = false;
+        CancellationTokenSource cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+        bool eventReceived = false;
 
         // Start streaming (this will trigger connection)
-        var streamingTask = Task.Run(async () =>
+        Task streamingTask = Task.Run(async () =>
         {
-            await foreach (var evt in pb.RealtimeSse.SubscribeAsync(
+            await foreach (RealtimeRecordEvent evt in pb.RealtimeSse.SubscribeAsync(
                 "categories", "*", cancellationToken: cts.Token))
             {
                 eventReceived = true;
@@ -141,7 +141,7 @@ public class SubscribeTests
         pb.RealtimeSse.IsConnected.Should().BeTrue();
 
         // Create a record to trigger an event
-        var record = await pb.Collection("categories")
+        Result<RecordResponse> record = await pb.Collection("categories")
             .CreateAsync<RecordResponse>(new
             {
                 name = "Connection Test",

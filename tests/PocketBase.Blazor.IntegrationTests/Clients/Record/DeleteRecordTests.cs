@@ -2,9 +2,10 @@ namespace PocketBase.Blazor.IntegrationTests.Clients.Record;
 
 using System.Net;
 using Blazor.IntegrationTests.Helpers;
-using Blazor.Responses;
+using Blazor.Models;
 using Blazor.Models.Collection;
 using Blazor.Models.Collection.Fields;
+using Blazor.Responses;
 
 [Trait("Category", "Integration")]
 [Collection("PocketBase.Blazor.Admin")]
@@ -21,7 +22,7 @@ public class DeleteRecordTests
     public async Task Delete_post_successfully()
     {
         // Arrange - Create a category
-        var categoryResult = await _pb.Collection("categories")
+        Result<RecordResponse> categoryResult = await _pb.Collection("categories")
             .CreateAsync<RecordResponse>(new
             {
                 name = "Test Category for Delete",
@@ -29,10 +30,10 @@ public class DeleteRecordTests
             });
 
         categoryResult.IsSuccess.Should().BeTrue();
-        var categoryId = categoryResult.Value.Id;
+        string categoryId = categoryResult.Value.Id;
 
         // Create a post to delete
-        var postRequest = new PostCreateRequest
+        PostCreateRequest postRequest = new PostCreateRequest
         {
             Category = categoryId,
             Slug = "post-to-delete",
@@ -42,20 +43,20 @@ public class DeleteRecordTests
             IsPublished = true
         };
 
-        var createResult = await _pb.Collection("posts")
+        Result<PostResponse> createResult = await _pb.Collection("posts")
             .CreateAsync<PostResponse>(postRequest);
 
         createResult.IsSuccess.Should().BeTrue();
-        var postId = createResult.Value.Id;
+        string postId = createResult.Value.Id;
 
         // Act
-        var deleteResult = await _pb.Collection("posts").DeleteAsync(postId);
+        Result deleteResult = await _pb.Collection("posts").DeleteAsync(postId);
 
         // Assert
         deleteResult.IsSuccess.Should().BeTrue();
 
         // Verify the post no longer exists
-        var getResult = await _pb.Collection("posts")
+        Result<PostResponse> getResult = await _pb.Collection("posts")
             .GetOneAsync<PostResponse>(postId);
 
         getResult.IsSuccess.Should().BeFalse();
@@ -70,7 +71,7 @@ public class DeleteRecordTests
     public async Task Delete_category_with_posts_should_succeed()
     {
         // Arrange - Create a category
-        var categoryResult = await _pb.Collection("categories")
+        Result<RecordResponse> categoryResult = await _pb.Collection("categories")
             .CreateAsync<RecordResponse>(new
             {
                 name = "Category with Posts",
@@ -78,10 +79,10 @@ public class DeleteRecordTests
             });
 
         categoryResult.IsSuccess.Should().BeTrue();
-        var categoryId = categoryResult.Value.Id;
+        string categoryId = categoryResult.Value.Id;
 
         // Create a post in this category
-        var postRequest = new PostCreateRequest
+        PostCreateRequest postRequest = new PostCreateRequest
         {
             Category = categoryId,
             Slug = "post-in-category",
@@ -91,19 +92,19 @@ public class DeleteRecordTests
             IsPublished = true
         };
 
-        var postResult = await _pb.Collection("posts")
+        Result<PostResponse> postResult = await _pb.Collection("posts")
             .CreateAsync<PostResponse>(postRequest);
 
         postResult.IsSuccess.Should().BeTrue();
 
         // Act - Delete the category
-        var deleteResult = await _pb.Collection("categories").DeleteAsync(categoryId);
+        Result deleteResult = await _pb.Collection("categories").DeleteAsync(categoryId);
 
         // Assert
         deleteResult.IsSuccess.Should().BeTrue();
 
         // Verify category is deleted
-        var getCategoryResult = await _pb.Collection("categories")
+        Result<RecordResponse> getCategoryResult = await _pb.Collection("categories")
             .GetOneAsync<RecordResponse>(categoryId);
 
         getCategoryResult.IsSuccess.Should().BeFalse();
@@ -118,16 +119,16 @@ public class DeleteRecordTests
     public async Task Delete_non_existent_post_should_fail()
     {
         // Arrange
-        var nonExistentId = "non-existent-id-123";
+        string nonExistentId = "non-existent-id-123";
 
         // Act
-        var deleteResult = await _pb.Collection("posts").DeleteAsync(nonExistentId);
+        Result deleteResult = await _pb.Collection("posts").DeleteAsync(nonExistentId);
 
         // Assert
         deleteResult.IsSuccess.Should().BeFalse();
         deleteResult.Errors.Should().NotBeNull();
 
-        var error = JsonSerializer.Deserialize<ErrorResponse>(deleteResult.Errors[0].Message);
+        ErrorResponse? error = JsonSerializer.Deserialize<ErrorResponse>(deleteResult.Errors[0].Message);
 
         error.Should().NotBeNull();
         error.Message.Should().Be("The requested resource wasn't found.");
@@ -138,16 +139,16 @@ public class DeleteRecordTests
     public async Task Delete_post_with_invalid_id_format_should_fail()
     {
         // Arrange
-        var invalidId = "invalid-id-format";
+        string invalidId = "invalid-id-format";
 
         // Act
-        var deleteResult = await _pb.Collection("posts").DeleteAsync(invalidId);
+        Result deleteResult = await _pb.Collection("posts").DeleteAsync(invalidId);
 
         // Assert
         deleteResult.IsSuccess.Should().BeFalse();
         deleteResult.Errors.Should().NotBeNull();
 
-        var error = JsonSerializer.Deserialize<ErrorResponse>(deleteResult.Errors[0].Message);
+        ErrorResponse? error = JsonSerializer.Deserialize<ErrorResponse>(deleteResult.Errors[0].Message);
 
         error.Should().NotBeNull();
         error.Message.Should().Be("The requested resource wasn't found.");
@@ -158,7 +159,7 @@ public class DeleteRecordTests
     public async Task Delete_multiple_posts_successfully()
     {
         // Arrange - Create a category
-        var categoryResult = await _pb.Collection("categories")
+        Result<RecordResponse> categoryResult = await _pb.Collection("categories")
             .CreateAsync<RecordResponse>(new
             {
                 name = "Category for Batch Delete",
@@ -166,13 +167,13 @@ public class DeleteRecordTests
             });
 
         categoryResult.IsSuccess.Should().BeTrue();
-        var categoryId = categoryResult.Value.Id;
+        string categoryId = categoryResult.Value.Id;
 
         // Create multiple posts
-        var postIds = new List<string>();
+        List<string> postIds = new List<string>();
         for (int i = 1; i <= 3; i++)
         {
-            var postRequest = new PostCreateRequest
+            PostCreateRequest postRequest = new PostCreateRequest
             {
                 Category = categoryId,
                 Slug = $"batch-post-{i}",
@@ -182,7 +183,7 @@ public class DeleteRecordTests
                 IsPublished = true
             };
 
-            var createResult = await _pb.Collection("posts")
+            Result<PostResponse> createResult = await _pb.Collection("posts")
                 .CreateAsync<PostResponse>(postRequest);
 
             createResult.IsSuccess.Should().BeTrue();
@@ -190,13 +191,13 @@ public class DeleteRecordTests
         }
 
         // Act & Assert - Delete each post
-        foreach (var postId in postIds)
+        foreach (string postId in postIds)
         {
-            var deleteResult = await _pb.Collection("posts").DeleteAsync(postId);
+            Result deleteResult = await _pb.Collection("posts").DeleteAsync(postId);
             deleteResult.IsSuccess.Should().BeTrue();
 
             // Verify each post is deleted
-            var getResult = await _pb.Collection("posts")
+            Result<PostResponse> getResult = await _pb.Collection("posts")
                 .GetOneAsync<PostResponse>(postId);
 
             getResult.IsSuccess.Should().BeFalse();
@@ -212,7 +213,7 @@ public class DeleteRecordTests
     public async Task Delete_parent_with_cascade_relation_should_delete_child()
     {
         // Arrange - Create parent collection
-        var parentResult = await _pb.Collections.CreateAsync(
+        Result<CollectionModel> parentResult = await _pb.Collections.CreateAsync(
             new BaseCollectionCreateModel
             {
                 Name = "authors",
@@ -222,10 +223,10 @@ public class DeleteRecordTests
                 }
             });
 
-        var parentId = parentResult.Value.Id;
+        string parentId = parentResult.Value.Id;
 
         // Create child collection with cascade relation
-        var childResult = await _pb.Collections.CreateAsync(
+        Result<CollectionModel> childResult = await _pb.Collections.CreateAsync(
             new BaseCollectionCreateModel
             {
                 Name = "books",
@@ -242,32 +243,32 @@ public class DeleteRecordTests
             });
 
         // Create parent record
-        var authorResult = await _pb.Collection("authors")
+        Result<RecordResponse> authorResult = await _pb.Collection("authors")
             .CreateAsync<RecordResponse>(new { name = "John Doe" });
-        var authorId = authorResult.Value.Id;
+        string authorId = authorResult.Value.Id;
 
         // Create child record linked to parent
-        var bookResult = await _pb.Collection("books")
+        Result<RecordResponse> bookResult = await _pb.Collection("books")
             .CreateAsync<RecordResponse>(new
             {
                 title = "Cascade Test Book",
                 author = authorId
             });
-        var bookId = bookResult.Value.Id;
+        string bookId = bookResult.Value.Id;
 
         // Act - Delete parent (should cascade to child)
-        var deleteResult = await _pb.Collection("authors")
+        Result deleteResult = await _pb.Collection("authors")
             .DeleteAsync(authorId);
 
         // Assert
         deleteResult.IsSuccess.Should().BeTrue();
 
         // Verify both parent and child are deleted
-        var getAuthorResult = await _pb.Collection("authors")
+        Result<RecordResponse> getAuthorResult = await _pb.Collection("authors")
             .GetOneAsync<RecordResponse>(authorId);
         getAuthorResult.IsSuccess.Should().BeFalse();
 
-        var getBookResult = await _pb.Collection("books")
+        Result<RecordResponse> getBookResult = await _pb.Collection("books")
             .GetOneAsync<RecordResponse>(bookId);
         getBookResult.IsSuccess.Should().BeFalse();
     }

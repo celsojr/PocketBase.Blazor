@@ -17,7 +17,7 @@ public class GetLogStatsTests
     public async Task GetStatsAsync_ReturnsStats_WhenDefaultOptions()
     {
         // Act
-        var result = await _pb.Log.GetStatsAsync();
+        Result<List<HourlyStatsResponse>> result = await _pb.Log.GetStatsAsync();
 
         // Assert
         result.IsSuccess.Should().BeTrue();
@@ -29,13 +29,13 @@ public class GetLogStatsTests
     public async Task GetStatsAsync_ReturnsFilteredStats_WhenFilterProvided()
     {
         // Arrange
-        var options = new LogStatsOptions
+        LogStatsOptions options = new LogStatsOptions
         {
             Filter = "level > 0" // Error logs only
         };
 
         // Act
-        var result = await _pb.Log.GetStatsAsync(options);
+        Result<List<HourlyStatsResponse>> result = await _pb.Log.GetStatsAsync(options);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
@@ -46,16 +46,16 @@ public class GetLogStatsTests
     public async Task GetStatsAsync_ReturnsStatsWithDateRange_WhenDatesProvided()
     {
         // Arrange
-        var yesterday = DateTime.UtcNow.AddDays(-1);
-        var today = DateTime.UtcNow;
-        
-        var options = new LogStatsOptions
+        DateTime yesterday = DateTime.UtcNow.AddDays(-1);
+        DateTime today = DateTime.UtcNow;
+
+        LogStatsOptions options = new LogStatsOptions
         {
             Filter = $"created >= '{yesterday:yyyy-MM-dd}' && created <= '{today:yyyy-MM-dd}'"
         };
 
         // Act
-        var result = await _pb.Log.GetStatsAsync(options);
+        Result<List<HourlyStatsResponse>> result = await _pb.Log.GetStatsAsync(options);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
@@ -66,17 +66,16 @@ public class GetLogStatsTests
     public async Task GetStatsAsync_ReturnsStatsByType_WhenTypeFiltered()
     {
         // Arrange
-        var options = new LogStatsOptions
+        LogStatsOptions options = new LogStatsOptions
         {
             Filter = "type = 'request'"
         };
 
         // Act
-        var result = await _pb.Log.GetStatsAsync(options);
+        Result<List<HourlyStatsResponse>> result = await _pb.Log.GetStatsAsync(options);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().NotBeNull();
     }
 }
-

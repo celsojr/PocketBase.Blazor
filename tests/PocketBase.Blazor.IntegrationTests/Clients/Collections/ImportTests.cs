@@ -20,11 +20,11 @@ public class ImportTests
     [Fact]
     public async Task Import_collections_successfully()
     {
-        var baseCollectionName = $"import_base_{Guid.NewGuid():N}"[..20];
-        var viewCollectionName = $"import_view_{Guid.NewGuid():N}"[..20];
+        string baseCollectionName = $"import_base_{Guid.NewGuid():N}"[..20];
+        string viewCollectionName = $"import_view_{Guid.NewGuid():N}"[..20];
 
-        var collections = new CollectionCreateModel[]
-        {
+        CollectionCreateModel[] collections =
+        [
             new BaseCollectionCreateModel
             {
                 Name = baseCollectionName,
@@ -43,26 +43,26 @@ public class ImportTests
                 Name = viewCollectionName,
                 ViewQuery = $"SELECT id, title FROM {baseCollectionName};",
             }
-        };
+        ];
 
-        var result = await _pb.Collections.ImportAsync(collections);
+        Result result = await _pb.Collections.ImportAsync(collections);
 
         result.IsSuccess.Should().BeTrue();
 
-        var baseGet = await _pb.Collections.GetOneAsync<CollectionModel>(baseCollectionName);
+        Result<CollectionModel> baseGet = await _pb.Collections.GetOneAsync<CollectionModel>(baseCollectionName);
         baseGet.IsSuccess.Should().BeTrue();
 
-        var viewGet = await _pb.Collections.GetOneAsync<CollectionModel>(viewCollectionName);
+        Result<CollectionModel> viewGet = await _pb.Collections.GetOneAsync<CollectionModel>(viewCollectionName);
         viewGet.IsSuccess.Should().BeTrue();
     }
 
     [Fact]
     public async Task Import_is_idempotent()
     {
-        var name = $"import_idempotent_{Guid.NewGuid():N}"[..20];
+        string name = $"import_idempotent_{Guid.NewGuid():N}"[..20];
 
-        var collections = new CollectionCreateModel[]
-        {
+        CollectionCreateModel[] collections =
+        [
             new BaseCollectionCreateModel
             {
                 Name = name,
@@ -75,10 +75,10 @@ public class ImportTests
                     }
                 ]
             }
-        };
+        ];
 
-        var first = await _pb.Collections.ImportAsync(collections);
-        var second = await _pb.Collections.ImportAsync(collections);
+        Result first = await _pb.Collections.ImportAsync(collections);
+        Result second = await _pb.Collections.ImportAsync(collections);
 
         first.IsSuccess.Should().BeTrue();
         second.IsSuccess.Should().BeTrue();
@@ -87,7 +87,7 @@ public class ImportTests
     [Fact]
     public async Task Import_without_deleteMissing_preserves_existing_collections()
     {
-        var existingName = $"existing_{Guid.NewGuid():N}"[..20];
+        string existingName = $"existing_{Guid.NewGuid():N}"[..20];
 
         await _pb.Collections.CreateAsync(
             new BaseCollectionCreateModel
@@ -97,7 +97,7 @@ public class ImportTests
             }
         );
 
-        var importResult = await _pb.Collections.ImportAsync(
+        Result importResult = await _pb.Collections.ImportAsync(
             collections:
             [
                 new BaseCollectionCreateModel
@@ -118,7 +118,7 @@ public class ImportTests
 
         importResult.IsSuccess.Should().BeTrue();
 
-        var getExisting = await _pb.Collections.GetOneAsync<CollectionModel>(existingName);
+        Result<CollectionModel> getExisting = await _pb.Collections.GetOneAsync<CollectionModel>(existingName);
         getExisting.IsSuccess.Should().BeTrue();
     }
 
@@ -126,7 +126,7 @@ public class ImportTests
     public async Task Import_with_deleteMissing_removes_non_imported_collections()
     {
         // **This test is destructive — isolate it carefully**
-        var toDelete = $"delete_me_{Guid.NewGuid():N}"[..20];
+        string toDelete = $"delete_me_{Guid.NewGuid():N}"[..20];
 
         await _pb.Collections.CreateAsync(
             new BaseCollectionCreateModel
@@ -136,7 +136,7 @@ public class ImportTests
             }
         );
 
-        var importResult = await _pb.Collections.ImportAsync(
+        Result importResult = await _pb.Collections.ImportAsync(
             collections:
             [
                 new BaseCollectionCreateModel
@@ -157,7 +157,7 @@ public class ImportTests
 
         importResult.IsSuccess.Should().BeTrue();
 
-        var getDeleted = await _pb.Collections.GetOneAsync<CollectionModel>(toDelete);
+        Result<CollectionModel> getDeleted = await _pb.Collections.GetOneAsync<CollectionModel>(toDelete);
         getDeleted.IsSuccess.Should().BeFalse();
     }
 }

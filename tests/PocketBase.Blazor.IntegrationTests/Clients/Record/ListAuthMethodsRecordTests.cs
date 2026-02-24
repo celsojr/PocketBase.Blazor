@@ -1,6 +1,7 @@
 namespace PocketBase.Blazor.IntegrationTests.Clients.Record;
 
 using Blazor.Models;
+using Blazor.Responses.Auth;
 
 [Trait("Category", "Integration")]
 [Collection("PocketBase.Blazor.Admin")]
@@ -40,12 +41,12 @@ public class ListAuthMethodsRecordTests : IAsyncLifetime
     public async Task DisposeAsync()
     {
         // Clean up
-        var listResult = await _pb.Collections
+        Result<ListResult<CollectionModel>> listResult = await _pb.Collections
             .GetListAsync<CollectionModel>(options: new ListOptions { SkipTotal = true });
 
         listResult.IsSuccess.Should().BeTrue();
 
-        var collection = listResult.Value.Items
+        CollectionModel? collection = listResult.Value.Items
             .FirstOrDefault(c => c.Name?.Equals(CollectionName) == true);
 
         if (collection?.Id != null)
@@ -57,7 +58,7 @@ public class ListAuthMethodsRecordTests : IAsyncLifetime
     [Fact]
     public async Task ListAuthMethodsAsync_ReturnsSuccessResult()
     {
-        var result = await _pb.Collection(CollectionName).ListAuthMethodsAsync();
+        Result<AuthMethodsResponse> result = await _pb.Collection(CollectionName).ListAuthMethodsAsync();
 
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().NotBeNull();
@@ -66,7 +67,7 @@ public class ListAuthMethodsRecordTests : IAsyncLifetime
     [Fact]
     public async Task ListAuthMethodsAsync_ReturnsAuthMethodsWithExpectedStructure()
     {
-        var result = await _pb.Collection(CollectionName).ListAuthMethodsAsync();
+        Result<AuthMethodsResponse> result = await _pb.Collection(CollectionName).ListAuthMethodsAsync();
 
         result.Value.Should().NotBeNull();
         result.Value.Password.Should().NotBeNull();
@@ -78,7 +79,7 @@ public class ListAuthMethodsRecordTests : IAsyncLifetime
     [Fact]
     public async Task ListAuthMethodsAsync_PasswordAuth_HasEnabledAndIdentityFields()
     {
-        var result = await _pb.Collection(CollectionName).ListAuthMethodsAsync();
+        Result<AuthMethodsResponse> result = await _pb.Collection(CollectionName).ListAuthMethodsAsync();
 
         result.Value.Password.IdentityFields.Should().NotBeNull();
     }
@@ -86,7 +87,7 @@ public class ListAuthMethodsRecordTests : IAsyncLifetime
     [Fact]
     public async Task ListAuthMethodsAsync_OAuth2_ReturnsProviders()
     {
-        var result = await _pb.Collection(CollectionName).ListAuthMethodsAsync();
+        Result<AuthMethodsResponse> result = await _pb.Collection(CollectionName).ListAuthMethodsAsync();
 
         result.Value.Oauth2.Providers.Should().NotBeNull();
     }
@@ -94,7 +95,7 @@ public class ListAuthMethodsRecordTests : IAsyncLifetime
     [Fact]
     public async Task ListAuthMethodsAsync_Mfa_ReturnsEnabledAndDuration()
     {
-        var result = await _pb.Collection(CollectionName).ListAuthMethodsAsync();
+        Result<AuthMethodsResponse> result = await _pb.Collection(CollectionName).ListAuthMethodsAsync();
 
         result.Value.Mfa.Duration.Should().BeGreaterThanOrEqualTo(0);
     }
@@ -102,7 +103,7 @@ public class ListAuthMethodsRecordTests : IAsyncLifetime
     [Fact]
     public async Task ListAuthMethodsAsync_Otp_ReturnsEnabledAndValidDuration()
     {
-        var result = await _pb.Collection(CollectionName).ListAuthMethodsAsync();
+        Result<AuthMethodsResponse> result = await _pb.Collection(CollectionName).ListAuthMethodsAsync();
 
         result.Value.Otp.Enabled.Should().BeTrue(); // We set it to true
         result.Value.Otp.Duration.Should().BeGreaterThanOrEqualTo(10);

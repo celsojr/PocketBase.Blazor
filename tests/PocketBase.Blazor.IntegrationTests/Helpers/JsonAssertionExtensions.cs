@@ -6,8 +6,8 @@ public static class JsonAssertionExtensions
     {
         ArgumentNullException.ThrowIfNull(item);
 
-        var jsonText = item.ToString() ?? "{}";
-        var dict = JsonSerializer.Deserialize<Dictionary<string, object>>(jsonText)!;
+        string jsonText = item.ToString() ?? "{}";
+        Dictionary<string, object> dict = JsonSerializer.Deserialize<Dictionary<string, object>>(jsonText)!;
 
         dict.Should().NotBeNull("The object should deserialize to a JSON dictionary");
         return dict;
