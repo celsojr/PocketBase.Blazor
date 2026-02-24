@@ -47,6 +47,7 @@ Beta is not an excuse for random changes; it is a controlled phase for convergin
 
 - Unit tests protect pure logic and boundaries.
 - Integration tests are source-of-truth for public API behavior and docs examples.
+- Integration tests should not be run simultaneously, either through test runners or manually, due to the lack of isolation of the authorization context.
 
 ## Evolution Intent
 
