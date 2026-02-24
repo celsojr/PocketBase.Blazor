@@ -87,3 +87,4 @@ Common trait filters in this project:
 - Tests mutate test data; do not point to production data.
 - If tests fail after schema changes, reset/reseed `pb_data` and re-run migrations.
 - Keep integration examples in sync with README snippets.
+- Integration tests should not be run simultaneously, either through test runners or manually, due to the lack of isolation of the authorization context.
