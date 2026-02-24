@@ -80,8 +80,9 @@ go run main.go
 > Under the hood, PocketBase relies on the [**robfig/cron**](https://github.com/robfig/cron) package for scheduling and managing these cron jobs.
 
 ## Advanced example
-- **Dynamic payload support**: payloads are kept in memory and passed to the handler function. Users can define any structure.
-- **Custom Go logic**: advanced users can define their own logic Go handler body logic in a CronManifest via the C# SDK.
+- **Payload contract**: `payload` must be a JSON object and is passed to handlers as `map[string]any`.
+- **Custom Go logic**: define handler bodies in `CronManifest` (C# SDK), which generates `RegisterHandler("<id>", func(payload map[string]any) { ... })`.
+- **Known IDs only**: `/internal/cron` can register/update schedules only for handler IDs registered at startup; unknown IDs return `unknown cron id: <id>`.
 - **Internal endpoint for registration**:
 ```
 curl -X POST http://127.0.0.1:8090/internal/cron \
@@ -96,9 +97,9 @@ curl -X POST http://127.0.0.1:8090/internal/cron \
 ## Summary
 
 - Custom cron jobs run **in-memory** in the Go process alongside PocketBase.
-- Payloads are **kept in memory**, and persistence is left to the user if needed.
-- Handlers are fully **customizable** and can use any Go code.
-- Cron jobs are **not stored in PocketBase DB**—this keeps the core DB untouched.
-- Registration and execution are handled via **C# SDK or internal HTTP endpoints**.
+- Registering the same cron ID updates behavior (`Remove` + `Add`) and replaces the in-memory payload.
+- Payloads are **kept in memory** per cron ID and are lost on process restart unless you persist them externally.
+- Cron jobs are **not stored in PocketBase DB**; runtime state lives in the custom Go host.
+- Listing/running crons uses PocketBase `/api/crons`; dynamic registration uses `/internal/cron` (custom extension).
 
-This design allows **flexible, safe, and testable cron logic** while keeping **PocketBase** isolated from custom runtime code.
+This keeps PocketBase core storage untouched while enabling flexible, testable custom cron runtime logic.
