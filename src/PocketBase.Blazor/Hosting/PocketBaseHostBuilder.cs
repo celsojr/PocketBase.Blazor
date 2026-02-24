@@ -11,6 +11,8 @@ using PocketBase.Blazor.Hosting.Interfaces;
 using PocketBase.Blazor.Hosting.Services;
 using PocketBase.Blazor.Models;
 using PocketBase.Blazor.Options;
+using PocketBase.Blazor.Scaffolding;
+using PocketBase.Blazor.Scaffolding.Internal;
 
 namespace PocketBase.Blazor.Hosting
 {
@@ -23,6 +25,7 @@ namespace PocketBase.Blazor.Hosting
         private ICronGenerator? _cronGenerator;
         private CronManifest? _cronManifest;
         private CronGenerationOptions? _cronOptions;
+        private readonly HashSet<CommonSchema> _schemaTemplates = [];
 
         public static IPocketBaseHostBuilder CreateDefault(string[]? args = null)
         {
@@ -40,6 +43,28 @@ namespace PocketBase.Blazor.Hosting
             _cronGenerator = cronGenerator;
             _cronManifest = manifest;
             _cronOptions = options;
+            return this;
+        }
+
+        public IPocketBaseHostBuilder UseSchemaTemplate(CommonSchema schema)
+        {
+            if (Enum.IsDefined(typeof(CommonSchema), schema))
+            {
+                _schemaTemplates.Add(schema);
+            }
+
+            return this;
+        }
+
+        public IPocketBaseHostBuilder UseSchemaTemplates(IEnumerable<CommonSchema> schemas)
+        {
+            ArgumentNullException.ThrowIfNull(schemas);
+
+            foreach (CommonSchema schema in schemas)
+            {
+                UseSchemaTemplate(schema);
+            }
+
             return this;
         }
 
@@ -64,6 +89,11 @@ namespace PocketBase.Blazor.Hosting
                         "Cron generator configured without manifest or options.");
 
                 await _cronGenerator.GenerateAsync(_cronManifest, _cronOptions);
+            }
+
+            if (_schemaTemplates.Count > 0)
+            {
+                await SchemaTemplateMigrationWriter.WriteAsync(_schemaTemplates, _options, _logger);
             }
 
             if (_logger != null)
