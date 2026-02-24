@@ -80,16 +80,16 @@ namespace PocketBase.Blazor.Hosting
 
         public IPocketBaseHostBuilder UseEnvironmentVariables(string prefix = "POCKETBASE_")
         {
-            var envVars = Environment.GetEnvironmentVariables();
+            IDictionary envVars = Environment.GetEnvironmentVariables();
 
             foreach (DictionaryEntry envVar in envVars)
             {
-                var key = envVar.Key.ToString();
+                string? key = envVar.Key.ToString();
 
                 if (key?.StartsWith(prefix, StringComparison.OrdinalIgnoreCase) == true)
                 {
-                    var optionName = key.Substring(prefix.Length);
-                    var value = envVar.Value?.ToString();
+                    string optionName = key.Substring(prefix.Length);
+                    string? value = envVar.Value?.ToString();
 
                     if (value != null)
                         ApplyEnvironmentVariable(optionName, value);
@@ -133,7 +133,7 @@ namespace PocketBase.Blazor.Hosting
                 throw new FileNotFoundException($"Configuration file not found: {filePath}");
             }
 
-            var extension = Path.GetExtension(filePath).ToLowerInvariant();
+            string extension = Path.GetExtension(filePath).ToLowerInvariant();
 
             return extension switch
             {
@@ -148,8 +148,8 @@ namespace PocketBase.Blazor.Hosting
 
         public PocketBaseHostBuilder UseJsonConfiguration(string filePath)
         {
-            var json = File.ReadAllText(filePath);
-            var config = JsonSerializer.Deserialize<PocketBaseHostOptions>(json, new JsonSerializerOptions
+            string json = File.ReadAllText(filePath);
+            PocketBaseHostOptions? config = JsonSerializer.Deserialize<PocketBaseHostOptions>(json, new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true,
                 AllowTrailingCommas = true,
@@ -179,12 +179,12 @@ namespace PocketBase.Blazor.Hosting
 
         public IPocketBaseHostBuilder UseXmlConfiguration(string filePath)
         {
-            var xml = File.ReadAllText(filePath);
-            var doc = XDocument.Parse(xml);
+            string xml = File.ReadAllText(filePath);
+            XDocument doc = XDocument.Parse(xml);
 
-            var config = new PocketBaseHostOptions();
+            PocketBaseHostOptions config = new PocketBaseHostOptions();
 
-            var root = doc.Root;
+            XElement? root = doc.Root;
             if (root != null)
             {
                 config.Host = root.Element("Host")?.Value ?? config.Host;
@@ -221,10 +221,10 @@ namespace PocketBase.Blazor.Hosting
             if (config == null)
                 return;
 
-            if (config.TryGetValue("Host", out var host) && host is string hostStr)
+            if (config.TryGetValue("Host", out object? host) && host is string hostStr)
                 _options.Host = hostStr;
 
-            if (config.TryGetValue("Port", out var port))
+            if (config.TryGetValue("Port", out object? port))
             {
                 if (port is int portInt)
                     _options.Port = portInt;

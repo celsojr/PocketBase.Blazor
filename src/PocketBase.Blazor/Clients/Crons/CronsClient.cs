@@ -26,7 +26,7 @@ namespace PocketBase.Blazor.Clients.Crons
         /// <inheritdoc />
         public Task<Result<IEnumerable<CronsResponse>>> GetFullListAsync(CommonOptions? options = null, CancellationToken cancellationToken = default)
         {
-            var query = options?.ToDictionary();
+            IDictionary<string, object?>? query = options?.ToDictionary();
             return _http.SendAsync<IEnumerable<CronsResponse>>(HttpMethod.Get, "api/crons", query: query, cancellationToken: cancellationToken);
         }
 
@@ -36,7 +36,7 @@ namespace PocketBase.Blazor.Clients.Crons
             if (string.IsNullOrWhiteSpace(id))
                 throw new ArgumentException("Cron job id is required.", nameof(id));
 
-            var query = options?.ToDictionary();
+            IDictionary<string, object?>? query = options?.ToDictionary();
             return _http.SendAsync(HttpMethod.Post, $"api/crons/{id}", body: null, query: query, cancellationToken: cancellationToken);
         }
 

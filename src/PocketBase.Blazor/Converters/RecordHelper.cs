@@ -13,8 +13,8 @@ namespace PocketBase.Blazor.Converters
 
             try
             {
-                var json = JsonDocument.Parse(evt.Data);
-                var root = json.RootElement;
+                JsonDocument json = JsonDocument.Parse(evt.Data);
+                JsonElement root = json.RootElement;
 
                 return new RealtimeRecordEvent
                 {

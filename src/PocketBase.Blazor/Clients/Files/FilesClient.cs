@@ -9,6 +9,7 @@ using PocketBase.Blazor.Options;
 using PbOptions = PocketBase.Blazor.Options;
 using PocketBase.Blazor.Responses.Auth;
 using System.Linq;
+using System.Collections.Generic;
 
 namespace PocketBase.Blazor.Clients.Files
 {
@@ -32,7 +33,7 @@ namespace PocketBase.Blazor.Clients.Files
                 return string.Empty;
             }
 
-            var path = string.Join('/', [
+            string path = string.Join('/', [
                 "api",
                 "files",
                 Uri.EscapeDataString(collectionId),
@@ -41,12 +42,12 @@ namespace PocketBase.Blazor.Clients.Files
             ]);
 
             options ??= new PbOptions.FileOptions();
-            var query = options.BuildQuery();
+            Dictionary<string, object?>? query = options.BuildQuery();
 
             if (query != null)
             {
                 // normalize the download query param (same as TS)
-                if (query.TryGetValue("download", out var download)
+                if (query.TryGetValue("download", out object? download)
                     && download?.Equals("false") == true)
                 {
                     query.Remove("download");
@@ -67,7 +68,7 @@ namespace PocketBase.Blazor.Clients.Files
         {
             options ??= new CommonOptions();
 
-            var data = await _http.SendAsync<TokenResponse>(
+            Result<TokenResponse> data = await _http.SendAsync<TokenResponse>(
                 HttpMethod.Post,
                 "api/files/token",
                 body: options.Body,
@@ -86,7 +87,7 @@ namespace PocketBase.Blazor.Clients.Files
                return Result.Fail<Stream>("fileName and recordId are required");
            }
 
-           var path = string.Join('/', [
+            string path = string.Join('/', [
                "api",
                "files",
                Uri.EscapeDataString(collectionId),
@@ -95,7 +96,7 @@ namespace PocketBase.Blazor.Clients.Files
            ]);
 
            options ??= new PbOptions.FileOptions();
-           var query = options.BuildQuery();
+           Dictionary<string, object?> query = options.BuildQuery();
 
            return await _http.SendForStreamAsync(HttpMethod.Get, path, query: query, cancellationToken: cancellationToken);
         }
@@ -108,7 +109,7 @@ namespace PocketBase.Blazor.Clients.Files
                return Result.Fail<byte[]>("fileName and recordId are required");
            }
 
-           var path = string.Join('/', [
+            string path = string.Join('/', [
                "api",
                "files",
                Uri.EscapeDataString(collectionId),
@@ -117,7 +118,7 @@ namespace PocketBase.Blazor.Clients.Files
            ]);
 
            options ??= new PbOptions.FileOptions();
-           var query = options.BuildQuery();
+            Dictionary<string, object?> query = options.BuildQuery();
 
            return await _http.SendForBytesAsync(HttpMethod.Get, path, query: query, cancellationToken: cancellationToken);
         }

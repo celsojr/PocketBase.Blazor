@@ -60,7 +60,7 @@ public sealed class PocketBase : IPocketBase
         Health = new HealthClient(_http);
         Settings = new SettingsClient(_http);
 
-        var authStore = new AuthStore();
+        AuthStore authStore = new AuthStore();
         AuthStore = new PocketBaseStore(authStore, Realtime, RealtimeSse);
 
         if (_http is HttpTransport transport)
@@ -73,12 +73,12 @@ public sealed class PocketBase : IPocketBase
     /// <inheritdoc />
     public IRecordClient Collection(string collectionName)
     {
-        var encodedName = WebUtility.UrlEncode(collectionName);
-        if (_recordClients.TryGetValue(encodedName, out var value))
+        string encodedName = WebUtility.UrlEncode(collectionName);
+        if (_recordClients.TryGetValue(encodedName, out RecordClient? value))
         {
             return value;
         }
-        var newRecordClient = new RecordClient(encodedName, _http, AuthStore);
+        RecordClient newRecordClient = new RecordClient(encodedName, _http, AuthStore);
         _recordClients[encodedName] = newRecordClient;
         return newRecordClient;
     }

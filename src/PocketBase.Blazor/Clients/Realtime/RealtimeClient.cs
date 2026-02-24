@@ -12,6 +12,7 @@ using PocketBase.Blazor.Events;
 using PocketBase.Blazor.Http;
 using PocketBase.Blazor.Models;
 using PocketBase.Blazor.Options;
+using System.Collections.Generic;
 
 namespace PocketBase.Blazor.Clients.Realtime
 {
@@ -34,7 +35,7 @@ namespace PocketBase.Blazor.Clients.Realtime
         public async Task<IDisposable> SubscribeAsync(string collection, string recordId, Action<RealtimeRecordEvent> onEvent, CommonOptions? options = null, CancellationToken cancellationToken = default)
         {
             ArgumentNullException.ThrowIfNull(onEvent);
-            var topic = recordId == "*" ? $"{collection}/*" : $"{collection}/{recordId}";
+            string topic = recordId == "*" ? $"{collection}/*" : $"{collection}/{recordId}";
 
             await EnsureConnectedAsync(cancellationToken);
             await SubscribeInternalAsync(topic, options, cancellationToken);
@@ -52,15 +53,15 @@ namespace PocketBase.Blazor.Clients.Realtime
         public async Task UnsubscribeAsync(string collection, string? recordId = null, CancellationToken cancellationToken = default)
         {
             await EnsureConnectedAsync(cancellationToken);
-        
-            var topicsToRemove = _subscriptions.Keys
+
+            List<string> topicsToRemove = _subscriptions.Keys
                 .Where(t => ShouldRemoveTopic(t, collection, recordId))
                 .ToList();
         
             if (topicsToRemove.Count == 0)
                 return;
         
-            foreach (var topic in topicsToRemove)
+            foreach (string? topic in topicsToRemove)
             {
                 _subscriptions.TryRemove(topic, out _);
             }
@@ -75,8 +76,8 @@ namespace PocketBase.Blazor.Clients.Realtime
             
             if (recordId == null)
                 return true; // Remove all for this collection
-            
-            var suffix = topic[(collection.Length + 1)..];
+
+            string suffix = topic[(collection.Length + 1)..];
         
             return recordId == "*" ? suffix == "*" : suffix == recordId;
         }
@@ -85,20 +86,20 @@ namespace PocketBase.Blazor.Clients.Realtime
         {
             return Task.Run(async () =>
             {
-                await foreach (var evt in _eventChannel.Reader.ReadAllAsync(ct))
+                await foreach (RealtimeEvent evt in _eventChannel.Reader.ReadAllAsync(ct))
                 {
                     if (!evt.Data.Contains("\"record\":")) continue;
 
-                    var recordEvt = ParseRecordEvent(evt);
+                    RealtimeRecordEvent? recordEvt = ParseRecordEvent(evt);
                     if (recordEvt == null) continue;
 
-                    var exactTopic = $"{recordEvt.Collection}/{recordEvt.RecordId}";
-                    var wildcardTopic = $"{recordEvt.Collection}/*";
+                    string exactTopic = $"{recordEvt.Collection}/{recordEvt.RecordId}";
+                    string wildcardTopic = $"{recordEvt.Collection}/*";
 
-                    var exactHandlers = GetHandlers(exactTopic);
-                    var wildcardHandlers = GetHandlers(wildcardTopic);
+                    ImmutableList<Action<RealtimeRecordEvent>> exactHandlers = GetHandlers(exactTopic);
+                    ImmutableList<Action<RealtimeRecordEvent>> wildcardHandlers = GetHandlers(wildcardTopic);
 
-                    foreach (var handler in exactHandlers.Concat(wildcardHandlers).Distinct())
+                    foreach (Action<RealtimeRecordEvent>? handler in exactHandlers.Concat(wildcardHandlers).Distinct())
                     {
                         try { handler(recordEvt); }
                         catch (Exception ex) { _logger.LogError(ex, "Error in event handler"); }
@@ -127,12 +128,12 @@ namespace PocketBase.Blazor.Clients.Realtime
                 _ => ImmutableList<Action<RealtimeRecordEvent>>.Empty,
                 (_, existing) => existing.Remove(handler));
 
-            if (_subscriptions.TryGetValue(topic, out var handlers) && handlers.IsEmpty)
+            if (_subscriptions.TryGetValue(topic, out ImmutableList<Action<RealtimeRecordEvent>>? handlers) && handlers.IsEmpty)
                 _subscriptions.TryRemove(topic, out _);
         }
 
         private ImmutableList<Action<RealtimeRecordEvent>> GetHandlers(string topic) =>
-            _subscriptions.TryGetValue(topic, out var handlers) ? handlers : [];
+            _subscriptions.TryGetValue(topic, out ImmutableList<Action<RealtimeRecordEvent>>? handlers) ? handlers : [];
 
         private static ILogger CreateDefaultLogger<T>()
         {

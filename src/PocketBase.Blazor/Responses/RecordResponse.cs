@@ -30,7 +30,7 @@ namespace PocketBase.Blazor.Responses
         /// <returns>The deserialized expanded record, or null if not found or deserialization fails.</returns>
         public T? GetExpandedRecord<T>(string fieldName) where T : class
         {
-            if (Expand?.TryGetValue(fieldName, out var expansion) != true ||
+            if (Expand?.TryGetValue(fieldName, out JsonElement? expansion) != true ||
                 expansion is not JsonElement jsonElement)
             {
                 return null;
@@ -61,7 +61,7 @@ namespace PocketBase.Blazor.Responses
         /// <returns>A list of deserialized expanded records, or an empty list if not found or deserialization fails.</returns>
         public List<T> GetExpandedList<T>(string fieldName) where T : class
         {
-            if (Expand?.TryGetValue(fieldName, out var expansion) != true ||
+            if (Expand?.TryGetValue(fieldName, out JsonElement? expansion) != true ||
                 expansion is not JsonElement jsonElement)
             {
                 return new List<T>();

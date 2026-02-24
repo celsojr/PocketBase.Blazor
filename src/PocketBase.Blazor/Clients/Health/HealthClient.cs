@@ -22,7 +22,7 @@ namespace PocketBase.Blazor.Clients.Health
         /// <inheritdoc />
         public async Task<Result<HealthCheckResponse>> CheckAsync(CommonOptions? options = null, CancellationToken cancellationToken = default)
         {
-            var response = await _http.SendAsync<HealthCheckResponse>(
+            Result<HealthCheckResponse> response = await _http.SendAsync<HealthCheckResponse>(
                 HttpMethod.Get,
                 "api/health",
                 query: options?.Query,

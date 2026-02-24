@@ -8,8 +8,8 @@ namespace PocketBase.Blazor.Converters
     {
         public override DateTime? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
-            var value = reader.GetString();
-            if (!DateTime.TryParse(value, out var dt))
+            string? value = reader.GetString();
+            if (!DateTime.TryParse(value, out DateTime dt))
             {
                 return null;
             }

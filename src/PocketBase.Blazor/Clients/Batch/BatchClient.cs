@@ -62,8 +62,8 @@ namespace PocketBase.Blazor.Clients.Batch
         /// <inheritdoc />
         public async Task<Result<List<BatchResponse>>> SendAsync(CancellationToken cancellationToken = default)
         {
-            var requests = BuildBatchRequest();
-            var body = BuildRequestBody(requests);
+            List<BatchRequest> requests = BuildBatchRequest();
+            object body = BuildRequestBody(requests);
 
             return await _transport.SendAsync<List<BatchResponse>>(HttpMethod.Post, "api/batch", body, cancellationToken: cancellationToken);
         }
@@ -86,7 +86,7 @@ namespace PocketBase.Blazor.Clients.Batch
 
         private static object BuildRequestBody(IReadOnlyList<BatchRequest> requests)
         {
-            var hasFiles = requests.Any(static r => r.Files?.Count > 0);
+            bool hasFiles = requests.Any(static r => r.Files?.Count > 0);
 
             if (!hasFiles)
             {
@@ -98,9 +98,9 @@ namespace PocketBase.Blazor.Clients.Batch
 
         private static MultipartFormDataContent BuildMultipartFormData(IReadOnlyList<BatchRequest> requests)
         {
-            var form = new MultipartFormDataContent();
-            var payload = CreatePayload(requests);
-            var payloadJson = JsonSerializer.Serialize(payload);
+            MultipartFormDataContent form = new MultipartFormDataContent();
+            object payload = CreatePayload(requests);
+            string payloadJson = JsonSerializer.Serialize(payload);
     
             form.Add(new StringContent(payloadJson, Encoding.UTF8, "application/json"), "@jsonPayload");
             AddFilesToForm(form, requests);
@@ -124,14 +124,14 @@ namespace PocketBase.Blazor.Clients.Batch
 
         private static void AddFilesToForm(MultipartFormDataContent form, IReadOnlyList<BatchRequest> requests)
         {
-            for (var i = 0; i < requests.Count; i++)
+            for (int i = 0; i < requests.Count; i++)
             {
-                var req = requests[i];
+                BatchRequest req = requests[i];
                 if (req.Files is null) continue;
         
-                foreach (var file in req.Files)
+                foreach (BatchFile file in req.Files)
                 {
-                    var content = new StreamContent(file.Content);
+                    StreamContent content = new StreamContent(file.Content);
             
                     if (!string.IsNullOrWhiteSpace(file.ContentType))
                     {

@@ -45,12 +45,12 @@ namespace PocketBase.Blazor.Clients
         /// <inheritdoc />
         private async Task<Result<List<T>>> GetFullListInternalAsync<T>(int batch, ListOptions? options, CancellationToken cancellationToken)
         {
-            var result = new List<T>();
-            var page = 1;
+            List<T> result = [];
+            int page = 1;
 
             while (true)
             {
-                var pageResult = await GetListAsync<T>(
+                Result<ListResult<T>> pageResult = await GetListAsync<T>(
                     page: page,
                     perPage: batch,
                     options: options,
@@ -92,7 +92,7 @@ namespace PocketBase.Blazor.Clients
         /// <inheritdoc />
         public virtual async Task<Result<List<T>>> GetFullListAsync<T>(FullListOptions options, CancellationToken cancellationToken = default)
         {
-            var batch = options.Batch ?? 500;
+            int batch = options.Batch ?? 500;
             return await GetFullListInternalAsync<T>(
                 batch,
                 options,
@@ -115,7 +115,7 @@ namespace PocketBase.Blazor.Clients
             options ??= new CommonOptions();
             options.Query = options.BuildQuery();
 
-            var url = $"{BasePath}/{UrlEncode(id)}";
+            string url = $"{BasePath}/{UrlEncode(id)}";
 
             return await Http.SendAsync<T>(HttpMethod.Get, url, query: options?.Query, cancellationToken: cancellationToken);
         }
@@ -124,7 +124,7 @@ namespace PocketBase.Blazor.Clients
         public virtual async Task<Result<T>> CreateAsync<T>(object? body = null, CommonOptions? options = null, CancellationToken cancellationToken = default)
             where T : BaseModel
         {
-            var mergedBody = MergeBodies(body, options?.Body as Dictionary<string, object?>);
+            object? mergedBody = MergeBodies(body, options?.Body as Dictionary<string, object?>);
             return await Http.SendAsync<T>(
                 HttpMethod.Post,
                 BasePath,
@@ -140,7 +140,7 @@ namespace PocketBase.Blazor.Clients
             if (string.IsNullOrWhiteSpace(id))
                 throw new ArgumentException("Collection id or name is required.", nameof(id));
 
-            var mergedBody = MergeBodies(body, options?.Body as Dictionary<string, object?>);
+            object? mergedBody = MergeBodies(body, options?.Body as Dictionary<string, object?>);
             return await Http.SendAsync<T>(
                 HttpMethod.Patch,
                 $"{BasePath}/{UrlEncode(id)}",
@@ -183,11 +183,11 @@ namespace PocketBase.Blazor.Clients
             if (optionsBody == null && body is not IDictionary<string, object?>) return body;
 
             // convert main body to dictionary if needed
-            var mainDict = body is IDictionary<string, object?> d ? d : ToDictionary(body);
-            var result = new Dictionary<string, object?>(optionsBody ?? new Dictionary<string, object?>());
+            IDictionary<string, object?> mainDict = body is IDictionary<string, object?> d ? d : ToDictionary(body);
+            Dictionary<string, object?> result = new Dictionary<string, object?>(optionsBody ?? new Dictionary<string, object?>());
 
             // main body overrides options.Body
-            foreach (var kv in mainDict)
+            foreach (KeyValuePair<string, object?> kv in mainDict)
                 result[kv.Key] = kv.Value;
 
             return result;

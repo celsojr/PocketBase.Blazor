@@ -34,10 +34,10 @@ namespace PocketBase.Blazor.Options
 
         internal Dictionary<string, object?> BuildQuery(int page = 1, int perPage = 30)
         {
-            var query = base.BuildQuery(page, perPage);
+            Dictionary<string, object?> query = base.BuildQuery(page, perPage);
 
-            var effectivePage = Page ?? page;
-            var effectivePerPage = PerPage ?? perPage;
+            int effectivePage = Page ?? page;
+            int effectivePerPage = PerPage ?? perPage;
 
             if (effectivePage != 1)
                 query["page"] = effectivePage;

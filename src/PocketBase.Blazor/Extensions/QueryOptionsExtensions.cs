@@ -7,7 +7,7 @@ namespace PocketBase.Blazor.Extensions
     {
         public static Dictionary<string, object?> ToQueryDictionary(this QueryOptionsRequest? options)
         {
-            var dict = new Dictionary<string, object?>();
+            Dictionary<string, object?> dict = new Dictionary<string, object?>();
 
             if (options == null)
                 return dict;

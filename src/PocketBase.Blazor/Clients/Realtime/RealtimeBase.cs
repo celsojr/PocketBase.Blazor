@@ -91,18 +91,18 @@ namespace PocketBase.Blazor.Clients.Realtime
             {
                 try
                 {
-                    await foreach (var evt in StreamRawEventsAsync(ct))
+                    await foreach (RealtimeEvent evt in StreamRawEventsAsync(ct))
                     {
                         if (evt.Event == "PB_CONNECT")
                         {
-                            var json = JsonDocument.Parse(evt.Data);
+                            JsonDocument json = JsonDocument.Parse(evt.Data);
                             _clientId = json.RootElement.GetProperty("clientId").GetString();
                             _isConnected = true;
                         }
                         else if (evt.Event == "PB_DISCONNECT")
                         {
                             _isConnected = false;
-                            var reasons = JsonSerializer.Deserialize<string[]>(evt.Data) ?? [];
+                            string[] reasons = JsonSerializer.Deserialize<string[]>(evt.Data) ?? [];
                             OnDisconnect?.Invoke(reasons);
                         }
                         else
@@ -133,9 +133,9 @@ namespace PocketBase.Blazor.Clients.Realtime
         protected async IAsyncEnumerable<RealtimeEvent> StreamRawEventsAsync([EnumeratorCancellation] CancellationToken ct)
         {
             string? id = null, evtType = null;
-            var data = new StringBuilder();
+            StringBuilder data = new StringBuilder();
 
-            await foreach (var line in _http.SendForSseAsync(HttpMethod.Get, "api/realtime", cancellationToken: ct))
+            await foreach (string line in _http.SendForSseAsync(HttpMethod.Get, "api/realtime", cancellationToken: ct))
             {
                 if (string.IsNullOrWhiteSpace(line))
                 {

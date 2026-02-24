@@ -11,7 +11,7 @@ namespace PocketBase.Blazor.Options
 
         public virtual Dictionary<string, object?> BuildQuery(int page = 1, int perPage = 30)
         {
-            var query = new Dictionary<string, object?>
+            Dictionary<string, object?> query = new Dictionary<string, object?>
             {
                 ["page"] = page,
                 ["perPage"] = perPage

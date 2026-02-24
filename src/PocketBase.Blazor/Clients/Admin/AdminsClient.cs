@@ -32,13 +32,13 @@ namespace PocketBase.Blazor.Clients.Admin
             if (string.IsNullOrWhiteSpace(password))
                 throw new ArgumentException("Password must be provided.", nameof(password));
 
-            var body = new Dictionary<string, object>
+            Dictionary<string, object> body = new Dictionary<string, object>
             {
                 ["identity"] = email,
                 ["password"] = password
             };
 
-            var result = await _http.SendAsync<AuthResponse>(HttpMethod.Post, "api/collections/_superusers/auth-with-password", body, cancellationToken: cancellationToken);
+            Result<AuthResponse> result = await _http.SendAsync<AuthResponse>(HttpMethod.Post, "api/collections/_superusers/auth-with-password", body, cancellationToken: cancellationToken);
 
             if (result.IsSuccess)
             {
@@ -57,7 +57,7 @@ namespace PocketBase.Blazor.Clients.Admin
             options ??= new CommonOptions();
             options.Query = options.BuildQuery();
 
-            var result = await _http.SendAsync<AuthResponse>(HttpMethod.Post, "api/_superusers/auth-refresh", query: options.Query, cancellationToken: cancellationToken);
+            Result<AuthResponse> result = await _http.SendAsync<AuthResponse>(HttpMethod.Post, "api/_superusers/auth-refresh", query: options.Query, cancellationToken: cancellationToken);
 
             if (result.IsSuccess)
             {
@@ -76,7 +76,7 @@ namespace PocketBase.Blazor.Clients.Admin
             ArgumentException.ThrowIfNullOrWhiteSpace(collectionName, nameof(collectionName));
             ArgumentException.ThrowIfNullOrWhiteSpace(recordId, nameof(recordId));
 
-            var body = new Dictionary<string, object>()
+            Dictionary<string, object> body = new Dictionary<string, object>()
             {
                 ["duration"] = duration,
             };
@@ -84,7 +84,7 @@ namespace PocketBase.Blazor.Clients.Admin
             options ??= new CommonOptions();
             options.Query = options.BuildQuery();
 
-            var result = await _http.SendAsync<AuthResponse>(HttpMethod.Post, $"api/collections/{collectionName}/impersonate/{recordId}", body, options.Query, cancellationToken: cancellationToken);
+            Result<AuthResponse> result = await _http.SendAsync<AuthResponse>(HttpMethod.Post, $"api/collections/{collectionName}/impersonate/{recordId}", body, options.Query, cancellationToken: cancellationToken);
 
             if (result.IsSuccess)
             {

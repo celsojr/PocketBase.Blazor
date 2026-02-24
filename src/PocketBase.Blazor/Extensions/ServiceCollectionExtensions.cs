@@ -10,7 +10,7 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddPocketBase(this IServiceCollection services, Action<PocketBaseOptions> configure)
     {
         ArgumentNullException.ThrowIfNull(configure);
-        var options = new PocketBaseOptions();
+        PocketBaseOptions options = new PocketBaseOptions();
         configure(options);
 
         if (string.IsNullOrWhiteSpace(options.BaseUrl))
@@ -20,7 +20,7 @@ public static class ServiceCollectionExtensions
 
         services.AddScoped(sp =>
         {
-            var http = new HttpClient
+            HttpClient http = new HttpClient
             {
                 BaseAddress = new Uri(options.BaseUrl)
             };

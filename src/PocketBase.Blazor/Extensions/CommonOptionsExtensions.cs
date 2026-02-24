@@ -13,7 +13,7 @@ namespace PocketBase.Blazor.Extensions
         /// </summary>
         public static IDictionary<string, object?> ToDictionary(this CommonOptions options)
         {
-            var dict = options?.Query != null
+            Dictionary<string, object?> dict = options?.Query != null
                 ? new Dictionary<string, object?>(options.Query)
                 : [];
 

@@ -27,8 +27,8 @@ namespace PocketBase.Blazor.Responses.Logging
     {
         public override LogDataResponse Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
-            var jsonDoc = JsonDocument.ParseValue(ref reader);
-            var root = jsonDoc.RootElement;
+            JsonDocument jsonDoc = JsonDocument.ParseValue(ref reader);
+            JsonElement root = jsonDoc.RootElement;
 
             return new LogDataResponse
             {
@@ -50,16 +50,16 @@ namespace PocketBase.Blazor.Responses.Logging
         }
 
         private static string? TryGetObject(JsonElement element, string propertyName)
-            => element.TryGetProperty(propertyName, out var prop) ? prop.GetRawText() : null;
+            => element.TryGetProperty(propertyName, out JsonElement prop) ? prop.GetRawText() : null;
 
         private static string? TryGetString(JsonElement element, string propertyName)
-            => element.TryGetProperty(propertyName, out var prop) ? prop.GetString() : null;
+            => element.TryGetProperty(propertyName, out JsonElement prop) ? prop.GetString() : null;
 
         private static double TryGetDouble(JsonElement element, string propertyName)
-            => element.TryGetProperty(propertyName, out var prop) ? prop.GetDouble() : 0;
+            => element.TryGetProperty(propertyName, out JsonElement prop) ? prop.GetDouble() : 0;
 
         private static int TryGetInt(JsonElement element, string propertyName)
-            => element.TryGetProperty(propertyName, out var prop) ? prop.GetInt32() : 0;
+            => element.TryGetProperty(propertyName, out JsonElement prop) ? prop.GetInt32() : 0;
 
         public override void Write(Utf8JsonWriter writer, LogDataResponse value, JsonSerializerOptions options)
         {

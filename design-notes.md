@@ -49,6 +49,15 @@ Beta is not an excuse for random changes; it is a controlled phase for convergin
 - Integration tests are source-of-truth for public API behavior and docs examples.
 - Integration tests should not be run simultaneously, either through test runners or manually, due to the lack of isolation of the authorization context.
 
+## Coding Conventions (Beta Baseline)
+
+- Private instance fields use `_camelCase`.
+- Avoid `this.` qualification unless required for disambiguation.
+- Prefer explicit local types in public-library code for readability.
+- Use `var` only when the type is obvious from the right-hand side (for example, anonymous types or object creation with repetitive generic types).
+- Keep DTO intent explicit: `*Request` for outbound payloads, `*Response` for inbound API payloads, `*Model` for reusable domain/client structures.
+- Keep transport/auth/hosting/cron boundaries separated; do not move cross-cutting concerns into client DTOs.
+
 ## Evolution Intent
 
 Before stable releases, expect improvements in:

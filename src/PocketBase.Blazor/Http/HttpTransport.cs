@@ -85,8 +85,8 @@ namespace PocketBase.Blazor.Http
         public async Task<Result<T>> SendAsync<T>(HttpMethod method, string path, object? body = null, IDictionary<string, object?>? query = null, CancellationToken cancellationToken = default)
         {
             UpdateAuthorizationHeader();
-            var request = BuildRequest(method, path, body, query);
-            var response = await _client.SendAsync(request, cancellationToken);
+            HttpRequestMessage request = BuildRequest(method, path, body, query);
+            HttpResponseMessage response = await _client.SendAsync(request, cancellationToken);
             return await HandleResponse<T>(response, cancellationToken);
         }
 
@@ -94,18 +94,18 @@ namespace PocketBase.Blazor.Http
         public async Task<Result> SendAsync(HttpMethod method, string path, object? body = null, IDictionary<string, object?>? query = null, CancellationToken cancellationToken = default)
         {
             UpdateAuthorizationHeader();
-            var request = BuildRequest(method, path, body, query);
-            var response = await _client.SendAsync(request, cancellationToken);
+            HttpRequestMessage request = BuildRequest(method, path, body, query);
+            HttpResponseMessage response = await _client.SendAsync(request, cancellationToken);
             return await HandleResponse(response, cancellationToken);
         }
 
         HttpRequestMessage BuildRequest(HttpMethod method, string path, object? body, IDictionary<string, object?>? query)
         {
-            var url = BuildUrl(path);
+            string url = BuildUrl(path);
             if (query != null)
                 url += "?" + string.Join("&", query.Select(kv => $"{kv.Key}={Uri.EscapeDataString(kv.Value?.ToString() ?? "")}"));
 
-            var req = new HttpRequestMessage(method, url);
+            HttpRequestMessage req = new HttpRequestMessage(method, url);
 
             if (body is HttpContent httpContent)
             {
@@ -113,7 +113,7 @@ namespace PocketBase.Blazor.Http
             }
             else if (body != null)
             {
-                var json = JsonSerializer.Serialize(body, _pocketBaseOptions.JsonSerializerOptions);
+                string json = JsonSerializer.Serialize(body, _pocketBaseOptions.JsonSerializerOptions);
                 req.Content = new StringContent(json, Encoding.UTF8, "application/json");
             }
             return req;
@@ -123,21 +123,21 @@ namespace PocketBase.Blazor.Http
         public async Task<Result> SendAsync(HttpMethod method, string path, MultipartFile file, IDictionary<string, object?>? query = null, CancellationToken cancellationToken = default)
         {
             UpdateAuthorizationHeader();
-            var request = BuildRequest(method, path, file, query);
-            var response = await _client.SendAsync(request, cancellationToken);
+            HttpRequestMessage request = BuildRequest(method, path, file, query);
+            HttpResponseMessage response = await _client.SendAsync(request, cancellationToken);
             return await HandleResponse(response, cancellationToken);
         }
 
         private HttpRequestMessage BuildRequest(HttpMethod method, string path, MultipartFile file, IDictionary<string, object?>? query)
         {
-            var url = BuildUrl(path);
+            string url = BuildUrl(path);
             if (query != null)
                 url += "?" + string.Join("&", query.Select(kv => $"{kv.Key}={Uri.EscapeDataString(kv.Value?.ToString() ?? "")}"));
 
-            var request = new HttpRequestMessage(method, url);
-    
-            var formData = new MultipartFormDataContent();
-            var streamContent = new StreamContent(file.Content);
+            HttpRequestMessage request = new HttpRequestMessage(method, url);
+
+            MultipartFormDataContent formData = new MultipartFormDataContent();
+            StreamContent streamContent = new StreamContent(file.Content);
             streamContent.Headers.ContentType = new MediaTypeHeaderValue(file.ContentType);
             formData.Add(streamContent, file.Name, file.FileName);
     
@@ -147,13 +147,13 @@ namespace PocketBase.Blazor.Http
 
         static async Task<Result> HandleResponse(HttpResponseMessage response, CancellationToken cancellationToken)
         {
-            var content = string.Empty;
+            string content = string.Empty;
             try
             {
                 content = await response.Content.ReadAsStringAsync(cancellationToken);
                 if (!response.IsSuccessStatusCode)
                 {
-                    var ex = new PocketBaseException(response.StatusCode, content);
+                    PocketBaseException ex = new PocketBaseException(response.StatusCode, content);
                     return Result.Fail(ex.Message).WithError(ex.Message);
                 }
                 return Result.Ok();
@@ -174,7 +174,7 @@ namespace PocketBase.Blazor.Http
 
         async Task<Result<T>> HandleResponse<T>(HttpResponseMessage response, CancellationToken cancellationToken)
         {
-            var content = string.Empty;
+            string content = string.Empty;
 
             try
             {
@@ -182,7 +182,7 @@ namespace PocketBase.Blazor.Http
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    var ex = new PocketBaseException(response.StatusCode, content);
+                    PocketBaseException ex = new PocketBaseException(response.StatusCode, content);
 
                     return Result.Fail<T>(
                         new ExceptionalError(ex)
@@ -191,20 +191,20 @@ namespace PocketBase.Blazor.Http
                     );
                 }
 
-                if (IsListResult(typeof(T), out var itemType))
+                if (IsListResult(typeof(T), out Type? itemType))
                 {
-                    using var doc = JsonDocument.Parse(content);
-                    var root = doc.RootElement;
+                    using JsonDocument doc = JsonDocument.Parse(content);
+                    JsonElement root = doc.RootElement;
 
-                    var itemsElement = root.GetProperty("items");
+                    JsonElement itemsElement = root.GetProperty("items");
 
-                    var items = JsonSerializer.Deserialize(
+                    object? items = JsonSerializer.Deserialize(
                         itemsElement.GetRawText(),
                         typeof(List<>).MakeGenericType(itemType),
                         _pocketBaseOptions.JsonSerializerOptions
                     );
 
-                    var result = Activator.CreateInstance(typeof(ListResult<>).MakeGenericType(itemType))!;
+                    object result = Activator.CreateInstance(typeof(ListResult<>).MakeGenericType(itemType))!;
 
                     typeof(T).GetProperty("Page")!.SetValue(result, root.GetProperty("page").GetInt32());
                     typeof(T).GetProperty("PerPage")!.SetValue(result, root.GetProperty("perPage").GetInt32());
@@ -215,13 +215,13 @@ namespace PocketBase.Blazor.Http
                     return Result.Ok((T)result);
                 }
 
-                var wrapperOptions = new JsonSerializerOptions
+                JsonSerializerOptions wrapperOptions = new JsonSerializerOptions
                 {
                     PropertyNameCaseInsensitive = true,
                     Converters = { new PocketBaseDateTimeConverter() }
                 };
 
-                var data = JsonSerializer.Deserialize<T>(content, wrapperOptions);
+                T? data = JsonSerializer.Deserialize<T>(content, wrapperOptions);
 
                 return data != null ? Result.Ok(data) : Result.Fail<T>("Deserialized value is null");
             }
@@ -255,15 +255,15 @@ namespace PocketBase.Blazor.Http
         public async Task<Result<Stream>> SendForStreamAsync(HttpMethod method, string path, object? body = null, IDictionary<string, object?>? query = null, CancellationToken cancellationToken = default)
         {
             UpdateAuthorizationHeader();
-            var request = BuildRequest(method, path, body, query);
-            var response = await _client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+            HttpRequestMessage request = BuildRequest(method, path, body, query);
+            HttpResponseMessage response = await _client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
             if (!response.IsSuccessStatusCode)
             {
-                var content = await response.Content.ReadAsStringAsync(cancellationToken);
-                var ex = new PocketBaseException(response.StatusCode, content);
+                string content = await response.Content.ReadAsStringAsync(cancellationToken);
+                PocketBaseException ex = new PocketBaseException(response.StatusCode, content);
                 return Result.Fail<Stream>(ex.Message).WithError(ex.Message);
             }
-            var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
+            Stream stream = await response.Content.ReadAsStreamAsync(cancellationToken);
             return Result.Ok(stream);
         }
 
@@ -271,15 +271,15 @@ namespace PocketBase.Blazor.Http
         public async Task<Result<byte[]>> SendForBytesAsync(HttpMethod method, string path, object? body = null, IDictionary<string, object?>? query = null, CancellationToken cancellationToken = default)
         {
             UpdateAuthorizationHeader();
-            var request = BuildRequest(method, path, body, query);
-            var response = await _client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+            HttpRequestMessage request = BuildRequest(method, path, body, query);
+            HttpResponseMessage response = await _client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
             if (!response.IsSuccessStatusCode)
             {
-                var content = await response.Content.ReadAsStringAsync(cancellationToken);
-                var ex = new PocketBaseException(response.StatusCode, content);
+                string content = await response.Content.ReadAsStringAsync(cancellationToken);
+                PocketBaseException ex = new PocketBaseException(response.StatusCode, content);
                 return Result.Fail<byte[]>(ex.Message).WithError(ex.Message);
             }
-            var bytes = await response.Content.ReadAsByteArrayAsync(cancellationToken);
+            byte[] bytes = await response.Content.ReadAsByteArrayAsync(cancellationToken);
             return Result.Ok(bytes);
         }
 
@@ -287,27 +287,24 @@ namespace PocketBase.Blazor.Http
         public async IAsyncEnumerable<string> SendForSseAsync(HttpMethod method, string path, object? body = null, IDictionary<string, object?>? query = null, [EnumeratorCancellation] CancellationToken cancellationToken = default)
         {
             UpdateAuthorizationHeader();
-            var request = BuildRequest(method, path, body, query);
+            HttpRequestMessage request = BuildRequest(method, path, body, query);
             request.Headers.Accept.Clear();
             request.Headers.Accept.ParseAdd("text/event-stream");
-            var response = await _client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+            HttpResponseMessage response = await _client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
             response.EnsureSuccessStatusCode();
-            using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
-            using var reader = new StreamReader(stream);
-            while (!reader.EndOfStream || !cancellationToken.IsCancellationRequested)
+            using Stream stream = await response.Content.ReadAsStreamAsync(cancellationToken);
+            using StreamReader reader = new StreamReader(stream);
+            string? line;
+            while ((line = await reader.ReadLineAsync(cancellationToken)) != null && !cancellationToken.IsCancellationRequested)
             {
-                var line = await reader.ReadLineAsync(cancellationToken);
-                if (line != null)
-                {
-                    yield return line;
-                }
+                yield return line;
             }
         }
 
         /// <inheritdoc />
         public string BuildUrl(string endpoint)
         {
-            var baseUrl = _client.BaseAddress?.ToString();
+            string? baseUrl = _client.BaseAddress?.ToString();
             return $"{baseUrl?.TrimEnd('/')}/{endpoint.TrimStart('/')}";
         }
 

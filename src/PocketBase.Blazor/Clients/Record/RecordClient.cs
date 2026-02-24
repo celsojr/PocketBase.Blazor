@@ -72,7 +72,7 @@ namespace PocketBase.Blazor.Clients.Record
                 );
             }
 
-            var body = new Dictionary<string, object?>
+            Dictionary<string, object?> body = new Dictionary<string, object?>
             {
                 ["identity"] = email,
                 ["password"] = password
@@ -86,7 +86,7 @@ namespace PocketBase.Blazor.Clients.Record
             options ??= new CommonOptions();
             options.Query = options.BuildQuery();
 
-            var result = await Http.SendAsync<AuthResponse>(HttpMethod.Post, $"api/collections/{CollectionName}/auth-with-password", body, options.Query, cancellationToken: cancellationToken);
+            Result<AuthResponse> result = await Http.SendAsync<AuthResponse>(HttpMethod.Post, $"api/collections/{CollectionName}/auth-with-password", body, options.Query, cancellationToken: cancellationToken);
 
             if (result.IsSuccess)
             {
@@ -110,7 +110,7 @@ namespace PocketBase.Blazor.Clients.Record
         public async Task<Result<RequestOtpResponse>> RequestOtpAsync(string email, CancellationToken cancellationToken = default)
         {
             ArgumentException.ThrowIfNullOrWhiteSpace(email, nameof(email));
-            var body = new Dictionary<string, object> { ["email"] = email };
+            Dictionary<string, object> body = new Dictionary<string, object> { ["email"] = email };
             return await Http.SendAsync<RequestOtpResponse>(HttpMethod.Post, $"api/collections/{CollectionName}/request-otp", body, cancellationToken: cancellationToken);
         }
 
@@ -127,7 +127,7 @@ namespace PocketBase.Blazor.Clients.Record
                 ["password"] = otpCode,
             };
 
-            var result = await Http.SendAsync<AuthResponse>(HttpMethod.Post, $"api/collections/{CollectionName}/auth-with-otp", options.Body, options.ToDictionary(), cancellationToken: cancellationToken);
+            Result<AuthResponse> result = await Http.SendAsync<AuthResponse>(HttpMethod.Post, $"api/collections/{CollectionName}/auth-with-otp", options.Body, options.ToDictionary(), cancellationToken: cancellationToken);
 
             if (result.IsSuccess)
             {
@@ -146,7 +146,7 @@ namespace PocketBase.Blazor.Clients.Record
             options = options ?? new CommonOptions();
             options.Query = options.BuildQuery();
 
-            var result = await Http.SendAsync<AuthResponse>(HttpMethod.Post, "api/collections/users/auth-refresh", query: options.Query, cancellationToken: cancellationToken);
+            Result<AuthResponse> result = await Http.SendAsync<AuthResponse>(HttpMethod.Post, "api/collections/users/auth-refresh", query: options.Query, cancellationToken: cancellationToken);
 
             if (result.IsSuccess)
             {

@@ -39,13 +39,13 @@ namespace PocketBase.Blazor.Hosting
 
             _executablePath = executablePath;
 
-            var args = BuildArguments();
+            string args = BuildArguments();
             _process = CreateNewProcess(executablePath, args);
         }
 
         private Process CreateNewProcess(string executablePath, string args)
         {
-            var process = new Process
+            Process process = new Process
             {
                 StartInfo = new ProcessStartInfo
                 {
@@ -70,7 +70,7 @@ namespace PocketBase.Blazor.Hosting
             // Host and Port are still paused under investigation
             //var args = $"serve --http={_options.Host}:{_options.Port}";
 
-            var args = "serve";
+            string args = "serve";
 
             if (_options.Dev)
                 args += " --dev";
@@ -109,7 +109,7 @@ namespace PocketBase.Blazor.Hosting
 
                 _logger.LogInformation("Starting PocketBase on {BaseUrl}", BaseUrl);
 
-                var args = BuildArguments();
+                string args = BuildArguments();
                 ArgumentException.ThrowIfNullOrWhiteSpace(ExecutablePath);
                 _process = CreateNewProcess(ExecutablePath, args);
 

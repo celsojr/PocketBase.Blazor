@@ -9,7 +9,7 @@ namespace PocketBase.Blazor.Options
 
         public override Dictionary<string, object?> BuildQuery(int page = 1, int perPage = 30)
         {
-            var query = base.BuildQuery(page, perPage);
+            Dictionary<string, object?> query = base.BuildQuery(page, perPage);
 
             if (!string.IsNullOrEmpty(Fields))
             {

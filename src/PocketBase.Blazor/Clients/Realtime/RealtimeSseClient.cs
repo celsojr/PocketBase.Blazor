@@ -24,16 +24,16 @@ namespace PocketBase.Blazor.Clients.Realtime
         /// <inheritdoc />
         public async IAsyncEnumerable<RealtimeRecordEvent> SubscribeAsync(string collection, string recordId, CommonOptions? options = null, [EnumeratorCancellation] CancellationToken cancellationToken = default)
         {
-            var topic = recordId == "*" ? $"{collection}/*" : $"{collection}/{recordId}";
+            string topic = recordId == "*" ? $"{collection}/*" : $"{collection}/{recordId}";
             await EnsureConnectedAsync(cancellationToken);
             await SubscribeInternalAsync(topic, options, cancellationToken);
 
             try
             {
-                await foreach (var evt in _eventChannel.Reader.ReadAllAsync(cancellationToken))
+                await foreach (RealtimeEvent evt in _eventChannel.Reader.ReadAllAsync(cancellationToken))
                 {
                     if (!evt.Data.Contains("\"record\":")) continue;
-                    var recordEvt = ParseRecordEvent(evt);
+                    RealtimeRecordEvent? recordEvt = ParseRecordEvent(evt);
                     if (recordEvt != null) yield return recordEvt;
                 }
             }
@@ -47,7 +47,7 @@ namespace PocketBase.Blazor.Clients.Realtime
         public async Task UnsubscribeAsync(string collection, string? recordId = null, CancellationToken cancellationToken = default)
         {
             await EnsureConnectedAsync(cancellationToken);
-            var topic = recordId == null ? collection : $"{collection}/{recordId}";
+            string topic = recordId == null ? collection : $"{collection}/{recordId}";
             await UnsubscribeInternalAsync([topic], cancellationToken);
         }
 

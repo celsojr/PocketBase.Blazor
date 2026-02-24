@@ -30,7 +30,7 @@ namespace PocketBase.Blazor.Hosting.Services
         public static async Task<string?> ResolveAsync()
         {
             // Check if already downloaded
-            var localPath = GetLocalExecutablePath();
+            string localPath = GetLocalExecutablePath();
             if (File.Exists(localPath))
                 return localPath;
 
@@ -40,8 +40,8 @@ namespace PocketBase.Blazor.Hosting.Services
 
         private static string GetLocalExecutablePath()
         {
-            var os = GetOSPlatform();
-            var extension = os == OSPlatform.Windows ? ".exe" : "";
+            OSPlatform os = GetOSPlatform();
+            string extension = os == OSPlatform.Windows ? ".exe" : "";
 
             return Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
@@ -54,27 +54,27 @@ namespace PocketBase.Blazor.Hosting.Services
         {
             try
             {
-                var os = GetOSPlatform();
-                var arch = GetArchitectureString();
-                var platformName = GetOSPlatformName();
+                OSPlatform os = GetOSPlatform();
+                string arch = GetArchitectureString();
+                string platformName = GetOSPlatformName();
 
                 // In future we're gonna provide our own custom GO build to be able to create cron jobs also from this library
                 // https://github.com/pocketbase/pocketbase/releases/download/v0.34.0/pocketbase_0.34.0_windows_amd64.zip
 
-                var downloadUrl = $"{BaseDownloadUrl}/v{Version}/pocketbase_{Version}_{platformName}_{arch}.zip";
+                string downloadUrl = $"{BaseDownloadUrl}/v{Version}/pocketbase_{Version}_{platformName}_{arch}.zip";
 
-                var tempFile = Path.GetTempFileName();
-                var localPath = GetLocalExecutablePath();
+                string tempFile = Path.GetTempFileName();
+                string localPath = GetLocalExecutablePath();
 
                 Directory.CreateDirectory(Path.GetDirectoryName(localPath)!);
 
                 _logger.LogInformation("Downloading PocketBase from {Url}", downloadUrl);
 
-                using var response = await _httpClient.GetAsync(downloadUrl);
+                using HttpResponseMessage response = await _httpClient.GetAsync(downloadUrl);
                 response.EnsureSuccessStatusCode();
 
-                using (var stream = await response.Content.ReadAsStreamAsync())
-                using (var fileStream = File.Create(tempFile))
+                using (Stream stream = await response.Content.ReadAsStreamAsync())
+                using (FileStream fileStream = File.Create(tempFile))
                 {
                     await stream.CopyToAsync(fileStream);
                 }

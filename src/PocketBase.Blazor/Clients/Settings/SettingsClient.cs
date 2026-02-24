@@ -13,6 +13,7 @@ using PocketBase.Blazor.Options;
 using PocketBase.Blazor.Requests.Settings;
 using PocketBase.Blazor.Responses.Auth;
 using PocketBase.Blazor.Responses.Settings;
+using System.Collections.Generic;
 
 namespace PocketBase.Blazor.Clients.Settings
 {
@@ -43,8 +44,8 @@ namespace PocketBase.Blazor.Clients.Settings
         /// <inheritdoc />
         public async Task<Result<bool>> TestS3Async(string fileSystem = "storage", CommonOptions? options = null, CancellationToken cancellationToken = default)
         {
-            var query = options?.ToDictionary();
-            var response = await _http.SendAsync(HttpMethod.Post, $"api/settings/test-s3/{fileSystem}", query: query, cancellationToken: cancellationToken);
+            Dictionary<string, object?>? query = options?.ToDictionary();
+            Result response = await _http.SendAsync(HttpMethod.Post, $"api/settings/test-s3/{fileSystem}", query: query, cancellationToken: cancellationToken);
             return response.IsSuccess ? Result.Ok(true) : Result.Fail(response.Errors);
         }
 
@@ -61,8 +62,8 @@ namespace PocketBase.Blazor.Clients.Settings
                 template = emailTemplate
             };
 
-            var query = options?.ToDictionary();
-            var response = await _http.SendAsync(HttpMethod.Post, "api/settings/test/email", body: body, query: query, cancellationToken: cancellationToken);
+            Dictionary<string, object?>? query = options?.ToDictionary();
+            Result response = await _http.SendAsync(HttpMethod.Post, "api/settings/test/email", body: body, query: query, cancellationToken: cancellationToken);
             return response.IsSuccess ? Result.Ok(true) : Result.Fail(response.Errors);
         }
 
@@ -85,7 +86,7 @@ namespace PocketBase.Blazor.Clients.Settings
                 duration = request.Duration
             };
 
-            var query = options?.ToDictionary();
+            Dictionary<string, object?>? query = options?.ToDictionary();
             return _http.SendAsync<AppleClientSecretResponse>(HttpMethod.Post, "api/settings/apple/generate-client-secret", body: body, query: query, cancellationToken: cancellationToken);
         }
 
@@ -100,18 +101,18 @@ namespace PocketBase.Blazor.Clients.Settings
             if (config.Duration <= 0) throw new ArgumentException("ExpiresIn must be positive");
             if (config.Duration > 15777000) throw new ArgumentException("ExpiresIn cannot exceed 15777000 seconds (~6 months)");
 
-            var privateKeyBytes = Convert.FromBase64String(config.PrivateKey);
-            using var ecdsa = ECDsa.Create();
+            byte[] privateKeyBytes = Convert.FromBase64String(config.PrivateKey);
+            using ECDsa ecdsa = ECDsa.Create();
             ecdsa.ImportECPrivateKey(privateKeyBytes, out _);
 
-            var securityKey = new ECDsaSecurityKey(ecdsa)
+            ECDsaSecurityKey securityKey = new ECDsaSecurityKey(ecdsa)
             {
                 KeyId = config.KeyId
             };
 
-            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.EcdsaSha256);
+            SigningCredentials credentials = new SigningCredentials(securityKey, SecurityAlgorithms.EcdsaSha256);
 
-            var tokenDescriptor = new SecurityTokenDescriptor
+            SecurityTokenDescriptor tokenDescriptor = new SecurityTokenDescriptor
             {
                 Audience = "https://appleid.apple.com",
                 Issuer = config.TeamId,
@@ -123,8 +124,8 @@ namespace PocketBase.Blazor.Clients.Settings
                 SigningCredentials = credentials
             };
 
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var token = tokenHandler.CreateToken(tokenDescriptor);
+            JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
+            SecurityToken token = tokenHandler.CreateToken(tokenDescriptor);
         
             return tokenHandler.WriteToken(token);
         }

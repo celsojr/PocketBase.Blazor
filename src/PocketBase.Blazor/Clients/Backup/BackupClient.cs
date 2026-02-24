@@ -24,7 +24,7 @@ namespace PocketBase.Blazor.Clients.Backup
         /// <inheritdoc />
         public Task<Result<List<BackupInfoResponse>>> GetFullListAsync(CommonOptions? options = null, CancellationToken cancellationToken = default)
         {
-            var query = default(Dictionary<string, object?>);
+            Dictionary<string, object?>? query = default(Dictionary<string, object?>);
             if (options != null)
             {
                 query = options.BuildQuery();
@@ -42,7 +42,7 @@ namespace PocketBase.Blazor.Clients.Backup
                 return await _transport.SendAsync(HttpMethod.Post, "api/backups", cancellationToken: cancellationToken);
             }
 
-            var sanitizedName = SanitizeBackupName(basename);
+            string sanitizedName = SanitizeBackupName(basename);
 
             var body = new { name = sanitizedName };
 
@@ -65,7 +65,7 @@ namespace PocketBase.Blazor.Clients.Backup
                 throw new ArgumentException("Backup key is required.", nameof(key));
             }
 
-            var sanitizedKey = SanitizeBackupName(key);
+            string sanitizedKey = SanitizeBackupName(key);
 
             return await _transport.SendAsync(HttpMethod.Delete, $"api/backups/{Uri.EscapeDataString(sanitizedKey)}", cancellationToken: cancellationToken);
         }
@@ -86,7 +86,7 @@ namespace PocketBase.Blazor.Clients.Backup
                 return Result.Fail("Backup restore is not supported on Windows. PocketBase requires Linux or macOS for restore operations.");
             }
 
-            var sanitizedKey = SanitizeBackupName(key);
+            string sanitizedKey = SanitizeBackupName(key);
 
             return await _transport.SendAsync(HttpMethod.Post, $"api/backups/{Uri.EscapeDataString(sanitizedKey)}/restore", cancellationToken: cancellationToken);
         }
@@ -104,7 +104,7 @@ namespace PocketBase.Blazor.Clients.Backup
                 throw new ArgumentException("Token is required.", nameof(token));
             }
 
-            var sanitizedKey = SanitizeBackupName(key);
+            string sanitizedKey = SanitizeBackupName(key);
 
             return _transport.BuildUrl($"/api/backups/{Uri.EscapeDataString(sanitizedKey)}?token={Uri.EscapeDataString(token)}");
         }
@@ -122,9 +122,9 @@ namespace PocketBase.Blazor.Clients.Backup
     
             // Convert to lowercase
             filename = filename.ToLowerInvariant();
-    
+
             // Only keep valid characters
-            var validChars = new List<char>();
+            List<char> validChars = new List<char>();
             foreach (char c in filename)
             {
                 if ((c >= 'a' && c <= 'z') ||
@@ -140,8 +140,8 @@ namespace PocketBase.Blazor.Clients.Backup
                     validChars.Add('_');
                 }
             }
-    
-            var sanitized = new string([.. validChars]);
+
+            string sanitized = new string([.. validChars]);
     
             // Ensure not empty after sanitization
             if (string.IsNullOrWhiteSpace(sanitized))

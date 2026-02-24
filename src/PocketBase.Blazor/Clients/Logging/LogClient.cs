@@ -26,7 +26,7 @@ namespace PocketBase.Blazor.Clients.Logging
         /// <inheritdoc />
         public async Task<Result<ListResult<LogResponse>>> GetListAsync(int page = 1, int perPage = 30, ListOptions? options = null, CancellationToken cancellationToken = default)
         {
-            var query = options?.BuildQuery(page, perPage) ?? new Dictionary<string, object?>();
+            Dictionary<string, object?> query = options?.BuildQuery(page, perPage) ?? new Dictionary<string, object?>();
             return await _http.SendAsync<ListResult<LogResponse>>(HttpMethod.Get, "api/logs", query: query, cancellationToken: cancellationToken);
         }
 
@@ -36,14 +36,14 @@ namespace PocketBase.Blazor.Clients.Logging
             if (string.IsNullOrWhiteSpace(id))
                 throw new ArgumentException("Log id is required.", nameof(id));
 
-            var query = options?.ToDictionary();
+            IDictionary<string, object?>? query = options?.ToDictionary();
             return await _http.SendAsync<LogResponse>(HttpMethod.Get, $"api/logs/{id}", query: query, cancellationToken: cancellationToken);
         }
 
         /// <inheritdoc />
         public async Task<Result<List<HourlyStatsResponse>>> GetStatsAsync(LogStatsOptions? options = null, CancellationToken cancellationToken = default)
         {
-            var query = options?.ToDictionary();
+            IDictionary<string, object?>? query = options?.ToDictionary();
             return await _http.SendAsync<List<HourlyStatsResponse>>(HttpMethod.Get, "api/logs/stats", query: query, cancellationToken: cancellationToken);
         }
     }
