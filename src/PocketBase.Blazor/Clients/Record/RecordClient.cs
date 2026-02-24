@@ -17,6 +17,8 @@ namespace PocketBase.Blazor.Clients.Record
     /// <inheritdoc />
     public class RecordClient : BaseClient, IRecordClient
     {
+        private const string SuperusersCollection = "_superusers";
+
         /// <inheritdoc />
         public string CollectionName { get; }
 
@@ -59,18 +61,7 @@ namespace PocketBase.Blazor.Clients.Record
             if (string.IsNullOrWhiteSpace(password))
                 throw new ArgumentException("Password must be provided.", nameof(password));
 
-            // Architectural guard:
-            // The Records endpoint must never be used to authenticate administrator accounts.
-            // In PocketBase, "_superusers" represents a separate auth domain (Admins).
-            // We enforce this boundary here to prevent accidental cross-authentication and
-            // to keep admin and record authentication flows explicitly separated at the SDK level.
-            if (string.Equals(CollectionName, "_superusers", StringComparison.Ordinal))
-            {
-                throw new InvalidOperationException(
-                    "Authentication for the '_superusers' collection is not allowed through the Records endpoint. " +
-                    "Use the Admins endpoint (pb.Admins.AuthWithPasswordAsync) to authenticate administrator accounts."
-                );
-            }
+            EnsureRecordAuthBoundary(nameof(AuthWithPasswordAsync));
 
             Dictionary<string, object?> body = new Dictionary<string, object?>
             {
@@ -103,6 +94,7 @@ namespace PocketBase.Blazor.Clients.Record
         public async Task<Result<AuthRecordResponse>> AuthWithOAuth2CodeAsync(AuthWithOAuth2Request request, CommonOptions? options = null, CancellationToken cancellationToken = default)
         {
             ArgumentNullException.ThrowIfNull(request, nameof(request));
+            EnsureRecordAuthBoundary(nameof(AuthWithOAuth2CodeAsync));
             return await Http.SendAsync<AuthRecordResponse>(HttpMethod.Post, "api/collections/users/auth-with-oauth2", request, options?.ToDictionary(), cancellationToken);
         }
 
@@ -110,6 +102,7 @@ namespace PocketBase.Blazor.Clients.Record
         public async Task<Result<RequestOtpResponse>> RequestOtpAsync(string email, CancellationToken cancellationToken = default)
         {
             ArgumentException.ThrowIfNullOrWhiteSpace(email, nameof(email));
+            EnsureRecordAuthBoundary(nameof(RequestOtpAsync));
             Dictionary<string, object> body = new Dictionary<string, object> { ["email"] = email };
             return await Http.SendAsync<RequestOtpResponse>(HttpMethod.Post, $"api/collections/{CollectionName}/request-otp", body, cancellationToken: cancellationToken);
         }
@@ -119,6 +112,7 @@ namespace PocketBase.Blazor.Clients.Record
         {
             ArgumentException.ThrowIfNullOrWhiteSpace(otpId, nameof(otpId));
             ArgumentException.ThrowIfNullOrWhiteSpace(otpCode, nameof(otpCode));
+            EnsureRecordAuthBoundary(nameof(AuthWithOtpAsync));
 
             options = options ?? new CommonOptions();
             options.Body = new Dictionary<string, object>
@@ -143,7 +137,8 @@ namespace PocketBase.Blazor.Clients.Record
         /// <inheritdoc />
         public async Task<Result<AuthResponse>> AuthRefreshAsync(CommonOptions? options = null, CancellationToken cancellationToken = default)
         {
-            options = options ?? new CommonOptions();
+            EnsureRecordAuthBoundary(nameof(AuthRefreshAsync));
+            options ??= new CommonOptions();
             options.Query = options.BuildQuery();
 
             Result<AuthResponse> result = await Http.SendAsync<AuthResponse>(HttpMethod.Post, "api/collections/users/auth-refresh", query: options.Query, cancellationToken: cancellationToken);
@@ -211,6 +206,22 @@ namespace PocketBase.Blazor.Clients.Record
         public void SetStore(PocketBaseStore store)
         {
             _authStore = store ?? throw new ArgumentNullException(nameof(store));
+        }
+
+        private void EnsureRecordAuthBoundary(string methodName)
+        {
+            // Architectural guard:
+            // The Records endpoint must never be used to authenticate administrator accounts.
+            // In PocketBase, "_superusers" represents a separate auth domain (Admins).
+            if (!string.Equals(CollectionName, SuperusersCollection, StringComparison.Ordinal))
+            {
+                return;
+            }
+
+            throw new InvalidOperationException(
+                $"'{methodName}' is not allowed for the '{SuperusersCollection}' collection through the Records endpoint. " +
+                "Use the Admins endpoint (pb.Admins.*) to authenticate administrator accounts."
+            );
         }
     }
 }
