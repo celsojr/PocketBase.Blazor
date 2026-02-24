@@ -44,7 +44,7 @@ namespace PocketBase.Blazor.Clients.Settings
         /// <inheritdoc />
         public async Task<Result<bool>> TestS3Async(string fileSystem = "storage", CommonOptions? options = null, CancellationToken cancellationToken = default)
         {
-            Dictionary<string, object?>? query = options?.ToDictionary();
+            IDictionary<string, object?>? query = options?.ToDictionary();
             Result response = await _http.SendAsync(HttpMethod.Post, $"api/settings/test-s3/{fileSystem}", query: query, cancellationToken: cancellationToken);
             return response.IsSuccess ? Result.Ok(true) : Result.Fail(response.Errors);
         }
@@ -62,7 +62,7 @@ namespace PocketBase.Blazor.Clients.Settings
                 template = emailTemplate
             };
 
-            Dictionary<string, object?>? query = options?.ToDictionary();
+            IDictionary<string, object?>? query = options?.ToDictionary();
             Result response = await _http.SendAsync(HttpMethod.Post, "api/settings/test/email", body: body, query: query, cancellationToken: cancellationToken);
             return response.IsSuccess ? Result.Ok(true) : Result.Fail(response.Errors);
         }
@@ -86,7 +86,7 @@ namespace PocketBase.Blazor.Clients.Settings
                 duration = request.Duration
             };
 
-            Dictionary<string, object?>? query = options?.ToDictionary();
+            IDictionary<string, object?>? query = options?.ToDictionary();
             return _http.SendAsync<AppleClientSecretResponse>(HttpMethod.Post, "api/settings/apple/generate-client-secret", body: body, query: query, cancellationToken: cancellationToken);
         }
 
