@@ -38,7 +38,7 @@ public abstract class BaseTest : IDisposable
 
     protected void LogJson(object obj, string title = "Object JSON")
     {
-        var json = JsonSerializer.Serialize(obj, new JsonSerializerOptions
+        string json = JsonSerializer.Serialize(obj, new JsonSerializerOptions
         {
             WriteIndented = true,
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase
@@ -49,13 +49,13 @@ public abstract class BaseTest : IDisposable
 
     protected async Task<T> LoadTestDataAsync<T>(string relativePath)
     {
-        var json = await LoadTestDataAsStringAsync(relativePath);
+        string json = await LoadTestDataAsStringAsync(relativePath);
         return JsonSerializer.Deserialize<T>(json, JsonOptions)!;
     }
 
     protected static async Task<string> LoadTestDataAsStringAsync(string relativePath)
     {
-        var fullPath = Path.Combine(TestPaths.PostResponsesDirectory, relativePath);
+        string fullPath = Path.Combine(TestPaths.PostResponsesDirectory, relativePath);
     
         if (!File.Exists(fullPath))
             throw new FileNotFoundException($"Test data file not found: {fullPath}");
@@ -65,14 +65,14 @@ public abstract class BaseTest : IDisposable
 
     public static IEnumerable<object[]> GetTestDataFiles()
     {
-        var files = new[]
-        {
+        string[] files =
+        [
             "MinimalPost.json",
             "CompletePost.json",
             "WithExpand.json",
             "WithNullValues.json",
             "WithEmptyExpand.json"
-        };
+        ];
         
         return files.Select(f => new object[] { f });
     }

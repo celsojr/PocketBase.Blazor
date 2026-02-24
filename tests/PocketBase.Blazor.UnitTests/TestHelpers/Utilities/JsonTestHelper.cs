@@ -23,13 +23,13 @@ public static class JsonTestHelper
 
     public static async Task<T> DeserializeFromFileAsync<T>(string filePath)
     {
-        var json = await File.ReadAllTextAsync(filePath);
+        string json = await File.ReadAllTextAsync(filePath);
         return JsonSerializer.Deserialize<T>(json, DefaultOptions)!;
     }
 
     public static string SerializeWithSettings(object obj, bool indented = true)
     {
-        var options = new JsonSerializerOptions(DefaultOptions)
+        JsonSerializerOptions options = new JsonSerializerOptions(DefaultOptions)
         {
             WriteIndented = indented
         };
@@ -38,8 +38,8 @@ public static class JsonTestHelper
 
     public static bool JsonEquals(object expected, object actual)
     {
-        var expectedJson = JsonSerializer.Serialize(expected, DefaultOptions);
-        var actualJson = JsonSerializer.Serialize(actual, DefaultOptions);
+        string expectedJson = JsonSerializer.Serialize(expected, DefaultOptions);
+        string actualJson = JsonSerializer.Serialize(actual, DefaultOptions);
         return expectedJson == actualJson;
     }
 
@@ -58,7 +58,7 @@ public class JsonSnakeCaseNamingPolicy : JsonNamingPolicy
         if (string.IsNullOrEmpty(name))
             return name;
 
-        var result = new StringBuilder();
+        StringBuilder result = new StringBuilder();
         result.Append(char.ToLowerInvariant(name[0]));
 
         for (int i = 1; i < name.Length; i++)

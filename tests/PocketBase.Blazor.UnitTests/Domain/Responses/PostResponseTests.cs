@@ -20,11 +20,11 @@ public class PostResponseTests : BaseTest
     public async Task Deserialize_FromCompleteJsonFile_ShouldCreateValidPostResponse()
     {
         // Arrange
-        var completePost = Path.Combine(TestPaths.PostResponsesDirectory, "CompletePost.json");
-        var json = await File.ReadAllTextAsync(completePost);
+        string completePost = Path.Combine(TestPaths.PostResponsesDirectory, "CompletePost.json");
+        string json = await File.ReadAllTextAsync(completePost);
 
         // Act
-        var result = JsonSerializer.Deserialize<PostResponse>(json, JsonOptions);
+        PostResponse? result = JsonSerializer.Deserialize<PostResponse>(json, JsonOptions);
 
         // Assert
         result.Should().NotBeNull();
@@ -47,7 +47,7 @@ public class PostResponseTests : BaseTest
     public async Task Deserialize_FromVariousTestFiles_ShouldAllSucceed(string testFile)
     {
         // Arrange
-        var json = await LoadTestDataAsStringAsync(testFile);
+        string json = await LoadTestDataAsStringAsync(testFile);
 
         // Act & Assert
         json.ShouldDeserializeFromJson<PostResponse>();
@@ -58,10 +58,10 @@ public class PostResponseTests : BaseTest
     public async Task Deserialize_FromTestFile_ShouldCreateValidPostResponse(string testFile)
     {
         // Arrange
-        var json = await LoadTestDataAsStringAsync(testFile);
+        string json = await LoadTestDataAsStringAsync(testFile);
 
         // Act
-        var result = JsonSerializer.Deserialize<PostResponse>(json, JsonOptions);
+        PostResponse? result = JsonSerializer.Deserialize<PostResponse>(json, JsonOptions);
 
         // Assert
         result.Should().NotBeNull();
@@ -73,7 +73,7 @@ public class PostResponseTests : BaseTest
     public async Task LoadTestData_ShouldDeserializeToPostResponse(string testFile)
     {
         // Act
-        var result = await LoadTestDataAsync<PostResponse>(testFile);
+        PostResponse result = await LoadTestDataAsync<PostResponse>(testFile);
 
         // Assert
         result.Should().NotBeNull();
@@ -84,7 +84,7 @@ public class PostResponseTests : BaseTest
     public void Builder_CreateDefault_ShouldProduceValidPostResponse()
     {
         // Arrange & Act
-        var post = PostResponseBuilder.CreateDefault()
+        PostResponse post = PostResponseBuilder.CreateDefault()
             .WithTitle("Builder Test")
             .WithSlug("builder-test")
             .WithSimpleExpand()
@@ -102,19 +102,19 @@ public class PostResponseTests : BaseTest
     public void Serialize_UsingBuilder_ShouldProduceValidJson()
     {
         // Arrange
-        var builder = PostResponseBuilder.CreateDefault()
+        PostResponseBuilder builder = PostResponseBuilder.CreateDefault()
             .WithTitle("Serialization Test")
             .WithId("test_123");
 
         // Act
-        var json = builder.BuildAsJson();
+        string json = builder.BuildAsJson();
 
         // Assert
-        var doc = JsonDocument.Parse(json);
-        doc.RootElement.TryGetProperty("title", out var titleProp).Should().BeTrue();
+        JsonDocument doc = JsonDocument.Parse(json);
+        doc.RootElement.TryGetProperty("title", out JsonElement titleProp).Should().BeTrue();
         titleProp.GetString().Should().Be("Serialization Test");
 
-        doc.RootElement.TryGetProperty("id", out var idProp).Should().BeTrue();
+        doc.RootElement.TryGetProperty("id", out JsonElement idProp).Should().BeTrue();
         idProp.GetString().Should().Be("test_123");
 
         LogJson(doc, "Generated JSON");
@@ -124,12 +124,12 @@ public class PostResponseTests : BaseTest
     public async Task PostResponse_ExpandedTags_ShouldDeserializeTagsFromExpand()
     {
         // Arrange
-        var completePost = Path.Combine(TestPaths.PostResponsesDirectory, "CompletePost.json");
-        var json = await File.ReadAllTextAsync(completePost);
-        var post = JsonSerializer.Deserialize<PostResponse>(json, JsonOptions);
+        string completePost = Path.Combine(TestPaths.PostResponsesDirectory, "CompletePost.json");
+        string json = await File.ReadAllTextAsync(completePost);
+        PostResponse? post = JsonSerializer.Deserialize<PostResponse>(json, JsonOptions);
 
         // Act
-        var expandedTags = post?.ExpandedTags;
+        List<TagResponse>? expandedTags = post?.ExpandedTags;
 
         // Assert
         post.Should().NotBeNull();
@@ -151,7 +151,7 @@ public class PostResponseTests : BaseTest
     public void PostResponse_ExpandedTags_ShouldReturnEmptyListWhenNoTagsExpand()
     {
         // Arrange - JSON without tags in expand
-        var json = @"
+        string json = @"
         {
             ""id"": ""post_123"",
             ""title"": ""Test Post"",
@@ -162,11 +162,11 @@ public class PostResponseTests : BaseTest
                 }
             }
         }";
-    
-        var post = JsonSerializer.Deserialize<PostResponse>(json, JsonOptions);
+
+        PostResponse? post = JsonSerializer.Deserialize<PostResponse>(json, JsonOptions);
 
         // Act
-        var expandedTags = post?.ExpandedTags;
+        List<TagResponse>? expandedTags = post?.ExpandedTags;
 
         // Assert
         expandedTags.Should().NotBeNull();
@@ -178,16 +178,16 @@ public class PostResponseTests : BaseTest
     public void PostResponse_ExpandedTags_ShouldReturnEmptyListWhenExpandIsNull()
     {
         // Arrange - JSON without any expand
-        var json = @"
+        string json = @"
         {
             ""id"": ""post_123"",
             ""title"": ""Test Post""
         }";
-    
-        var post = JsonSerializer.Deserialize<PostResponse>(json, JsonOptions);
+
+        PostResponse? post = JsonSerializer.Deserialize<PostResponse>(json, JsonOptions);
 
         // Act
-        var expandedTags = post?.ExpandedTags;
+        List<TagResponse>? expandedTags = post?.ExpandedTags;
 
         // Assert
         expandedTags.Should().NotBeNull();

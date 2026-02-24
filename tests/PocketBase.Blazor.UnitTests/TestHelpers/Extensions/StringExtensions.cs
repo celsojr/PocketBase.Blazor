@@ -9,7 +9,7 @@ public static string ToSlug(this string text)
     if (string.IsNullOrWhiteSpace(text))
         return string.Empty;
 
-    var slug = text.ToLowerInvariant();
+        string slug = text.ToLowerInvariant();
     
     // Replace invalid characters with hyphens
     slug = Regex.Replace(slug, @"[^a-z0-9\s-]", "");

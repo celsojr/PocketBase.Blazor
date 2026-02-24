@@ -8,26 +8,26 @@ public static class AssertionExtensions
 {
     public static void ShouldBeEquivalentToJson(this object actual, object expected)
     {
-        var actualJson = JsonSerializer.Serialize(actual, JsonTestHelper.DefaultOptions);
-        var expectedJson = JsonSerializer.Serialize(expected, JsonTestHelper.DefaultOptions);
+        string actualJson = JsonSerializer.Serialize(actual, JsonTestHelper.DefaultOptions);
+        string expectedJson = JsonSerializer.Serialize(expected, JsonTestHelper.DefaultOptions);
 
         Assert.Equal(expectedJson, actualJson);
     }
 
     public static void ShouldDeserializeFromJson<T>(this string json)
     {
-        var result = JsonSerializer.Deserialize<T>(json, JsonTestHelper.DefaultOptions);
+        T? result = JsonSerializer.Deserialize<T>(json, JsonTestHelper.DefaultOptions);
         Assert.NotNull(result);
     }
 
     public static void ShouldHaveJsonProperty<T>(this T obj, string propertyName, object expectedValue)
     {
-        var json = JsonSerializer.Serialize(obj, JsonTestHelper.DefaultOptions);
-        var doc = JsonDocument.Parse(json);
+        string json = JsonSerializer.Serialize(obj, JsonTestHelper.DefaultOptions);
+        JsonDocument doc = JsonDocument.Parse(json);
 
-        Assert.True(doc.RootElement.TryGetProperty(propertyName, out var property));
+        Assert.True(doc.RootElement.TryGetProperty(propertyName, out JsonElement property));
 
-        var actualValue = property.Deserialize(expectedValue.GetType());
+        object? actualValue = property.Deserialize(expectedValue.GetType());
         Assert.Equal(expectedValue, actualValue);
     }
 

@@ -9,8 +9,8 @@ public class MultipartFileTests
     [Fact]
     public void Constructor_ValidParameters_ShouldCreateInstance()
     {
-        using var stream = new MemoryStream();
-        using var file = new MultipartFile(stream, "test.zip", "application/zip", "backup");
+        using MemoryStream stream = new MemoryStream();
+        using MultipartFile file = new MultipartFile(stream, "test.zip", "application/zip", "backup");
 
         file.Name.Should().Be("backup");
         file.FileName.Should().Be("test.zip");
@@ -21,7 +21,7 @@ public class MultipartFileTests
     [Fact]
     public void Constructor_NullStream_ShouldThrow()
     {
-        var act = () => new MultipartFile(null!, "test.zip");
+        Func<MultipartFile> act = () => new MultipartFile(null!, "test.zip");
 
         act.Should().Throw<ArgumentNullException>();
     }
@@ -29,8 +29,8 @@ public class MultipartFileTests
     [Fact]
     public void Constructor_EmptyFileName_ShouldThrow()
     {
-        using var stream = new MemoryStream();
-        var act = () => new MultipartFile(stream, "");
+        using MemoryStream stream = new MemoryStream();
+        Func<MultipartFile> act = () => new MultipartFile(stream, "");
 
         act.Should().Throw<ArgumentException>();
     }
@@ -38,14 +38,14 @@ public class MultipartFileTests
     [Fact]
     public void FromBytes_ValidBytes_ShouldCreateFile()
     {
-        var bytes = new byte[] { 0x01, 0x02, 0x03 };
-        using var file = MultipartFile.FromBytes(bytes, "test.bin");
+        byte[] bytes = [0x01, 0x02, 0x03];
+        using MultipartFile file = MultipartFile.FromBytes(bytes, "test.bin");
 
         file.FileName.Should().Be("test.bin");
         file.ContentType.Should().Be("application/octet-stream");
         file.Name.Should().Be("file");
 
-        using var reader = new BinaryReader(file.Content);
+        using BinaryReader reader = new BinaryReader(file.Content);
         reader.ReadBytes(3).Should().Equal(bytes);
     }
 
@@ -53,11 +53,11 @@ public class MultipartFileTests
     [Trait("Requires", "FileSystem")]
     public void FromFile_ValidPath_ShouldCreateFile()
     {
-        var tempPath = Path.GetTempFileName();
+        string tempPath = Path.GetTempFileName();
         try
         {
             File.WriteAllText(tempPath, "test content");
-            using var file = MultipartFile.FromFile(tempPath, "text/plain");
+            using MultipartFile file = MultipartFile.FromFile(tempPath, "text/plain");
 
             file.FileName.Should().Be(Path.GetFileName(tempPath));
             file.ContentType.Should().Be("text/plain");
@@ -72,7 +72,7 @@ public class MultipartFileTests
     [Fact]
     public void FromFile_EmptyPath_ShouldThrow()
     {
-        var act = () => MultipartFile.FromFile("");
+        Func<MultipartFile> act = () => MultipartFile.FromFile("");
 
         act.Should().Throw<ArgumentException>();
     }

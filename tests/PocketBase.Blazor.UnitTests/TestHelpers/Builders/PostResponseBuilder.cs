@@ -1,5 +1,6 @@
 namespace PocketBase.Blazor.UnitTests.TestHelpers.Builders;
 
+using System.Reflection;
 using System.Text.Json;
 using Blazor.UnitTests.TestHelpers.Utilities;
 
@@ -64,7 +65,7 @@ public class PostResponseBuilder
 
     public string BuildAsJson(JsonSerializerOptions? options = null)
     {
-        var post = Build();
+        PostResponse post = Build();
         return JsonSerializer.Serialize(post, options ?? JsonTestHelper.DefaultOptions);
     }
 
@@ -77,11 +78,11 @@ public class PostResponseBuilder
     {
         // Create a new PostResponse with the expand data
         // Since Expand property is init-only, we need to use reflection or create a new instance
-        var post = Build(); // Get current post
+        PostResponse post = Build(); // Get current post
 
         // Use reflection to set the Expand property
-        var expandProperty = typeof(PostResponse).GetProperty(key,
-            System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
+        PropertyInfo? expandProperty = typeof(PostResponse).GetProperty(key,
+            BindingFlags.Public | BindingFlags.Instance);
 
         if (expandProperty != null && expandProperty.CanWrite)
         {

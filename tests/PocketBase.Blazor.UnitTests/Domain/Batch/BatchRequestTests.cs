@@ -1,6 +1,7 @@
 namespace PocketBase.Blazor.UnitTests.Domain.Batch;
 
 using System;
+using System.Text.Json;
 using Blazor.Enums;
 using Blazor.Requests.Batch;
 using FluentAssertions;
@@ -13,7 +14,7 @@ public class BatchRequestTests
     public void Constructor_Create_ShouldSetMethodUrlAndJson()
     {
         // Arrange & Act
-        var request = new BatchRequest(
+        BatchRequest request = new BatchRequest(
             collectionName: "test-collection",
             method: BatchMethod.Create,
             body: new { name = "test" }
@@ -24,7 +25,7 @@ public class BatchRequestTests
         request.Url.Should().Be("/api/collections/test-collection/records");
 
         request.Body.Should().NotBeNull();
-        request.Body!.Value.TryGetProperty("name", out var name).Should().BeTrue();
+        request.Body!.Value.TryGetProperty("name", out JsonElement name).Should().BeTrue();
         name.Should().NotBeNull();
         name.GetString().Should().Be("test");
     }
@@ -33,7 +34,7 @@ public class BatchRequestTests
     public void Constructor_Update_ShouldSetMethodUrlAndJson()
     {
         // Arrange & Act
-        var request = new BatchRequest(
+        BatchRequest request = new BatchRequest(
             collectionName: "test-collection",
             method: BatchMethod.Update,
             body: new { name = "updated" },
@@ -46,7 +47,7 @@ public class BatchRequestTests
 
         request.Body.Should().NotBeNull();
 
-        request.Body!.Value.TryGetProperty("name", out var name).Should().BeTrue();
+        request.Body!.Value.TryGetProperty("name", out JsonElement name).Should().BeTrue();
         name.Should().NotBeNull();
         name.GetString().Should().Be("updated");
     }
@@ -55,7 +56,7 @@ public class BatchRequestTests
     public void Constructor_Delete_ShouldSetMethodAndUrl_AndHaveNoJson()
     {
         // Arrange & Act
-        var request = new BatchRequest(
+        BatchRequest request = new BatchRequest(
             collectionName: "test-collection",
             method: BatchMethod.Delete,
             body: null,

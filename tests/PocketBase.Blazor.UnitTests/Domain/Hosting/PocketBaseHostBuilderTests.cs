@@ -2,6 +2,7 @@ namespace PocketBase.Blazor.UnitTests.Domain.Hosting;
 
 using System.Runtime.InteropServices;
 using Blazor.Hosting;
+using Blazor.Hosting.Interfaces;
 using FluentAssertions;
 
 [Trait("Category", "Unit")]
@@ -15,7 +16,7 @@ public class PocketBaseHostBuilderTests
     public void CreateDefault_ShouldInitializeWithDefaults()
     {
         // Arrange & Act
-        var builder = PocketBaseHostBuilder.CreateDefault();
+        IPocketBaseHostBuilder builder = PocketBaseHostBuilder.CreateDefault();
 
         // Assert
         builder.Should().NotBeNull();
@@ -25,7 +26,7 @@ public class PocketBaseHostBuilderTests
     public async Task UseOptions_ShouldConfigureCorrectly()
     {
         // Arrange
-        var builder = PocketBaseHostBuilder.CreateDefault();
+        IPocketBaseHostBuilder builder = PocketBaseHostBuilder.CreateDefault();
 
         // Act
         await builder
@@ -38,7 +39,7 @@ public class PocketBaseHostBuilderTests
             })
             .BuildAsync();
 
-        var host = await builder.BuildAsync();
+        IPocketBaseHost host = await builder.BuildAsync();
 
         // Assert
         host.Options.Should().NotBeNull();
@@ -52,13 +53,13 @@ public class PocketBaseHostBuilderTests
     public async Task UseExecutable_WithValidPath_ShouldConfigure()
     {
         // Arrange
-        var builder = PocketBaseHostBuilder.CreateDefault();
+        IPocketBaseHostBuilder builder = PocketBaseHostBuilder.CreateDefault();
 
-        var os = GetOSPlatform();
-        var extension = os == OSPlatform.Windows ? ".exe" : "";
-        var appData = Environment.SpecialFolder.LocalApplicationData;
+        OSPlatform os = GetOSPlatform();
+        string extension = os == OSPlatform.Windows ? ".exe" : "";
+        Environment.SpecialFolder appData = Environment.SpecialFolder.LocalApplicationData;
 
-        var exePath = Path.Combine(
+        string exePath = Path.Combine(
             Environment.GetFolderPath(appData),
             "pocketbase",
             $"pocketbase{extension}"
@@ -66,7 +67,7 @@ public class PocketBaseHostBuilderTests
 
         // Act
         await builder.UseExecutable(exePath).BuildAsync();
-        var host = await builder.BuildAsync();
+        IPocketBaseHost host = await builder.BuildAsync();
 
         // Assert
         host.ExecutablePath.Should().Be(exePath);
@@ -76,8 +77,8 @@ public class PocketBaseHostBuilderTests
     public async Task UseExecutable_WithInvalidPath_ShouldThrow()
     {
         // Arrange
-        var builder = PocketBaseHostBuilder.CreateDefault();
-        var invalidPath = @"C:\nonexistent\pocketbase.exe";
+        IPocketBaseHostBuilder builder = PocketBaseHostBuilder.CreateDefault();
+        string invalidPath = @"C:\nonexistent\pocketbase.exe";
 
         // Act & Assert
         await Assert.ThrowsAsync<FileNotFoundException>(async () =>
@@ -88,10 +89,10 @@ public class PocketBaseHostBuilderTests
     public async Task BuildAsync_WithoutOptions_ShouldUseDefaults()
     {
         // Arrange
-        var builder = PocketBaseHostBuilder.CreateDefault();
+        IPocketBaseHostBuilder builder = PocketBaseHostBuilder.CreateDefault();
 
         // Act
-        var host = await builder.BuildAsync();
+        IPocketBaseHost host = await builder.BuildAsync();
 
         // Assert
         host.Options.Should().NotBeNull();

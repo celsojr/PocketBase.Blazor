@@ -1,6 +1,7 @@
 namespace PocketBase.Blazor.UnitTests.Domain.Hosting;
 
 using Blazor.Hosting;
+using Blazor.Hosting.Interfaces;
 using FluentAssertions;
 
 [Trait("Category", "Unit")]
@@ -19,14 +20,14 @@ public class ConfigurationTests
 
         try
         {
-            var builder = PocketBaseHostBuilder.CreateDefault();
+            IPocketBaseHostBuilder builder = PocketBaseHostBuilder.CreateDefault();
 
             // Act
             await builder
                 .UseEnvironmentVariables()
                 .BuildAsync();
 
-            var host = await builder.BuildAsync();
+            IPocketBaseHost host = await builder.BuildAsync();
 
             // Assert
             host.Options.Should().NotBeNull();
@@ -49,7 +50,7 @@ public class ConfigurationTests
     public async Task UseConfigurationFile_ShouldLoadSettings()
     {
         // Arrange
-        var configJson = @"{
+        string configJson = @"{
             ""Host"": ""192.168.1.100"",
             ""Port"": 9090,
             ""Dir"": ""./config_data"",
@@ -60,11 +61,11 @@ public class ConfigurationTests
 
         try
         {
-            var builder = PocketBaseHostBuilder.CreateDefault();
+            IPocketBaseHostBuilder builder = PocketBaseHostBuilder.CreateDefault();
 
             // Act
             await builder.UseConfigurationFile("pocketbase.config.json").BuildAsync();
-            var host = await builder.BuildAsync();
+            IPocketBaseHost host = await builder.BuildAsync();
 
             // Assert
             host.Options.Should().NotBeNull();
