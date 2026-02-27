@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
@@ -11,19 +10,15 @@ namespace PocketBase.Blazor.Scaffolding.Internal
 {
     internal static class SchemaTemplateMigrationWriter
     {
-        private static readonly IReadOnlyDictionary<CommonSchema, (string FileName, string Content)> Templates =
+        private static readonly Dictionary<CommonSchema, (string FileName, string Content)> Templates =
             new Dictionary<CommonSchema, (string FileName, string Content)>
             {
-                [CommonSchema.Blog] = ("2990000000_pbblazor_blog_schema.js", BlogSchemaMigration),
-                [CommonSchema.Todo] = ("2990000001_pbblazor_todo_schema.js", TodoSchemaMigration),
-                [CommonSchema.ECommerce] = ("2990000002_pbblazor_ecommerce_schema.js", ECommerceSchemaMigration)
+                [CommonSchema.Blog] = ("2990000000_pb_blazor_blog_schema.js", BlogSchemaMigration),
+                [CommonSchema.Todo] = ("2990000001_pb_blazor_todo_schema.js", TodoSchemaMigration),
+                [CommonSchema.ECommerce] = ("2990000002_pb_blazor_ecommerce_schema.js", ECommerceSchemaMigration)
             };
 
-        internal static async Task WriteAsync(
-            IReadOnlyCollection<CommonSchema> schemas,
-            PocketBaseHostOptions options,
-            ILogger? logger,
-            CancellationToken cancellationToken = default)
+        internal static async Task WriteAsync(IReadOnlyCollection<CommonSchema> schemas, PocketBaseHostOptions options, ILogger? logger, CancellationToken cancellationToken = default)
         {
             if (schemas.Count == 0)
             {
@@ -42,9 +37,7 @@ namespace PocketBase.Blazor.Scaffolding.Internal
 
                 string fullPath = Path.Combine(migrationsDir, template.FileName);
                 await File.WriteAllTextAsync(fullPath, template.Content, cancellationToken);
-                (logger ?? NullLogger.Instance).LogInformation(
-                    "Schema template migration generated: {Path}",
-                    fullPath);
+                (logger ?? NullLogger.Instance).LogInformation("New schema template migration generated");
             }
         }
 

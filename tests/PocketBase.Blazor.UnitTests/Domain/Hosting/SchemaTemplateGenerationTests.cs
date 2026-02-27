@@ -37,9 +37,9 @@ public class SchemaTemplateGenerationTests
                 .UseSchemaTemplate(CommonSchema.ECommerce)
                 .BuildAsync();
 
-            File.Exists(Path.Combine(migrationsDir, "2990000000_pbblazor_blog_schema.js")).Should().BeTrue();
-            File.Exists(Path.Combine(migrationsDir, "2990000001_pbblazor_todo_schema.js")).Should().BeTrue();
-            File.Exists(Path.Combine(migrationsDir, "2990000002_pbblazor_ecommerce_schema.js")).Should().BeTrue();
+            File.Exists(Path.Combine(migrationsDir, "2990000000_pb_blazor_blog_schema.js")).Should().BeTrue();
+            File.Exists(Path.Combine(migrationsDir, "2990000001_pb_blazor_todo_schema.js")).Should().BeTrue();
+            File.Exists(Path.Combine(migrationsDir, "2990000002_pb_blazor_ecommerce_schema.js")).Should().BeTrue();
         }
         finally
         {
