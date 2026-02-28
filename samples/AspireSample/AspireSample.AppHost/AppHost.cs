@@ -14,6 +14,7 @@ var hooksPath = Path.Combine(projectRoot, "data", "pb_hooks"); // optional
 
 var pocketBase = builder.AddContainer("pocketbase", "ghcr.io/muchobien/pocketbase:latest")
     .WithHttpEndpoint(targetPort: 8090)
+    .WithArgs("serve", "--http=0.0.0.0:8090", "--dir=/pb_data", "--dev")
     .WithContainerName("aspire_sample_pocketbase")
     .WithBindMount(dataPath, "/pb_data", isReadOnly: false)
     .WithBindMount(migrationsPath, "/pb_migrations", isReadOnly: false)

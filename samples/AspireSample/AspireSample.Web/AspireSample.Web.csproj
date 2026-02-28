@@ -8,10 +8,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AspireSample.ServiceDefaults\AspireSample.ServiceDefaults.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="PocketBase.Blazor" Version="0.0.3" />
+    <ProjectReference Include="..\..\..\src\PocketBase.Blazor\PocketBase.Blazor.csproj" />
   </ItemGroup>
 
 </Project>

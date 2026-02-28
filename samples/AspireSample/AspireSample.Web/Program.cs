@@ -1,7 +1,7 @@
 using System.Text.Json;
 using AspireSample.Web;
 using AspireSample.Web.Components;
-using PocketBase.Blazor;
+using PocketBase.Blazor.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 

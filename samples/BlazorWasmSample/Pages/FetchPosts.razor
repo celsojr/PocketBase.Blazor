@@ -68,11 +68,12 @@ else
         Console.WriteLine($"Auth result Record ID: {authResult.Value.Record?.Id}");
 
         // Fetch all posts like JS SDK style
-        var result = await pb.Collection("posts").GetListAsync<Post>(
-            options: new ListOptions()
-            {
-                Expand = "category" // Expanded relationship
-            });
+        var result = await pb.Collection("posts")
+            .GetListAsync<Post>(
+                options: new ListOptions()
+                {
+                    Expand = "category" // Expanded relationship
+                });
 
         if (result.IsSuccess)
         {

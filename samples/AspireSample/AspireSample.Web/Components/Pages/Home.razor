@@ -1,8 +1,14 @@
 ﻿@page "/"
 @using PocketBase.Blazor
-@inject IPocketBaseClient Client
+@inject IPocketBase _pb
+@inject ILogger<Home> _logger
 
 <h3 class="page-title">Posts</h3>
+
+@if (!string.IsNullOrWhiteSpace(loadError))
+{
+    <div class="alert alert-warning" role="alert">@loadError</div>
+}
 
 @if (posts == null)
 {
@@ -39,25 +45,59 @@ else
 
 @code {
     private List<Post>? posts;
+    private string? loadError;
 
     protected override async Task OnInitializedAsync()
     {
-        var (items, error) = await Client.GetListAsync<Post>("posts");
+        // Authenticate as a user to access protected endpoints
+        var authResult = await _pb.Collection("users")
+            .AuthWithPasswordAsync("joe.doe@email.com", "GY93nUyXb79B3t9");
 
-        if (error != null)
+        var result = await _pb.Collection("posts").GetListAsync<Post>();
+
+        if (!result.IsSuccess)
         {
-            if (error.RequiresApiKey)
+            var errorMessages = result.Errors
+                .Select(e => e.Message)
+                .Where(m => !string.IsNullOrWhiteSpace(m))
+                .ToList();
+
+            var joinedErrors = errorMessages.Count > 0
+                ? string.Join(" | ", errorMessages)
+                : "Unknown error.";
+
+            if (joinedErrors.Contains("API key", StringComparison.OrdinalIgnoreCase))
             {
-                Console.WriteLine("⚠ This endpoint requires an API key or admin privileges.");
+                loadError = "You are not authorized to view posts. Please sign in with a user that has access.";
+                _logger.LogWarning(
+                    "Failed to load posts due to missing authorization. Errors: {Errors}",
+                    joinedErrors);
             }
             else
             {
-                Console.WriteLine($"Error {error.Status}: {error.Message}");
+                loadError = "Could not load posts right now. Please try again.";
+                _logger.LogError(
+                    "Failed to load posts from PocketBase. Errors: {Errors}",
+                    joinedErrors);
             }
+
+            posts = [];
+            return;
         }
-        else
+
+        posts = result.Value.Items;
+
+        _logger.LogInformation(
+            "Posts query completed successfully. TotalItems={TotalItems}, Page={Page}, PerPage={PerPage}, Returned={Returned}",
+            result.Value.TotalItems,
+            result.Value.Page,
+            result.Value.PerPage,
+            posts.Count);
+
+        if (posts.Count == 0)
         {
-            posts = items;
+            _logger.LogWarning(
+                "Posts query returned 200 OK with zero items. This can happen when collection rules allow request but filter out records for current auth context.");
         }
     }
 
