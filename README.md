@@ -1,4 +1,4 @@
-# PocketBase.Blazor (Beta) [![NuGet Version](https://img.shields.io/nuget/v/PocketBase.Blazor.svg)](https://www.nuget.org/packages/PocketBase.Blazor/0.1.2-beta.3) [![NuGet Downloads](https://img.shields.io/nuget/dt/PocketBase.Blazor.svg)](https://www.nuget.org/packages/PocketBase.Blazor/0.1.2-beta.3) ![GitHub Packages](https://img.shields.io/badge/GitHub%20Packages-0.1.2-blue)
+# PocketBase.Blazor (Beta) [![NuGet Version](https://img.shields.io/nuget/v/PocketBase.Blazor.svg)](https://www.nuget.org/packages/PocketBase.Blazor/0.1.3-beta.4) [![NuGet Downloads](https://img.shields.io/nuget/dt/PocketBase.Blazor.svg)](https://www.nuget.org/packages/PocketBase.Blazor/0.1.3-beta.4) ![GitHub Packages](https://img.shields.io/badge/GitHub%20Packages-0.1.2-blue)
 
 PocketBase.Blazor is a PocketBase .NET REST client wrapper (with some extra powers) for Blazor and .NET apps.
 
@@ -25,7 +25,7 @@ This client is intentionally close to PocketBase JS-SDK semantics and method nam
 ## Install
 
 ```bash
-dotnet add package PocketBase.Blazor --version 0.1.2-beta.3
+dotnet add package PocketBase.Blazor --version 0.1.3-beta.4
 ```
 
 ## Architecture Notes
@@ -49,6 +49,8 @@ builder.Services.AddPocketBase(options =>
 ## Usage Examples (From Integration Tests)
 
 Source-of-truth examples live under `tests/PocketBase.Blazor.IntegrationTests/Clients`.
+
+This project is a C# PocketBase REST client wrapper with a test-first approach and 300+ tests across unit and integration suites.
 
 ### Authenticate with password
 
@@ -157,6 +159,8 @@ var host = await PocketBaseHostBuilder.CreateDefault()
 ### Generate custom cron handlers and build a custom binary
 
 Source references: `src/PocketBase.Blazor/Clients/Crons/CronGenerator.cs`, `src/PocketBase.Blazor/Options/CronGenerationOptions.cs`
+
+Requirement: generating and building custom cron binaries requires a Go toolchain that is either available on `PATH` or explicitly set via `CronGenerationOptions.GoExecutable` (for example, a custom executable path).
 
 ```csharp
 var generator = new CronGenerator();

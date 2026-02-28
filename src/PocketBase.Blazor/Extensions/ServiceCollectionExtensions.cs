@@ -42,7 +42,12 @@ public static class ServiceCollectionExtensions
             return http;
         });
 
-        services.AddScoped<IPocketBase, PocketBase>();
+        services.AddScoped<IPocketBase>(sp =>
+        {
+            PocketBaseOptions pbOptions = sp.GetRequiredService<PocketBaseOptions>();
+            HttpClient http = sp.GetRequiredService<HttpClient>();
+            return new PocketBase(pbOptions.BaseUrl, http, pbOptions);
+        });
 
         return services;
     }
