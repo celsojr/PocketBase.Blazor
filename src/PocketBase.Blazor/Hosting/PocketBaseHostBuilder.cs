@@ -128,7 +128,7 @@ namespace PocketBase.Blazor.Hosting
 
                 if (key?.StartsWith(prefix, StringComparison.OrdinalIgnoreCase) == true)
                 {
-                    string optionName = key.Substring(prefix.Length);
+                    string optionName = key[prefix.Length..];
                     string? value = envVar.Value?.ToString();
 
                     if (value != null)
@@ -202,7 +202,7 @@ namespace PocketBase.Blazor.Hosting
         }
 
         /// <inheritdoc cref="IPocketBaseHostBuilder"/>
-        public PocketBaseHostBuilder UseJsonConfiguration(string filePath)
+        public IPocketBaseHostBuilder UseJsonConfiguration(string filePath)
         {
             string json = File.ReadAllText(filePath);
             PocketBaseHostOptions? config = JsonSerializer
@@ -286,21 +286,21 @@ namespace PocketBase.Blazor.Hosting
             _executablePath = config.Executable ?? _executablePath;
         }
 
-        private void ApplyDictionaryConfiguration(Dictionary<string, object> config)
-        {
-            if (config == null)
-                return;
+        //private void ApplyDictionaryConfiguration(Dictionary<string, object> config)
+        //{
+        //    if (config == null)
+        //        return;
 
-            if (config.TryGetValue("Host", out object? host) && host is string hostStr)
-                _options.Host = hostStr;
+        //    if (config.TryGetValue("Host", out object? host) && host is string hostStr)
+        //        _options.Host = hostStr;
 
-            if (config.TryGetValue("Port", out object? port))
-            {
-                if (port is int portInt)
-                    _options.Port = portInt;
-                else if (port is string portStr && int.TryParse(portStr, out portInt))
-                    _options.Port = portInt;
-            }
-        }
+        //    if (config.TryGetValue("Port", out object? port))
+        //    {
+        //        if (port is int portInt)
+        //            _options.Port = portInt;
+        //        else if (port is string portStr && int.TryParse(portStr, out portInt))
+        //            _options.Port = portInt;
+        //    }
+        //}
     }
 }

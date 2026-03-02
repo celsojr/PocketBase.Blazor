@@ -1,4 +1,4 @@
-# PocketBase.Blazor (Beta) [![NuGet Version](https://img.shields.io/nuget/v/PocketBase.Blazor.svg)](https://www.nuget.org/packages/PocketBase.Blazor/0.1.3-beta.4) [![NuGet Downloads](https://img.shields.io/nuget/dt/PocketBase.Blazor.svg)](https://www.nuget.org/packages/PocketBase.Blazor/0.1.3-beta.4) ![GitHub Packages](https://img.shields.io/badge/GitHub%20Packages-0.1.2-blue)
+# PocketBase.Blazor (Beta) [![NuGet Version](https://img.shields.io/nuget/v/PocketBase.Blazor.svg)](https://www.nuget.org/packages/PocketBase.Blazor/0.2.0-beta.1) [![NuGet Downloads](https://img.shields.io/nuget/dt/PocketBase.Blazor.svg)](https://www.nuget.org/packages/PocketBase.Blazor/0.2.0-beta.1) ![GitHub Packages](https://img.shields.io/badge/GitHub%20Packages-0.2.0-blue)
 
 PocketBase.Blazor is a PocketBase .NET REST client wrapper (with some extra powers) for Blazor and .NET apps.
 
@@ -25,7 +25,7 @@ This client is intentionally close to PocketBase JS-SDK semantics and method nam
 ## Install
 
 ```bash
-dotnet add package PocketBase.Blazor --version 0.1.3-beta.4
+dotnet add package PocketBase.Blazor --version 0.2.0-beta.1
 ```
 
 ## Architecture Notes

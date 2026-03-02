@@ -60,6 +60,12 @@ namespace PocketBase.Blazor.Hosting.Interfaces
         IPocketBaseHostBuilder UseConfigurationFile(string filePath);
 
         /// <summary>
+        /// Configures the application to use settings from a JSON configuration file at the specified path.
+        /// </summary>
+        /// <param name="filePath">The path to the JSON configuration file.</param>
+        IPocketBaseHostBuilder UseJsonConfiguration(string filePath);
+
+        /// <summary>
         /// Builds the host asynchronously.
         /// </summary>
         /// <returns>A task that resolves to the configured <see cref="IPocketBaseHost"/>.</returns>
