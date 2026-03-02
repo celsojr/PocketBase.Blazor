@@ -42,7 +42,7 @@ public class SchemaTemplateValidationTests
             host = await builder
                 .UseOptions(options =>
                 {
-                    options.Dir = dataDir;
+                    options.DataDir = dataDir;
                     options.MigrationsDir = migrationsDir;
                     options.Dev = true;
                 })

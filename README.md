@@ -141,7 +141,7 @@ var host = await PocketBaseHostBuilder.CreateDefault()
     {
         o.Host = "127.0.0.1";
         o.Port = 8090;
-        o.Dir = "./pb_data";
+        o.DataDir = "./pb_data";
         o.Dev = true;
     })
     .BuildAsync();
@@ -194,7 +194,7 @@ var host = await PocketBaseHostBuilder.CreateDefault()
 var host = await PocketBaseHostBuilder.CreateDefault()
     .UseOptions(o =>
     {
-        o.Dir = "./pb_data";
+        o.DataDir = "./pb_data";
         o.MigrationsDir = "./pb_migrations"; // optional; defaults to <Dir>/pb_migrations
         o.Dev = true;
     })

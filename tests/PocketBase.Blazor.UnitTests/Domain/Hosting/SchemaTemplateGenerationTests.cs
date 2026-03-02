@@ -28,7 +28,7 @@ public class SchemaTemplateGenerationTests
                 .UseExecutable(fakeExecutablePath)
                 .UseOptions(options =>
                 {
-                    options.Dir = dataDir;
+                    options.DataDir = dataDir;
                     options.MigrationsDir = migrationsDir;
                     options.Dev = true;
                 })

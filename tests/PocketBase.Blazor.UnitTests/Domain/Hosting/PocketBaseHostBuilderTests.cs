@@ -34,7 +34,7 @@ public class PocketBaseHostBuilderTests
             {
                 options.Host = "127.0.0.1";
                 options.Port = 8888;
-                options.Dir = TestDataDir;
+                options.DataDir = TestDataDir;
                 options.Dev = true;
             })
             .BuildAsync();
@@ -45,7 +45,7 @@ public class PocketBaseHostBuilderTests
         host.Options.Should().NotBeNull();
         host.Options.Host.Should().Be("127.0.0.1");
         host.Options.Port.Should().Be(8888);
-        host.Options.Dir.Should().Be(TestDataDir);
+        host.Options.DataDir.Should().Be(TestDataDir);
         host.Options.Dev.Should().BeTrue();
     }
 
@@ -98,7 +98,7 @@ public class PocketBaseHostBuilderTests
         host.Options.Should().NotBeNull();
         host.Options.Host.Should().Be("127.0.0.1");
         host.Options.Port.Should().Be(8090);
-        host.Options.Dir.Should().BeNull();
+        host.Options.DataDir.Should().BeNull();
         host.Options.Dev.Should().BeFalse();
     }
 

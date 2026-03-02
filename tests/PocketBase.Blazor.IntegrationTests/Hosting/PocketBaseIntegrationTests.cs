@@ -17,6 +17,8 @@ public class PocketBaseIntegrationTests : IAsyncLifetime
     private IPocketBaseHost? _host;
     private int _port;
     private HttpClient? _httpClient;
+    private readonly string _scheme = "http";
+    private readonly string _hostName = "127.0.0.1";
 
     public TestSettings Settings { get; } = new();
 
@@ -26,7 +28,7 @@ public class PocketBaseIntegrationTests : IAsyncLifetime
 
         IPocketBaseHostBuilder builder = PocketBaseHostBuilder.CreateDefault();
 
-        ILoggerFactory loggerFactory = LoggerFactory.Create(builder => 
+        ILoggerFactory loggerFactory = LoggerFactory.Create(builder =>
             builder.AddConsole().SetMinimumLevel(LogLevel.Debug));
 
         ILogger<PocketBaseHost> logger = loggerFactory.CreateLogger<PocketBaseHost>();
@@ -35,9 +37,9 @@ public class PocketBaseIntegrationTests : IAsyncLifetime
             .UseLogger(logger)
             .UseOptions(options =>
             {
-                options.Host = "127.0.0.1";
+                options.Host = _hostName;
                 options.Port = _port;
-                options.Dir = TestPaths.TestDataDirectory;
+                options.DataDir = TestPaths.TestDataDirectory;
                 options.MigrationsDir = TestPaths.TestMigrationDirectory;
                 options.Dev = true;
             })
@@ -49,15 +51,13 @@ public class PocketBaseIntegrationTests : IAsyncLifetime
         // instance being served through the same port
         await _host.StartAsync();
 
-        _httpClient = new HttpClient() { BaseAddress = new Uri("http://127.0.0.1:8090") };
+        _httpClient = new HttpClient() { BaseAddress = new Uri($"{_scheme}://{_hostName}:{_port}") };
 
         PocketBaseOptions options = new PocketBaseOptions();
         options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
         options.JsonSerializerOptions.WriteIndented = true;
 
-        // Allowing different ports is still under investigation
-        // Only working when behind a reverse proxy in a local machine
-        _pb = new PocketBase("http://127.0.0.1:8090", options: options);
+        _pb = new PocketBase($"{_scheme}://{_hostName}:{_port}", options: options);
 
         // Wait for PocketBase to be ready
         await WaitForPocketBaseReady();

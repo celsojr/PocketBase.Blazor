@@ -28,9 +28,9 @@ public class PocketBaseHostTests : IAsyncLifetime
             .UseLogger(logger)
             .UseOptions(options =>
             {
-                //options.Host = "127.0.0.1";
-                //options.Port = GetRandomPort();
-                options.Dir = _testDataDir;
+                options.Host = "127.0.0.1";
+                options.Port = GetRandomPort();
+                options.DataDir = _testDataDir;
                 options.Dev = false;
             })
             .BuildAsync();
@@ -52,7 +52,7 @@ public class PocketBaseHostTests : IAsyncLifetime
         }
     }
 
-    //private static int GetRandomPort() => Random.Shared.Next(9000, 9999);
+    private static int GetRandomPort() => Random.Shared.Next(9000, 9999);
 
     [Fact]
     public async Task StartAsync_ShouldLaunchProcess()

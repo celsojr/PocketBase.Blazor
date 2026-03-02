@@ -16,6 +16,7 @@ using PocketBase.Blazor.Scaffolding.Internal;
 
 namespace PocketBase.Blazor.Hosting
 {
+    /// <inheritdoc cref="IPocketBaseHostBuilder"/>
     public class PocketBaseHostBuilder : IPocketBaseHostBuilder
     {
         private string? _executablePath;
@@ -27,17 +28,20 @@ namespace PocketBase.Blazor.Hosting
         private CronGenerationOptions? _cronOptions;
         private readonly HashSet<CommonSchema> _schemaTemplates = [];
 
+        /// <inheritdoc cref="IPocketBaseHostBuilder"/>
         public static IPocketBaseHostBuilder CreateDefault(string[]? args = null)
         {
             return new PocketBaseHostBuilder();
         }
 
+        /// <inheritdoc cref="IPocketBaseHostBuilder"/>
         public IPocketBaseHostBuilder UseExecutable(string executablePath)
         {
             _executablePath = executablePath ?? throw new ArgumentNullException(nameof(executablePath));
             return this;
         }
 
+        /// <inheritdoc cref="IPocketBaseHostBuilder"/>
         public IPocketBaseHostBuilder UseCrons(ICronGenerator cronGenerator, CronManifest manifest, CronGenerationOptions options)
         {
             _cronGenerator = cronGenerator;
@@ -46,6 +50,7 @@ namespace PocketBase.Blazor.Hosting
             return this;
         }
 
+        /// <inheritdoc cref="IPocketBaseHostBuilder"/>
         public IPocketBaseHostBuilder UseSchemaTemplate(CommonSchema schema)
         {
             if (Enum.IsDefined(typeof(CommonSchema), schema))
@@ -56,6 +61,7 @@ namespace PocketBase.Blazor.Hosting
             return this;
         }
 
+        /// <inheritdoc cref="IPocketBaseHostBuilder"/>
         public IPocketBaseHostBuilder UseSchemaTemplates(IEnumerable<CommonSchema> schemas)
         {
             ArgumentNullException.ThrowIfNull(schemas);
@@ -68,18 +74,21 @@ namespace PocketBase.Blazor.Hosting
             return this;
         }
 
+        /// <inheritdoc cref="IPocketBaseHostBuilder"/>
         public IPocketBaseHostBuilder UseOptions(Action<PocketBaseHostOptions> configure)
         {
             configure?.Invoke(_options);
             return this;
         }
 
+        /// <inheritdoc cref="IPocketBaseHostBuilder"/>
         public IPocketBaseHostBuilder UseLogger(ILogger<PocketBaseHost> logger)
         {
             _logger = logger;
             return this;
         }
 
+        /// <inheritdoc cref="IPocketBaseHostBuilder"/>
         public async Task<IPocketBaseHost> BuildAsync()
         {
             if (_cronGenerator is not null)
@@ -108,6 +117,7 @@ namespace PocketBase.Blazor.Hosting
             return new PocketBaseHost(_executablePath, _options, _logger);
         }
 
+        /// <inheritdoc cref="IPocketBaseHostBuilder"/>
         public IPocketBaseHostBuilder UseEnvironmentVariables(string prefix = "POCKETBASE_")
         {
             IDictionary envVars = Environment.GetEnvironmentVariables();
@@ -131,7 +141,7 @@ namespace PocketBase.Blazor.Hosting
 
         private void ApplyEnvironmentVariable(string optionName, string value)
         {
-            if (string.IsNullOrEmpty(value))
+            if (string.IsNullOrWhiteSpace(value))
                 return;
 
             switch (optionName.ToUpperInvariant())
@@ -141,12 +151,26 @@ namespace PocketBase.Blazor.Hosting
                     break;
 
                 case "PORT":
-                    if (int.TryParse(value, out int port))
+                    if (int.TryParse(value, out int port) && port > 0 && port <= 65535)
                         _options.Port = port;
                     break;
 
-                case "DIR":
-                    _options.Dir = value;
+                case "USE_HTTPS":
+                    if (bool.TryParse(value, out bool useHttps))
+                        _options.UseHttps = useHttps;
+                    break;
+
+                case "HTTPS_PORT":
+                    if (int.TryParse(value, out int httpsPort) && httpsPort > 0 && httpsPort <= 65535)
+                        _options.HttpsPort = httpsPort;
+                    break;
+
+                case "DATA_DIR":
+                    _options.DataDir = value;
+                    break;
+
+                case "MIGRATIONS_DIR":
+                    _options.MigrationsDir = value;
                     break;
 
                 case "DEV":
@@ -156,6 +180,7 @@ namespace PocketBase.Blazor.Hosting
             }
         }
 
+        /// <inheritdoc cref="IPocketBaseHostBuilder"/>
         public IPocketBaseHostBuilder UseConfigurationFile(string filePath)
         {
             if (!File.Exists(filePath))
@@ -176,20 +201,23 @@ namespace PocketBase.Blazor.Hosting
             };
         }
 
+        /// <inheritdoc cref="IPocketBaseHostBuilder"/>
         public PocketBaseHostBuilder UseJsonConfiguration(string filePath)
         {
             string json = File.ReadAllText(filePath);
-            PocketBaseHostOptions? config = JsonSerializer.Deserialize<PocketBaseHostOptions>(json, new JsonSerializerOptions
-            {
-                PropertyNameCaseInsensitive = true,
-                AllowTrailingCommas = true,
-                ReadCommentHandling = JsonCommentHandling.Skip
-            });
+            PocketBaseHostOptions? config = JsonSerializer
+                .Deserialize<PocketBaseHostOptions>(json, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true,
+                    AllowTrailingCommas = true,
+                    ReadCommentHandling = JsonCommentHandling.Skip
+                });
 
             ApplyConfiguration(config);
             return this;
         }
 
+        /// <inheritdoc cref="IPocketBaseHostBuilder"/>
         public IPocketBaseHostBuilder UseYamlConfiguration(string filePath)
         {
             throw new NotImplementedException();
@@ -207,6 +235,7 @@ namespace PocketBase.Blazor.Hosting
         //    return this;
         //}
 
+        /// <inheritdoc cref="IPocketBaseHostBuilder"/>
         public IPocketBaseHostBuilder UseXmlConfiguration(string filePath)
         {
             string xml = File.ReadAllText(filePath);
@@ -222,7 +251,15 @@ namespace PocketBase.Blazor.Hosting
                 if (int.TryParse(root.Element("Port")?.Value, out int port))
                     config.Port = port;
 
-                config.Dir = root.Element("Dir")?.Value ?? config.Dir;
+                config.DataDir = root.Element("DataDir")?.Value ?? config.DataDir;
+
+                config.MigrationsDir = root.Element("MigrationsDir")?.Value ?? config.MigrationsDir;
+
+                if (bool.TryParse(root.Element("UseHttps")?.Value, out bool useHttps))
+                    config.UseHttps = useHttps;
+
+                if (int.TryParse(root.Element("HttpsPort")?.Value, out int httpsPort))
+                    config.HttpsPort = httpsPort;
 
                 if (bool.TryParse(root.Element("Dev")?.Value, out bool dev))
                     config.Dev = dev;
@@ -234,15 +271,18 @@ namespace PocketBase.Blazor.Hosting
             return this;
         }
 
-        private void ApplyConfiguration(PocketBaseHostOptions config)
+        private void ApplyConfiguration(PocketBaseHostOptions? config)
         {
             if (config == null)
                 return;
 
             _options.Host = config.Host ?? _options.Host;
             _options.Port = config.Port;
-            _options.Dir = config.Dir ?? _options.Dir;
+            _options.DataDir = config.DataDir ?? _options.DataDir;
             _options.Dev = config.Dev;
+            _options.MigrationsDir = config.MigrationsDir ?? _options.MigrationsDir;
+            _options.UseHttps = config.UseHttps;
+            _options.HttpsPort = config.HttpsPort;
             _executablePath = config.Executable ?? _executablePath;
         }
 
@@ -264,45 +304,3 @@ namespace PocketBase.Blazor.Hosting
         }
     }
 }
-
-
-/*
-
-// Startup
-var builder = PocketBaseHostBuilder.CreateDefault();
-
-// Auto-resolve and download executable if needed
-await builder
-    .UseOptions(options =>
-    {
-        options.Host = "localhost";
-        options.Port = 8090;
-        options.Dir = "./pb_data";
-        options.Dev = true;
-    })
-    .BuildAsync();
-
-// Or specify executable directly
-await builder
-    .UseExecutable(@"C:\tools\pocketbase.exe")
-    .UseOptions(options => options.Port = 8090)
-    .BuildAsync();
-
-// Create client
-var host = await builder.BuildAsync();
-await host.StartAsync();
-
-var pb = PocketBaseClientFactory.CreateClient(host);
-
-// Use the client
-var auth = await pb.Admins
-    .AuthWithPasswordAsync(
-        "admin@example.com",
-        "admin123"
-    );
-
-// Dispose when done
-await host.DisposeAsync();
- 
-*/
-

@@ -48,9 +48,9 @@ namespace PocketBase.Blazor.Scaffolding.Internal
                 return options.MigrationsDir;
             }
 
-            if (!string.IsNullOrWhiteSpace(options.Dir))
+            if (!string.IsNullOrWhiteSpace(options.DataDir))
             {
-                return Path.Combine(options.Dir, "pb_migrations");
+                return Path.Combine(options.DataDir, "pb_migrations");
             }
 
             return "pb_migrations";

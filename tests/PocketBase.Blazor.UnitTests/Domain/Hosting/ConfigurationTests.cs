@@ -33,7 +33,7 @@ public class ConfigurationTests
             host.Options.Should().NotBeNull();
             host.Options.Host.Should().Be("0.0.0.0");
             host.Options.Port.Should().Be(8888);
-            host.Options.Dir.Should().Be("./custom_data");
+            host.Options.DataDir.Should().Be("./custom_data");
             host.Options.Dev.Should().BeTrue();
         }
         finally
@@ -71,7 +71,7 @@ public class ConfigurationTests
             host.Options.Should().NotBeNull();
             host.Options.Host.Should().Be("192.168.1.100");
             host.Options.Port.Should().Be(9090);
-            host.Options.Dir.Should().Be("./config_data");
+            host.Options.DataDir.Should().Be("./config_data");
             host.Options.Dev.Should().BeFalse();
         }
         finally

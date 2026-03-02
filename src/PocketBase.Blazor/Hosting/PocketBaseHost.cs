@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
@@ -10,6 +11,7 @@ using PocketBase.Blazor.Options;
 
 namespace PocketBase.Blazor.Hosting
 {
+    /// <inheritdoc cref="IPocketBaseHost"/>
     public sealed class PocketBaseHost : IPocketBaseHost
     {
         private Process _process = null!;
@@ -20,15 +22,19 @@ namespace PocketBase.Blazor.Hosting
         private bool _isRunning = false;
         private readonly SemaphoreSlim _startLock = new(1, 1);
 
-        //public string BaseUrl => $"http://{_options.Host}:{_options.Port}";
-        public string BaseUrl => "http://127.0.0.1:8090";
+        /// <inheritdoc cref="IPocketBaseHost"/>
+        public string BaseUrl => $"{(_options.UseHttps ? "https" : "http")}://{_options.Host}:{_options.Port}";
 
+        /// <inheritdoc cref="IPocketBaseHost"/>
         public PocketBaseHostOptions? Options => _options;
 
+        /// <inheritdoc cref="IPocketBaseHost"/>
         public Process? Process => _process;
 
+        /// <inheritdoc cref="IPocketBaseHost"/>
         public string? ExecutablePath => _executablePath;
 
+        /// <inheritdoc cref="IPocketBaseHost"/>
         public PocketBaseHost(string executablePath, PocketBaseHostOptions? options = null, ILogger<PocketBaseHost>? logger = null)
         {
             _options = options ?? new PocketBaseHostOptions();
@@ -61,27 +67,37 @@ namespace PocketBase.Blazor.Hosting
 
             process.OutputDataReceived += OnOutputDataReceived;
             process.ErrorDataReceived += OnErrorDataReceived;
-    
+
             return process;
         }
 
         private string BuildArguments()
         {
-            // Host and Port are still paused under investigation
-            //var args = $"serve --http={_options.Host}:{_options.Port}";
+            StringBuilder args = new StringBuilder("serve");
 
-            string args = "serve";
+            args.Append($" --http={_options.Host}:{_options.Port}");
+
+            if (_options.UseHttps)
+            {
+                int httpsPort = _options.HttpsPort ?? 0;
+
+                if (httpsPort <= 0)
+                    throw new InvalidOperationException(
+                        "HttpsPort must be specified when UseHttps is true.");
+
+                args.Append($" --https={_options.Host}:{httpsPort}");
+            }
 
             if (_options.Dev)
-                args += " --dev";
+                args.Append(" --dev");
 
-            if (!string.IsNullOrWhiteSpace(_options.Dir))
-                args += $" --dir=\"{_options.Dir}\"";
+            if (!string.IsNullOrWhiteSpace(_options.DataDir))
+                args.Append($" --dir=\"{_options.DataDir}\"");
 
             if (!string.IsNullOrWhiteSpace(_options.MigrationsDir))
-                args += $" --migrationsDir=\"{_options.MigrationsDir}\"";
+                args.Append($" --migrationsDir=\"{_options.MigrationsDir}\"");
 
-            return args;
+            return args.ToString();
         }
 
         private void OnOutputDataReceived(object sender, DataReceivedEventArgs e)
@@ -96,6 +112,7 @@ namespace PocketBase.Blazor.Hosting
                 _logger.LogError("[PocketBase] {Message}", e.Data);
         }
 
+        /// <inheritdoc cref="IPocketBaseHost"/>
         public async Task StartAsync(CancellationToken cancellationToken = default)
         {
             await _startLock.WaitAsync(cancellationToken);
@@ -129,6 +146,7 @@ namespace PocketBase.Blazor.Hosting
             }
         }
 
+        /// <inheritdoc cref="IPocketBaseHost"/>
         public async Task RestartAsync(CancellationToken cancellationToken = default)
         {
             await DisposeAsync();
@@ -136,6 +154,7 @@ namespace PocketBase.Blazor.Hosting
             await StartAsync(cancellationToken);
         }
 
+        /// <inheritdoc cref="IPocketBaseHost"/>
         public async Task StopAsync(CancellationToken cancellationToken = default)
         {
             await _startLock.WaitAsync(cancellationToken);
@@ -169,6 +188,7 @@ namespace PocketBase.Blazor.Hosting
             }
         }
 
+        /// <inheritdoc cref="IPocketBaseHost"/>
         public async ValueTask DisposeAsync()
         {
             await StopAsync();
