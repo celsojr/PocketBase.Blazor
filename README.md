@@ -109,7 +109,7 @@ if (result.IsSuccess)
 }
 ```
 
-### Realtime subscription
+### Realtime subscription (JS-style callback)
 
 Source: `tests/PocketBase.Blazor.IntegrationTests/Clients/Realtime/SubscribeTests.cs`
 
@@ -125,6 +125,24 @@ using (await pb.Collection("categories").SubscribeAsync("*", evt =>
         slug = "test-category"
     });
 }
+```
+
+### Realtime SSE subscription (IAsyncEnumerable&lt;RealtimeRecordEvent&gt;)
+
+Source: `tests/PocketBase.Blazor.IntegrationTests/Clients/Realtime/SubscribeTests.cs` (`RealtimeSse_ShouldStreamParsedEvents`)
+
+```csharp
+using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+
+await foreach (var evt in pb.Collection("categories")
+    .SubscribeAsync("*", cancellationToken: cts.Token))
+    {
+        Console.WriteLine($"{evt.Action}: {evt.RecordId}");
+
+        // stop after first event for demo purposes
+        await cts.CancelAsync();
+        break;
+    }
 ```
 
 ## Hosting, Auto-Binary Download, and Custom Cron Build

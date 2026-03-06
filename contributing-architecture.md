@@ -20,9 +20,9 @@ Implications for contributors:
 
 Stable targets:
 
-- stricter organization boundaries
-- stronger naming/style consistency
-- hardened contributor standards
+- Stricter organization boundaries
+- Stronger naming/style consistency
+- Hardened contributor standards
 
 ## 2. Architectural Principles
 
@@ -58,10 +58,10 @@ Rules:
 
 `IHttpTransport` owns:
 
-- request creation and serialization
-- auth header propagation
+- Request creation and serialization
+- Auth header propagation
 - HTTP-to-result/error mapping
-- stream/bytes/SSE transport behaviors
+- Stream/bytes/SSE transport behaviors
 
 Contribution rule:
 
@@ -73,14 +73,14 @@ Every public client capability should be interface-backed.
 
 Why:
 
-- Consumer applications can mock dependencies with Moq/NSubstitute/FakeItEasy.
+- Consumer applications can mock dependencies with `Moq/NSubstitute/FakeItEasy`.
 - Integration tests and unit tests remain decoupled from concrete implementations.
 - Enables internal refactors with less break risk.
 
 Minimum expectation:
 
-- new public domain client -> new/update interface
-- new public method -> interface + implementation + tests
+- New public domain client -> new/update interface
+- New public method -> interface + implementation + tests
 
 ## 5. Result and Error Model
 
@@ -102,7 +102,7 @@ Default host build may resolve/download PocketBase binary.
 
 Use when:
 
-- local dev convenience
+- Local dev convenience
 - CI onboarding simplicity
 
 ### 6.2 Custom executable path
@@ -111,8 +111,9 @@ Support deterministic environments that pin binaries.
 
 Use when:
 
-- runtime downloads are disallowed
-- custom internal PocketBase builds are required
+- Runtime downloads are disallowed
+- Custom internal PocketBase builds are required
+- Custom cron logic is needed beyond logging
 
 ## 7. Cron Generation Policy
 
@@ -130,18 +131,19 @@ Guidelines:
 
 Use for:
 
-- pure logic
-- transformations
-- validations
-- boundary behavior with mocked dependencies
+- Pure logic
+- Parsing
+- Transformations
+- Validations
+- Boundary behavior with mocked dependencies
 
 ### 8.2 Integration tests
 
 Use for:
 
-- real PocketBase behavior
-- auth/permission semantics
-- realtime/runtime behavior
+- Real PocketBase behavior
+- Auth/permission semantics
+- Realtime/runtime behavior
 
 Rule:
 
@@ -152,8 +154,8 @@ Rule:
 When public behavior changes, update:
 
 - README usage snippet(s)
-- integration tests that validate those snippets
-- architecture/design docs if the direction changed
+- Integration tests that validate those snippets
+- Architecture/design docs if the direction changed
 
 If docs and tests diverge, tests are source-of-truth for behavior until docs are fixed.
 
@@ -161,20 +163,20 @@ If docs and tests diverge, tests are source-of-truth for behavior until docs are
 
 Before requesting review, verify:
 
-- no unnecessary JS interop introduced
-- transport boundary preserved
-- interface coverage updated
-- cancellation support maintained
-- result/error flow remains explicit
-- integration coverage updated for public behavior
-- docs updated where user-facing behavior changed
+- No unnecessary JS interop introduced
+- Transport boundary preserved
+- Interface coverage updated
+- Cancellation support maintained
+- Result/error flow remains explicit
+- Integration coverage updated for public behavior
+- Docs updated where user-facing behavior changed
 
 ## 11. What Should Improve Before Stable
 
 The stable milestone should improve:
 
-- consistent folder/module boundaries
-- naming and style conventions across all clients
-- stricter contributor rules for API surface evolution
-- stronger compatibility policy communication
-- tighter docs/test synchronization process
+- Consistent folder/module boundaries
+- Naming and style conventions across all clients
+- Stricter contributor rules for API surface evolution
+- Stronger compatibility policy communication
+- Tighter docs/test synchronization process

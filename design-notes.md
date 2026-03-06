@@ -70,14 +70,12 @@ Target structure (feature-first, boundary-aware):
 - `Models/<Feature>`: reusable SDK domain models not tied to a single HTTP request/response shape.
 - `Options/<Feature>`: request option builders and query/body configuration objects.
 - `Events/<Feature>`: event payload contracts used by realtime/event-driven flows.
-- `Infrastructure/Http|Store|Hosting|Realtime`: runtime plumbing and cross-cutting integrations.
-- `Abstractions`: top-level interfaces shared across features when needed.
 
 ## Evolution Intent
 
 Before stable releases, expect improvements in:
 
-- folder/module organization
-- naming and coding conventions
-- style consistency and contributor guardrails
-- doc accuracy and coverage
+- Folder/module organization
+- Naming and coding conventions
+- Style consistency and contributor guardrails
+- Doc accuracy and coverage

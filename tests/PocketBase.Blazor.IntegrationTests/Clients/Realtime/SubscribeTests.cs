@@ -54,20 +54,23 @@ public class SubscribeTests
         List<RealtimeRecordEvent> events = new List<RealtimeRecordEvent>();
         CancellationTokenSource cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
 
-        // Subscribe to trigger events
+        // Subscribe to trigger events for all records in the "categories" collection
+        // Using Task.Run to run this in a separate task and avoid blocking the main test thread and to allow for proper cancellation after receiving the first event
+        // Task.Run might not be strictly necessary in a real application, but it helps to demonstrate the cancellation pattern in this test context
         Task subscriptionTask = Task.Run(async () =>
         {
-            await foreach (RealtimeRecordEvent evt in _pb.RealtimeSse.SubscribeAsync("categories", "*", cancellationToken: cts.Token))
-            {
-                _output.WriteLine($"Parsed Event: {evt.Action} - {evt.RecordId}");
-                events.Add(evt);
-
-                if (events.Count >= 1) // Wait for at least one real event
+            await foreach (RealtimeRecordEvent evt in _pb.Collection("categories")
+                .SubscribeAsync("*", cancellationToken: cts.Token))
                 {
-                    await cts.CancelAsync();
-                    break;
+                    _output.WriteLine($"Parsed Event: {evt.Action} - {evt.RecordId}");
+                    events.Add(evt);
+
+                    if (events.Count >= 1) // Wait for at least one real event
+                    {
+                        await cts.CancelAsync();
+                        break;
+                    }
                 }
-            }
         }, cts.Token);
 
         // Give subscription time to establish
