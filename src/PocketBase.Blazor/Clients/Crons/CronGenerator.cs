@@ -54,7 +54,7 @@ namespace PocketBase.Blazor.Clients.Crons
 
                 go 1.27.0
 
-                require github.com/pocketbase/pocketbase v0.40.1
+                require github.com/pocketbase/pocketbase v0.40.4
                 """;
             string goModFilePath = Path.Combine(options.ProjectDirectory, "go.mod");
             await File.WriteAllTextAsync(goModFilePath, goModContent, cancellationToken);

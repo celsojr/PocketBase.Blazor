@@ -53,7 +53,7 @@ namespace PocketBase.Blazor.Clients.Record
         }
 
         /// <inheritdoc />
-        public async Task<Result<AuthResponse>> AuthWithPasswordAsync(string email, string password, string? identityField = null, CommonOptions? options = null, CancellationToken cancellationToken = default)
+        public async Task<Result<AuthResponse>> AuthWithPasswordAsync(string email, string password, string? identityField = null, CommonOptions? options = null, string? mfaId = null, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(email))
                 throw new ArgumentException("Email must be provided.", nameof(email));
@@ -74,6 +74,11 @@ namespace PocketBase.Blazor.Clients.Record
                 body["identityField"] = identityField;
             }
 
+            if (!string.IsNullOrWhiteSpace(mfaId))
+            {
+                body["mfaId"] = mfaId;
+            }
+
             options ??= new CommonOptions();
             options.Query = options.BuildQuery();
 
@@ -91,12 +96,26 @@ namespace PocketBase.Blazor.Clients.Record
         }
 
         /// <inheritdoc />
-        public async Task<Result<AuthRecordResponse>> AuthWithOAuth2CodeAsync(AuthWithOAuth2Request request, CommonOptions? options = null, CancellationToken cancellationToken = default)
+        public async Task<Result<AuthRecordResponse>> AuthWithOAuth2CodeAsync(AuthWithOAuth2Request request, CommonOptions? options = null, string? mfaId = null, CancellationToken cancellationToken = default)
         {
             ArgumentNullException.ThrowIfNull(request, nameof(request));
             EnsureRecordAuthBoundary(nameof(AuthWithOAuth2CodeAsync));
 
-            Result<AuthRecordResponse> result = await Http.SendAsync<AuthRecordResponse>(HttpMethod.Post, $"api/collections/{CollectionName}/auth-with-oauth2", request, options?.ToDictionary(), cancellationToken);
+            object body = request;
+            if (!string.IsNullOrWhiteSpace(mfaId))
+            {
+                body = new Dictionary<string, object?>
+                {
+                    ["provider"] = request.Provider,
+                    ["code"] = request.Code,
+                    ["codeVerifier"] = request.CodeVerifier,
+                    ["redirectURL"] = request.RedirectUrl,
+                    ["createData"] = request.CreateData,
+                    ["mfaId"] = mfaId
+                };
+            }
+
+            Result<AuthRecordResponse> result = await Http.SendAsync<AuthRecordResponse>(HttpMethod.Post, $"api/collections/{CollectionName}/auth-with-oauth2", body, options?.ToDictionary(), cancellationToken);
 
             if (result.IsSuccess)
             {
@@ -117,18 +136,26 @@ namespace PocketBase.Blazor.Clients.Record
         }
 
         /// <inheritdoc />
-        public async Task<Result<AuthResponse>> AuthWithOtpAsync(string otpId, string otpCode, CommonOptions? options = null, CancellationToken cancellationToken = default)
+        public async Task<Result<AuthResponse>> AuthWithOtpAsync(string otpId, string otpCode, CommonOptions? options = null, string? mfaId = null, CancellationToken cancellationToken = default)
         {
             ArgumentException.ThrowIfNullOrWhiteSpace(otpId, nameof(otpId));
             ArgumentException.ThrowIfNullOrWhiteSpace(otpCode, nameof(otpCode));
             EnsureRecordAuthBoundary(nameof(AuthWithOtpAsync));
 
             options = options ?? new CommonOptions();
-            options.Body = new Dictionary<string, object>
+
+            Dictionary<string, object?> body = new Dictionary<string, object?>
             {
                 ["otpId"] = otpId,
                 ["password"] = otpCode,
             };
+
+            if (!string.IsNullOrWhiteSpace(mfaId))
+            {
+                body["mfaId"] = mfaId;
+            }
+
+            options.Body = body;
 
             Result<AuthResponse> result = await Http.SendAsync<AuthResponse>(HttpMethod.Post, $"api/collections/{CollectionName}/auth-with-otp", options.Body, options.ToDictionary(), cancellationToken: cancellationToken);
 
@@ -144,13 +171,19 @@ namespace PocketBase.Blazor.Clients.Record
         }
 
         /// <inheritdoc />
-        public async Task<Result<AuthResponse>> AuthRefreshAsync(CommonOptions? options = null, CancellationToken cancellationToken = default)
+        public async Task<Result<AuthResponse>> AuthRefreshAsync(CommonOptions? options = null, string? mfaId = null, CancellationToken cancellationToken = default)
         {
             EnsureRecordAuthBoundary(nameof(AuthRefreshAsync));
             options ??= new CommonOptions();
             options.Query = options.BuildQuery();
 
-            Result<AuthResponse> result = await Http.SendAsync<AuthResponse>(HttpMethod.Post, $"api/collections/{CollectionName}/auth-refresh", query: options.Query, cancellationToken: cancellationToken);
+            object? body = null;
+            if (!string.IsNullOrWhiteSpace(mfaId))
+            {
+                body = new Dictionary<string, object?> { ["mfaId"] = mfaId };
+            }
+
+            Result<AuthResponse> result = await Http.SendAsync<AuthResponse>(HttpMethod.Post, $"api/collections/{CollectionName}/auth-refresh", body: body, query: options.Query, cancellationToken: cancellationToken);
 
             if (result.IsSuccess)
             {

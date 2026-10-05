@@ -50,15 +50,17 @@ namespace PocketBase.Blazor.Clients.Record
         /// <param name="password">Admin password.</param>
         /// <param name="identityField">A specific identity field to use (by default fallbacks to the first matching one).</param>
         /// <param name="options">An optional <see cref="CommonOptions"/> object that specifies request parameters such as Fields and Expand</param>
+        /// <param name="mfaId">Optional multi-factor authentication session id returned by a previous failed auth attempt (see <c>result.GetMfaId()</c>). Required to complete a second-factor MFA flow.</param>
         /// <param name="cancellationToken">Optional cancellation token.</param>
         /// <returns>The authentication response containing the session token.</returns>
-        Task<Result<AuthResponse>> AuthWithPasswordAsync(string email, string password, string? identityField = null, CommonOptions? options = null, CancellationToken cancellationToken = default);
+        Task<Result<AuthResponse>> AuthWithPasswordAsync(string email, string password, string? identityField = null, CommonOptions? options = null, string? mfaId = null, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Authenticates a user with OAuth2 provider and returns the authentication record.
         /// </summary>
         /// <param name="request">The OAuth2 authentication request containing provider, code, and other OAuth2 parameters.</param>
         /// <param name="options">An optional <see cref="CommonOptions"/> object that specifies request parameters such as Fields and Expand</param>
+        /// <param name="mfaId">Optional multi-factor authentication session id returned by a previous failed auth attempt (see <c>result.GetMfaId()</c>). Required to complete a second-factor MFA flow.</param>
         /// <param name="cancellationToken">A cancellation token that can be used to cancel the ongoing operation.</param>
         /// <returns>
         /// A task that represents the asynchronous operation. The task result contains a Result object wrapping:
@@ -67,7 +69,7 @@ namespace PocketBase.Blazor.Clients.Record
         /// </returns>
         /// <exception cref="ArgumentNullException">Thrown when the request parameter is null.</exception>
         /// <exception cref="HttpRequestException">Thrown when the underlying HTTP request fails due to network issues.</exception>
-        Task<Result<AuthRecordResponse>> AuthWithOAuth2CodeAsync(AuthWithOAuth2Request request, CommonOptions? options = null, CancellationToken cancellationToken = default);
+        Task<Result<AuthRecordResponse>> AuthWithOAuth2CodeAsync(AuthWithOAuth2Request request, CommonOptions? options = null, string? mfaId = null, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Requests a one-time password (OTP) to be sent to the user's email for authentication.
@@ -83,18 +85,20 @@ namespace PocketBase.Blazor.Clients.Record
         /// <param name="otpId">The unique identifier associated with the OTP challenge. Cannot be <see langword="null"/> or empty.</param>
         /// <param name="otpCode">The OTP code provided by the user. Cannot be <see langword="null"/> or empty.</param>
         /// <param name="options">An optional <see cref="CommonOptions"/> object that specifies request parameters such as Fields and Expand</param>
+        /// <param name="mfaId">Optional multi-factor authentication session id returned by a previous failed auth attempt (see <c>result.GetMfaId()</c>). Required to complete a second-factor MFA flow.</param>
         /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
         /// <returns>A task that represents the asynchronous operation. The task result contains a <see cref="Result{T}"/> with
         /// the outcome of the authentication attempt, including the authentication response if successful.</returns>
-        Task<Result<AuthResponse>> AuthWithOtpAsync(string otpId, string otpCode, CommonOptions? options = null, CancellationToken cancellationToken = default);
+        Task<Result<AuthResponse>> AuthWithOtpAsync(string otpId, string otpCode, CommonOptions? options = null, string? mfaId = null, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Refreshes the currently authenticated admin session.
         /// </summary>
         /// <param name="options">An optional <see cref="CommonOptions"/> object that specifies request parameters such as Fields and Expand</param>
+        /// <param name="mfaId">Optional multi-factor authentication session id returned by a previous failed auth attempt (see <c>result.GetMfaId()</c>). Required to complete a second-factor MFA flow.</param>
         /// <param name="cancellationToken">Optional cancellation token.</param>
         /// <returns>The updated authentication response.</returns>
-        Task<Result<AuthResponse>> AuthRefreshAsync(CommonOptions? options = null, CancellationToken cancellationToken = default);
+        Task<Result<AuthResponse>> AuthRefreshAsync(CommonOptions? options = null, string? mfaId = null, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Requests a verification email to be sent to the specified email address.

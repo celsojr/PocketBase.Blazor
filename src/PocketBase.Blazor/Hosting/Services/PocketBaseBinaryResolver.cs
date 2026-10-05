@@ -18,7 +18,7 @@ namespace PocketBase.Blazor.Hosting.Services
         /// The PocketBase release version downloaded by <see cref="ResolveAsync"/>
         /// when no local executable is found.
         /// </summary>
-        public const string Version = "0.40.1";
+        public const string Version = "0.40.4";
 
         private const string BaseDownloadUrl = "https://github.com/pocketbase/pocketbase/releases/download";
 
